@@ -21,43 +21,31 @@ class _DisplayState extends State<Display> {
       // body: pages[currentPageIndex],
       body: IndexedStack(index: currentPageIndex, children: pages),
 
-      // bottomNavigationBar: NavigationBar(
-      //   onDestinationSelected: (value) {
-      //     setState(() => currentPageIndex = value);
-      //   },
-      //   selectedIndex: currentPageIndex,
-      //   destinations: [
-      //     NavigationDestination(
-      //       selectedIcon: Icon(Icons.home_outlined, size: 30),
-      //       icon: Icon(Icons.home, size: 30),
-      //       label: 'Home',
-      //     ),
-      //     NavigationDestination(
-      //       icon: Icon(Icons.person, size: 30),
-      //       selectedIcon: Icon(Icons.person_outline, size: 28),
-      //       label: 'Profile',
-      //     ),
-      //     NavigationDestination(
-      //       icon: Icon(Icons.settings, size: 30),
-      //       selectedIcon: Icon(Icons.settings_outlined, size: 30),
-      //       label: 'Settings',
-      //     ),
-      //   ],
-      //   labelTextStyle: WidgetStateProperty.all(TextStyle(fontSize: 18)),
-      //   elevation: 3,
-      //   indicatorColor: null,
-      // ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        onTap: (value) => setState(() => currentPageIndex = value),
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (value) {
+          setState(() => currentPageIndex = value);
+        },
+        selectedIndex: currentPageIndex,
+        destinations: [
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home_outlined, size: 30),
+            icon: Icon(Icons.home, size: 30),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person, size: 30),
+            selectedIcon: Icon(Icons.person_outline, size: 28),
+            label: 'Profile',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings, size: 30),
+            selectedIcon: Icon(Icons.settings_outlined, size: 30),
             label: 'Settings',
           ),
         ],
+        labelTextStyle: WidgetStateProperty.all(TextStyle(fontSize: 18)),
+        elevation: 3,
+        indicatorColor: null,
       ),
     );
   }
