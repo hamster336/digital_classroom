@@ -18,10 +18,14 @@ class CustomWidgets {
                 size: 30,
                 // color: Color.fromARGB(100, 59, 141, 155),
               ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20),),
-        
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
       ),
       obscureText: obscureText,
     );
+  }
+
+  //
+  static Widget HomeScreenCard() {
+    return Card();
   }
 }

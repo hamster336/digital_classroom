@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:minor_project/presentation/login_screen.dart';
+import 'package:mobile_app/presentation/home_screen.dart';
+import 'package:mobile_app/presentation/login_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+void main() {
   runApp(const MyApp());
 }
 
@@ -20,6 +18,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
+          useMaterial3: true,
           colorScheme: .fromSeed(seedColor: Colors.green),
           fontFamily: 'Afacad',
           appBarTheme: AppBarThemeData(
@@ -34,7 +33,8 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const LoginScreen(),
+        home: const HomeScreen(),
+        // home: const LoginScreen(),
       ),
     );
   }

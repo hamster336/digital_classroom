@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:minor_project/models/custom_widgets.dart';
-import 'package:minor_project/presentation/home_screen.dart';
+import 'package:mobile_app/model/custom_widgets.dart';
+import 'package:mobile_app/presentation/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -42,13 +42,17 @@ class LoginScreen extends StatelessWidget {
                   // SizedBox(height: size.height * 0.02),
                   SizedBox(height: size.height * 0.02),
 
+                  // email textField
                   CustomWidgets.customTextField(
                     controller: emailController,
                     label: 'Enter email',
                     suffixIcon: Icons.email,
                     obscureText: false,
                   ),
+
                   SizedBox(height: size.height * 0.02),
+
+                  // password textField
                   CustomWidgets.customTextField(
                     controller: passController,
                     label: 'Enter password',
@@ -56,9 +60,11 @@ class LoginScreen extends StatelessWidget {
                     obscureText: true,
                   ),
 
+                  // password reset and login
                   Center(
                     child: Column(
                       children: [
+                        // forgot password
                         TextButton(
                           onPressed: () {},
                           child: const Text(
@@ -66,7 +72,10 @@ class LoginScreen extends StatelessWidget {
                             style: TextStyle(fontSize: 18),
                           ),
                         ),
+
                         SizedBox(height: size.height * 0.02),
+
+                        // login button
                         Container(
                           width: size.width * 0.6,
                           height: size.height * 0.06,
@@ -81,7 +90,7 @@ class LoginScreen extends StatelessWidget {
                           ),
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const HomeScreen(),
