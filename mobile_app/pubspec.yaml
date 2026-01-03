@@ -76,7 +76,7 @@ flutter:
   fonts:
     - family: Afacad
       fonts:
-        - asset: assets/fonts/Afacad-Regular.ttf
+        - asset: assets/fonts/Afacad-Medium.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

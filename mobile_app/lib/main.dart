@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_app/presentation/display.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([.portraitUp]);
   runApp(const MyApp());
 }
 
@@ -16,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: .fromSeed(seedColor: Colors.deepOrange),
+        colorScheme: .fromSeed(seedColor: Colors.green),
         fontFamily: 'Afacad',
         appBarTheme: AppBarThemeData(
           elevation: 0,

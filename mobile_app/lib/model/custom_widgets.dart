@@ -31,16 +31,29 @@ class CustomWidgets {
     required String title,
     required Size size,
   }) {
-    return SizedBox(
+    return Container(
       width: size.width * 0.43,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        gradient: LinearGradient(
+          colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
+          begin: .topLeft,
+          end: .bottomRight,
+        ),
+      ),
+      padding: const EdgeInsets.all(2.5),
       child: Card(
-        elevation: 2,
+        color: Colors.white,
+        margin: .zero,
+        elevation: 0,
         child: ListTile(
+          contentPadding: const EdgeInsets.all(5),
           onTap: onTap,
-          title: Image(
-            image: AssetImage(imageAsset),
-            // width: size.width * 0.1,
-            height: size.width * 0.12,
+          title: Center(
+            child: Image(
+              image: AssetImage(imageAsset),
+              height: size.width * 0.11,
+            ),
           ),
           subtitle: Center(child: Text(title, style: TextStyle(fontSize: 20))),
         ),
