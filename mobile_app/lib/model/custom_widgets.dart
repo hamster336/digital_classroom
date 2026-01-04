@@ -24,40 +24,83 @@ class CustomWidgets {
     );
   }
 
-  // home screen cards
-  static Widget homeScreenCard({
-    required VoidCallback onTap,
-    required String imageAsset,
-    required String title,
-    required Size size,
-  }) {
-    return Container(
-      width: size.width * 0.43,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(15)),
-        gradient: LinearGradient(
-          colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
-          begin: .topLeft,
-          end: .bottomRight,
-        ),
-      ),
-      padding: const EdgeInsets.all(2.5),
-      child: Card(
-        color: Colors.white,
-        margin: .zero,
-        elevation: 0,
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(5),
-          onTap: onTap,
-          title: Center(
-            child: Image(
-              image: AssetImage(imageAsset),
-              height: size.width * 0.11,
+  // general info card for homescreen
+  static Widget infoCard(Size size, int count, String info) {
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      child: ListTile(
+        contentPadding: .zero,
+        title: Center(
+          child: Text(
+            '$count',
+            style: TextStyle(
+              fontSize: 50,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF2AB3AA),
             ),
           ),
-          subtitle: Center(child: Text(title, style: TextStyle(fontSize: 20))),
+        ),
+        subtitle: Center(
+          child: Text(
+            info,
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
         ),
       ),
     );
+  }
+
+  // resources card for homescreen (notes, assginments and schedules)
+  static Widget resrcCard(
+    Size size,
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+  ) {
+    return SizedBox(
+      width: size.width * 0.45,
+      child: InkWell(
+        onTap: onTap,
+        child: Card(
+          elevation: 2,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF2AB3AA),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 27, color: Colors.white),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  subtitle,
+                  style: TextStyle(fontSize: 16, color: Colors.black45),
+                  maxLines: null,
+                  overflow: .visible,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Notice card
+  static Widget homeScrenNoticeCard() {
+    return Card();
   }
 }

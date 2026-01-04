@@ -3,6 +3,7 @@ import 'package:mobile_app/model/custom_widgets.dart';
 import 'package:mobile_app/presentation/assignment_screen.dart';
 import 'package:mobile_app/presentation/notes_screen.dart';
 import 'package:mobile_app/presentation/schedules.dart';
+import 'package:mobile_app/presentation/user_profile.dart';
 // import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -17,10 +18,10 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // username and menu section
+            // username and profile section
             Container(
               width: size.width,
-              height: size.height * 0.17,
+              height: size.longestSide * 0.17,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
@@ -28,8 +29,8 @@ class HomeScreen extends StatelessWidget {
                   end: .bottomRight,
                 ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
                 ),
               ),
               child: SafeArea(
@@ -50,79 +51,100 @@ class HomeScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                   trailing: IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.menu_rounded,
-                      color: Colors.white,
-                      size: 30,
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const UserProfile()),
+                    ),
+                    style: IconButton.styleFrom(backgroundColor: Colors.white),
+                    icon: Icon(Icons.person, color: Colors.green, size: 30),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: size.height * 0.01),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                mainAxisAlignment: .start,
+                crossAxisAlignment: .start,
+                children: [
+                  // general information
+                  Row(
+                    mainAxisAlignment: .spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: CustomWidgets.infoCard(size, 6, 'Classes'),
+                      ),
+                      Expanded(
+                        child: CustomWidgets.infoCard(size, 12, 'Assignments'),
+                      ),
+                      Expanded(
+                        child: CustomWidgets.infoCard(size, 2, 'New Notices'),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: size.height * 0.015),
+
+                  // learning materials and resources
+                  Center(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        CustomWidgets.resrcCard(
+                          size,
+                          Icons.note_alt_rounded,
+                          'Notes',
+                          'Access your study notes',
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotesScreen(),
+                            ),
+                          ),
+                        ),
+                        CustomWidgets.resrcCard(
+                          size,
+                          Icons.note_alt_rounded,
+                          'Assignments',
+                          'Track your homework',
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AssignmentScreen(),
+                            ),
+                          ),
+                        ),
+                        CustomWidgets.resrcCard(
+                          size,
+                          Icons.note_alt_rounded,
+                          'Schedules',
+                          'View your timetable',
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const Schedules(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
-            ),
 
-            SizedBox(height: size.height * 0.03),
+                  SizedBox(height: size.height * 0.015),
 
-            // Notice section
-            Container(
-              width: size.width * 0.9,
-              height: size.height * 0.25,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-                gradient: LinearGradient(
-                  colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
-                  begin: .topLeft,
-                  end: .bottomRight,
-                ),
-              ),
-              padding: const EdgeInsets.all(2.5),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                child: ListTile(
-                  title: const Text('Notices', style: TextStyle(fontSize: 30)),
-                ),
-              ),
-            ),
-
-            SizedBox(height: size.height * 0.05),
-
-            // notes, assignments and schedules
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              alignment: .spaceBetween,
-              children: [
-                CustomWidgets.homeScreenCard(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const NotesScreen()),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: const Text(
+                      'Upcoming',
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
-                  imageAsset: 'assets/icons/book.png',
-                  title: 'Notes',
-                  size: size,
-                ),
-                CustomWidgets.homeScreenCard(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AssignmentScreen()),
-                  ),
-                  imageAsset: 'assets/icons/assignment.png',
-                  title: 'Assignments',
-                  size: size,
-                ),
-                CustomWidgets.homeScreenCard(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const Schedules()),
-                  ),
-                  imageAsset: 'assets/icons/schedule.png',
-                  title: 'Schedules',
-                  size: size,
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
