@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/presentation/home_screen.dart';
+import 'package:mobile_app/presentation/notices_screen.dart';
 import 'package:mobile_app/presentation/settings.dart';
-import 'package:mobile_app/presentation/user_profile.dart';
 
 class Display extends StatefulWidget {
   const Display({super.key});
@@ -13,10 +13,12 @@ class Display extends StatefulWidget {
 class _DisplayState extends State<Display> {
   int currentPageIndex = 0;
 
-  // final List<Widget> pages = const [HomeScreen(), UserProfile(), Settings()];
+  final List<Widget> pages = const [HomeScreen(), NoticesScreen(), Settings()];
 
   @override
   Widget build(BuildContext context) {
+    // final size = MediaQuery.of(context).size;
+
     return Scaffold(
       // body: pages[currentPageIndex],
       body: IndexedStack(
@@ -29,7 +31,7 @@ class _DisplayState extends State<Display> {
           ),
           Navigator(
             onGenerateRoute: (settings) {
-              return MaterialPageRoute(builder: (_) => const UserProfile());
+              return MaterialPageRoute(builder: (_) => const NoticesScreen());
             },
           ),
           Navigator(
@@ -57,13 +59,13 @@ class _DisplayState extends State<Display> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person, size: 30),
+            icon: Icon(Icons.campaign_rounded, size: 30),
             selectedIcon: Icon(
-              Icons.person,
+              Icons.campaign_rounded,
               size: 28,
               color: Color(0xFF3B8D9B),
             ),
-            label: 'Profile',
+            label: 'Notices',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings, size: 30),
@@ -76,8 +78,9 @@ class _DisplayState extends State<Display> {
           ),
         ],
         labelTextStyle: WidgetStateProperty.all(TextStyle(fontSize: 16)),
-        elevation: 3,
+        elevation: 10,
         indicatorColor: Colors.transparent,
+        // backgroundColor: Colors.white,
       ),
     );
   }
