@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
             elevation: 0,
             surfaceTintColor: Colors.transparent,
             scrolledUnderElevation: 0,
+            backgroundColor: Colors.white,
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(

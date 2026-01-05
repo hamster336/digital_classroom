@@ -53,7 +53,7 @@ class _DisplayState extends State<Display> {
             selectedIcon: Icon(
               Icons.home_filled,
               size: 30,
-              color: Color(0xFF3B8D9B),
+              color: Color(0xFF2AB3AA),
             ),
             icon: Icon(Icons.home_filled, size: 30),
             label: 'Home',
@@ -63,7 +63,7 @@ class _DisplayState extends State<Display> {
             selectedIcon: Icon(
               Icons.campaign_rounded,
               size: 28,
-              color: Color(0xFF3B8D9B),
+              color: Color(0xFF2AB3AA),
             ),
             label: 'Notices',
           ),
@@ -72,7 +72,7 @@ class _DisplayState extends State<Display> {
             selectedIcon: Icon(
               Icons.settings,
               size: 30,
-              color: Color(0xFF3B8D9B),
+              color: Color(0xFF2AB3AA),
             ),
             label: 'Settings',
           ),
