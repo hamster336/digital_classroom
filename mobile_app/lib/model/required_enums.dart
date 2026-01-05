@@ -1,5 +1,1 @@
-enum Priority{
-  urgent,
-  important,
-  info
-}
+enum InfoPriority { urgent, important, info }

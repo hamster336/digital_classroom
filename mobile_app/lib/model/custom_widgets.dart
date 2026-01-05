@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mobile_app/model/notice.dart';
+import 'package:mobile_app/model/required_enums.dart';
 
 class CustomWidgets {
   // custom textFields
@@ -35,7 +38,7 @@ class CustomWidgets {
           child: Text(
             '$count',
             style: TextStyle(
-              fontSize: 50,
+              fontSize: 40,
               fontWeight: FontWeight.w600,
               color: Color(0xFF2AB3AA),
             ),
@@ -73,9 +76,15 @@ class CustomWidgets {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
+
                   decoration: BoxDecoration(
-                    color: Color(0xFF2AB3AA),
+                    // color: Color(0xFF2AB3AA),
                     shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
+                      begin: .topLeft,
+                      end: .bottomRight,
+                    ),
                   ),
                   child: Icon(icon, size: 27, color: Colors.white),
                 ),
@@ -100,7 +109,52 @@ class CustomWidgets {
   }
 
   // Notice card
-  static Widget homeScrenNoticeCard() {
-    return Card();
+  static Widget homeScrenNoticeCard(Notice notice) {
+    Color cardColor = Colors.blue;
+    if (notice.priority == InfoPriority.urgent) {
+      cardColor = Colors.red;
+    } else if (notice.priority == InfoPriority.important) {
+      cardColor = Colors.yellow.shade700;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: cardColor,
+      ),
+      child: Card(
+        margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+        color: Colors.white,
+        child: ListTile(
+          title: Text(notice.title, style: TextStyle(fontSize: 20)),
+          subtitle: Text(
+            formatTime(notice.publishedAt),
+            style: TextStyle(color: Colors.black54),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // format time for homescreen notice card
+  static String formatTime(DateTime publishedAt) {
+    final now = DateTime.now();
+    final date = DateTime(publishedAt.year, publishedAt.month, publishedAt.day);
+    final today = DateTime(now.year, now.month, now.day);
+    final difference = today.difference(date).inDays;
+
+    if (difference == 0) {
+      return 'Today, ${DateFormat('hh:mm a').format(date)}';
+    }
+
+    if (difference == 1) {
+      return 'Yesterday, ${DateFormat('hh:mm a').format(date)}';
+    }
+
+    if (difference <= 7) {
+      return DateFormat('EEEE, hh:mm a').format(date);
+    }
+
+    return DateFormat('dd MMM, hh:mm a').format(date);
   }
 }
