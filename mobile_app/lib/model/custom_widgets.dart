@@ -167,7 +167,6 @@ class CustomWidgets {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 16,
           color: (filter == currentFilter) ? Colors.white : null,
         ),
       ),
@@ -188,7 +187,7 @@ class CustomWidgets {
     }
 
     return Container(
-      margin: const EdgeInsets.only(top: 10),
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(15)),
         color: cardColor,
@@ -197,7 +196,7 @@ class CustomWidgets {
         margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
         color: Colors.white,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Column(
             crossAxisAlignment: .start,
             children: [
@@ -275,5 +274,37 @@ class CustomWidgets {
     }
 
     return 'on ${DateFormat('dd MMM').format(publishedAt)}';
+  }
+
+  // settings with toggles
+  static Widget toggleSetting(
+    String label,
+    bool toggle,
+    ValueChanged<bool> onChanged,
+  ) {
+    return Row(
+      mainAxisAlignment: .spaceBetween,
+      children: [
+        Text(label, style: TextStyle(fontSize: 20)),
+
+        Switch(
+          value: toggle,
+          onChanged: onChanged,
+          activeTrackColor: Color(0xFF2AB3AA),
+        ),
+      ],
+    );
+  }
+
+  // settings with navigation
+  static Widget navigateSettings(String label, VoidCallback onTap) {
+    return Row(
+      mainAxisAlignment: .spaceBetween,
+      children: [
+        Text(label, style: TextStyle(fontSize: 20)),
+
+        IconButton(onPressed: onTap, icon: Icon(Icons.chevron_right_rounded)),
+      ],
+    );
   }
 }

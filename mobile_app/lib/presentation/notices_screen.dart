@@ -9,7 +9,7 @@ class NoticesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final List<Notice> notices = [
+    final List<Notice> notices = [        
       Notice(
         title: 'Winter Holidays',
         publishedAt: DateTime(2026, 1, 5, 14, 12, 22),
@@ -31,6 +31,20 @@ class NoticesScreen extends StatelessWidget {
             'The sports week will start from 13th of Magh so the department of Engineering notifies all the interested students to enlist their names in the games they are interested in. The selection will start soon.',
         priority: InfoPriority.important,
       ),
+      Notice(
+        title: 'Winter Holidays',
+        publishedAt: DateTime(2025, 12, 31, 14, 12, 22),
+        description:
+            'This year, the winter vacation starts from 25th of Poush until 9th of Magh. The administration will remain open during the holidays.',
+        priority: InfoPriority.info,
+      ),
+      Notice(
+        title: 'Proposal Defense',
+        publishedAt: DateTime(2025, 1, 5, 08, 56, 01),
+        description:
+            'All the 6th sem students are notified to prepare for their proposal defense this Saturday starting from 10:00 am.',
+        priority: InfoPriority.urgent,
+      ),
     ];
 
     return Scaffold(
@@ -43,12 +57,10 @@ class NoticesScreen extends StatelessWidget {
       ),
 
       body: Padding(
-        padding: const EdgeInsetsGeometry.symmetric(
-          horizontal: 10,
-          vertical: 5,
-        ),
+        padding: const EdgeInsetsGeometry.symmetric(horizontal: 10),
         child: Column(
           children: [
+            // notice filter buttons
             Row(
               children: [
                 CustomWidgets.filterButton(
@@ -73,13 +85,21 @@ class NoticesScreen extends StatelessWidget {
 
             SizedBox(height: size.height * 0.01),
 
+            // view notices
             Expanded(
-              child: ListView.builder(
-                itemCount: notices.length,
-                itemBuilder: (context, index) {
-                  return CustomWidgets.noticeCard(notices[index]);
-                },
-              ),
+              child: (notices.isEmpty)
+                  ? Center(
+                      child: const Text(
+                        'No notices available',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: notices.length,
+                      itemBuilder: (context, index) {
+                        return CustomWidgets.noticeCard(notices[index]);
+                      },
+                    ),
             ),
           ],
         ),

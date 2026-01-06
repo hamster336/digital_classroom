@@ -22,7 +22,6 @@ class HomeScreen extends StatelessWidget {
           // username and profile section
           Container(
             width: size.width,
-            height: size.longestSide * 0.15,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
@@ -109,6 +108,7 @@ class HomeScreen extends StatelessWidget {
                       // learning materials and resources
                       Row(
                         mainAxisAlignment: .spaceEvenly,
+                        crossAxisAlignment: .start,
                         children: [
                           CustomWidgets.resrcCard(
                             size,
@@ -138,6 +138,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       Row(
                         mainAxisAlignment: .spaceEvenly,
+                        crossAxisAlignment: .start,
                         children: [
                           CustomWidgets.resrcCard(
                             size,

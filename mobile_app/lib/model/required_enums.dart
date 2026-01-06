@@ -1,3 +1,5 @@
+enum UserRoles { admin, teacher, student }
+
 enum InfoPriority { urgent, important, info }
 
 enum NoticeFilter { all, urgent, important }
