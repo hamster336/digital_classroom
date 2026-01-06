@@ -1,7 +1,9 @@
 enum UserRoles { admin, teacher, student }
 
-enum InfoPriority { urgent, important, info }
+enum NoticePriority { urgent, important, info }
 
 enum NoticeFilter { all, urgent, important }
+
+enum AssignmentPriority { urgent, medium, normal }
 
 enum AssignmentFilter { pending, completed, overdue }
