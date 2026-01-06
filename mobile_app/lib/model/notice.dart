@@ -4,7 +4,7 @@ class Notice {
   final String title;
   final DateTime publishedAt;
   final String description;
-  final InfoPriority priority;
+  final NoticePriority priority;
 
   Notice({
     required this.title,

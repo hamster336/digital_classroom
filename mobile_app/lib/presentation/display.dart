@@ -51,11 +51,11 @@ class _DisplayState extends State<Display> {
         destinations: [
           NavigationDestination(
             selectedIcon: Icon(
-              Icons.home_filled,
+              Icons.home_rounded,
               size: 30,
               color: Color(0xFF2AB3AA),
             ),
-            icon: Icon(Icons.home_filled, size: 30),
+            icon: Icon(Icons.home_rounded, size: 30),
             label: 'Home',
           ),
           NavigationDestination(
