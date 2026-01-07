@@ -59,7 +59,7 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
           priority: NoticePriority.urgent,
         ),
       ];
-      emit(NoticeLoaded(notices: notices, filter: NoticeFilter.all));
+      emit(NoticeLoaded(notices: notices));
     } catch (ex) {
       emit(NoticeError(message: 'Failed to load notices!'));
     }
@@ -69,8 +69,8 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
   Future<void> _filterNotices(
     FilterNotices event,
     Emitter<NoticeState> emit,
-  ) async{
-    if(state is! NoticeLoaded) return;
+  ) async {
+    if (state is! NoticeLoaded) return;
 
     final current = state as NoticeLoaded;
     emit(current.copyWith(filter: event.filter));

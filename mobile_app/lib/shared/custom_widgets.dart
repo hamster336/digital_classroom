@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
@@ -306,23 +305,21 @@ class CustomWidgets {
   }
 
   // assignment filter button
-  static Widget assignmentFilterButton(
-    String label,
-    AssignmentFilter filter,
-    AssignmentFilter currentFilter,
-  ) {
+  static Widget assignmentFilterButton({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: (filter == currentFilter) ? Color(0xFF2AB3AA) : null,
+        backgroundColor: isSelected ? Color(0xFF2AB3AA) : null,
         shadowColor: Colors.transparent,
         elevation: 6,
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: (filter == currentFilter) ? Colors.white : null,
-        ),
+        style: TextStyle(color: isSelected ? Colors.white : null),
       ),
     );
   }
@@ -417,6 +414,7 @@ class CustomWidgets {
                     children: [
                       Icon(Icons.timer, size: 20, color: Colors.black45),
                       const SizedBox(width: 5),
+
                       Text(
                         'Due: ${formatDueTime(assignment.dueDate)}',
                         style: TextStyle(color: Colors.black45),
@@ -503,7 +501,7 @@ class CustomWidgets {
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(10),
-          child: (assignment.submittedAt == null)
+          child: (!assignment.submitted)
               ? Center(
                   child: const Text(
                     "No submissions found",
@@ -511,16 +509,58 @@ class CustomWidgets {
                   ),
                 )
               : Column(
+                  // crossAxisAlignment: .start,
                   children: [
-                    // last submission date
-                    Text(
-                      'Last Submission date: ${DateFormat('hh:MM a, dd MMM').format(assignment.submittedAt!)}',
-                      style: TextStyle(fontSize: 17, color: Colors.black54),
-                    ),
-                    // no of submissions until now
-                    Text(
-                      'No of submissions: ${assignment.submissionCount!}',
-                      style: TextStyle(fontSize: 17, color: Colors.black54),
+                    Row(
+                      mainAxisAlignment: .spaceBetween,
+                      children: [
+                        // last submission date
+                        Column(
+                          children: [
+                            Text(
+                              'Last Submission date:',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                            ),
+
+                            Text(
+                              (assignment.submittedAt == null)
+                                  ? 'No data found'
+                                  : DateFormat(
+                                      'hh:MM a, dd MMM',
+                                    ).format(assignment.submittedAt!),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // no of submissions until now
+                        Column(
+                          children: [
+                            Text(
+                              'No of submissions:',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            Text(
+                              (assignment.submittedAt == null)
+                                  ? 'No data found'
+                                  : '${assignment.submissionCount!}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),

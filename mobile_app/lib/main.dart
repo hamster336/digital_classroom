@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/app/app_shell.dart';
 
@@ -18,7 +19,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       // injecting blocs
-      providers: [BlocProvider(create: (context) => NoticeBloc())],
+      providers: [
+        BlocProvider(create: (context) => NoticeBloc()),
+        BlocProvider(create: (context) => AssignmentBloc()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
