@@ -2,15 +2,13 @@ part of 'notice_bloc.dart';
 
 sealed class NoticeState {}
 
-final class NoticeInitial extends NoticeState {}
-
 final class NoticeLoading extends NoticeState {}
 
 final class NoticeLoaded extends NoticeState {
   final List<Notice> notices;
   final NoticeFilter filter;
 
-  NoticeLoaded({required this.notices, required this.filter});
+  NoticeLoaded({required this.notices, this.filter = NoticeFilter.all});
 
   // return notices based on priority
   List<Notice> get displayNotices {

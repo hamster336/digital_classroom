@@ -1,58 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/assignments/models/assignment.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
-class AssignmentScreen extends StatelessWidget {
+class AssignmentScreen extends StatefulWidget {
   const AssignmentScreen({super.key});
+
+  @override
+  State<AssignmentScreen> createState() => _AssignmentScreenState();
+}
+
+class _AssignmentScreenState extends State<AssignmentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AssignmentBloc>().add(LoadAssignments());
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final List<Assignment> list = [
-      Assignment(
-        id: '1',
-        title: 'AI lab report',
-        description:
-            'All the students are expected to submit their lab report on AI by 10th of January.',
-        issuedAt: DateTime(2026, 01, 06, 12, 23),
-        dueDate: DateTime(2026, 01, 10, 08, 00),
-        priority: AssignmentPriority.medium,
-        submitted: false,
-      ),
-      Assignment(
-        id: '1',
-        title: 'Minor Project Proposal submission',
-        description:
-            'All the students are expected to submit minor project proposal by 20th of January to the Library of School of Engineering.',
-        issuedAt: DateTime(2026, 01, 05, 10, 00),
-        dueDate: DateTime(2026, 01, 20, 10, 00),
-        priority: AssignmentPriority.urgent,
-        submitted: false,
-      ),
-      Assignment(
-        id: '1',
-        title: 'Economics Numericals',
-        description:
-            'I will provide some passed years question papers from different universities. Students will have to solve all the numerical questions that are covered in your syllabus and submit them by 01 Feb.',
-        issuedAt: DateTime(2026, 01, 02, 18, 47),
-        dueDate: DateTime(2026, 02, 01, 14, 30),
-        priority: AssignmentPriority.normal,
-        submitted: false,
-      ),
-      Assignment(
-        id: '1',
-        title: 'DBMS lab report',
-        description:
-            'All the students are expected to submit their lab report on DBMS by 5th of January.',
-        issuedAt: DateTime(2025, 12, 25, 13, 10),
-        dueDate: DateTime(2026, 01, 5, 15, 00),
-        priority: AssignmentPriority.normal,
-        submitted: false,
-      ),
-    ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
+
       appBar: AppBar(title: const Text('Assignments')),
 
       body: Padding(
@@ -60,48 +32,75 @@ class AssignmentScreen extends StatelessWidget {
         child: Column(
           children: [
             // filter buttons
-            Row(
-              children: [
-                CustomWidgets.assignmentFilterButton(
-                  'Pending',
-                  AssignmentFilter.pending,
-                  AssignmentFilter.pending,
-                ),
-                const SizedBox(width: 5),
-                CustomWidgets.assignmentFilterButton(
-                  'Completed',
-                  AssignmentFilter.completed,
-                  AssignmentFilter.pending,
-                ),
-                const SizedBox(width: 5),
-                CustomWidgets.assignmentFilterButton(
-                  'Overdue',
-                  AssignmentFilter.overdue,
-                  AssignmentFilter.pending,
-                ),
-              ],
+            BlocBuilder<AssignmentBloc, AssignmentState>(
+              builder: (context, state) {
+                if (state is! AssignmentLoaded) return const SizedBox.shrink();
+
+                final currentFilter = state.filter;
+
+                return Row(
+                  children: [
+                    CustomWidgets.assignmentFilterButton(
+                      label: 'Pending',
+                      isSelected: currentFilter == AssignmentFilter.pending,
+                      onTap: () => context.read<AssignmentBloc>().add(
+                        FilterAssignments(filter: AssignmentFilter.pending),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    CustomWidgets.assignmentFilterButton(
+                      label: 'Overdue',
+                      isSelected: currentFilter == AssignmentFilter.overdue,
+                      onTap: () => context.read<AssignmentBloc>().add(
+                        FilterAssignments(filter: AssignmentFilter.overdue),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    CustomWidgets.assignmentFilterButton(
+                      label: 'Completed',
+                      isSelected: currentFilter == AssignmentFilter.completed,
+                      onTap: () => context.read<AssignmentBloc>().add(
+                        FilterAssignments(filter: AssignmentFilter.completed),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
 
             SizedBox(height: size.height * 0.01),
 
             // show the assignments
             Expanded(
-              child: (list.isEmpty)
-                  ? Center(
-                      child: const Text(
-                        'Nothing to show',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
+              child: BlocBuilder<AssignmentBloc, AssignmentState>(
+                builder: (context, state) {
+                  if (state is AssignmentLoading)
+                    return const SizedBox.shrink();
+
+                  if (state is AssignmentLoaded) {
+                    final assignments = state.displayAssignments;
+                    if (assignments.isEmpty) {
+                      return Center(
+                        child: const Text(
+                          'No assingments available',
+                          style: TextStyle(fontSize: 17),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: assignments.length,
+                      itemBuilder: (_, index) {
                         return CustomWidgets.assignmentCards(
                           context,
-                          list[index],
+                          assignments[index],
                         );
                       },
-                    ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
           ],
         ),
