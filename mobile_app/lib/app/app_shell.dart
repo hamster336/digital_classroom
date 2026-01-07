@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/presentation/home_screen.dart';
-import 'package:mobile_app/presentation/notices_screen.dart';
-import 'package:mobile_app/presentation/settings.dart';
+import 'package:mobile_app/home/view/home_screen.dart';
+import 'package:mobile_app/notices/view/notices_screen.dart';
+import 'package:mobile_app/settings/view/settings.dart';
 
-class Display extends StatefulWidget {
-  const Display({super.key});
+class AppShell extends StatefulWidget {
+  const AppShell({super.key});
 
   @override
-  State<Display> createState() => _DisplayState();
+  State<AppShell> createState() => _AppShellState();
 }
 
-class _DisplayState extends State<Display> {
+class _AppShellState extends State<AppShell> {
   int currentPageIndex = 0;
 
   final List<Widget> pages = const [HomeScreen(), NoticesScreen(), Settings()];

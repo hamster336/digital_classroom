@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_app/model/assignment.dart';
-import 'package:mobile_app/model/notice.dart';
-import 'package:mobile_app/model/required_enums.dart';
+import 'package:mobile_app/notices/bloc/notice_bloc.dart';
+import 'package:mobile_app/assignments/models/assignment.dart';
+import 'package:mobile_app/notices/models/notice.dart';
+import 'package:mobile_app/shared/required_enums.dart';
+import 'package:mobile_app/assignments/view/assignment_details_screen.dart';
 
 class CustomWidgets {
   // custom textFields
@@ -153,23 +155,21 @@ class CustomWidgets {
   }
 
   // filter buttons
-  static Widget noticeFilterButton(
-    String label,
-    NoticeFilter filter,
-    NoticeFilter currentFilter,
-  ) {
+  static Widget noticeFilterButton({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: (filter == currentFilter) ? Color(0xFF2AB3AA) : null,
+        backgroundColor: isSelected ? Color(0xFF2AB3AA) : null,
         shadowColor: Colors.transparent,
         elevation: 6,
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: (filter == currentFilter) ? Colors.white : null,
-        ),
+        style: TextStyle(color: isSelected ? Colors.white : null),
       ),
     );
   }
@@ -328,7 +328,11 @@ class CustomWidgets {
   }
 
   // assignment cards
-  static Widget assignmentCards(Assignment assignment) {
+  static Widget assignmentCards(
+    BuildContext context,
+    Assignment assignment, {
+    bool detailed = false,
+  }) {
     Color cardColor = Colors.blue;
     String priority = 'Normal';
 
@@ -340,82 +344,102 @@ class CustomWidgets {
       priority = 'Medium';
     }
 
-    return Container(
-      margin: const EdgeInsets.only(top: 5, bottom: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        color: cardColor,
+    return InkWell(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AssignmentDetailsScreen(assignment: assignment),
+        ),
       ),
-      child: Card(
-        margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          child: Column(
-            crossAxisAlignment: .start,
-            children: [
-              Row(
-                mainAxisAlignment: .spaceBetween,
-                children: [
-                  // assignment title
-                  Flexible(
-                    child: Text(
-                      assignment.title,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+      child: Container(
+        margin: const EdgeInsets.only(top: 5, bottom: 5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          color: cardColor,
+        ),
+        child: Card(
+          margin: const EdgeInsets.only(left: 5),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Row(
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    // assignment title
+                    Flexible(
+                      child: Text(
+                        assignment.title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: .visible,
                       ),
-                      overflow: .visible,
                     ),
-                  ),
 
-                  const SizedBox(width: 5),
+                    const SizedBox(width: 5),
 
-                  // display priority
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                      color: cardColor.withValues(alpha: 0.2),
+                    // display priority
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                        color: cardColor.withValues(alpha: 0.2),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(priority, style: TextStyle(color: cardColor)),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(priority, style: TextStyle(color: cardColor)),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              const SizedBox(height: 5),
-              // posted date
-              Text(
-                'Issued ${formatIssuedTime(assignment.issuedAt)}',
-                style: TextStyle(color: Colors.black45),
-              ),
-
-              // description of the assignment
-              Text(
-                assignment.description,
-                style: TextStyle(fontSize: 17, color: Colors.black54),
-              ),
-
-              const SizedBox(height: 10),
-              // due time
-              Row(
-                children: [
-                  Icon(Icons.timer, size: 20, color: Colors.black45),
-                  const SizedBox(width: 5),
+                // issue date
+                if (detailed)
                   Text(
-                    'Due: ${formatDueTime(assignment.dueDate)}',
+                    'Issued: ${formatIssuedTime(assignment.issuedAt)}',
                     style: TextStyle(color: Colors.black45),
                   ),
-                ],
-              ),
 
-              // time passed since issued indicator
-              const SizedBox(height: 10),
-              LinearProgressIndicator(
-                value: getPercentage(assignment.issuedAt, assignment.dueDate),
-                color: Color(0xFF2AB3AA),
-              ),
-            ],
+                if (detailed) const SizedBox(height: 10),
+
+                // description of the assignment
+                Text(
+                  assignment.description,
+                  style: TextStyle(fontSize: 17, color: Colors.black54),
+                ),
+
+                const SizedBox(height: 10),
+
+                // due time
+                if (detailed)
+                  Row(
+                    children: [
+                      Icon(Icons.timer, size: 20, color: Colors.black45),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Due: ${formatDueTime(assignment.dueDate)}',
+                        style: TextStyle(color: Colors.black45),
+                      ),
+
+                      Spacer(),
+
+                      // show how much time has passed in percentage
+                      Text(
+                        '${(getPercentage(assignment.issuedAt, assignment.dueDate) * 100).toInt()}%',
+                        style: TextStyle(color: Colors.black45),
+                      ),
+                    ],
+                  ),
+
+                // time passed since issued indicator
+                if (detailed) const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: getPercentage(assignment.issuedAt, assignment.dueDate),
+                  color: Color(0xFF2AB3AA),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -451,10 +475,57 @@ class CustomWidgets {
     final i = issued.millisecondsSinceEpoch;
     final d = due.millisecondsSinceEpoch;
 
-    if (d <= i) return 100; // zero or invalid time range
-    if (d <= now) return 100; // if due date is passed
+    if (d <= i) return 1; // zero or invalid time range
+    if (d <= now) return 1; // if due date is passed
     if (now < i) return 0; // if hasn't started yet
 
     return ((now - i) / (d - i));
+  }
+
+  // assignment subission details
+  static Widget submissionDetails(Assignment assignment) {
+    Color cardColor = Colors.blue;
+
+    if (assignment.priority == AssignmentPriority.urgent) {
+      cardColor = Colors.red;
+    } else if (assignment.priority == AssignmentPriority.medium) {
+      cardColor = Colors.yellow.shade700;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: cardColor,
+      ),
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: (assignment.submittedAt == null)
+              ? Center(
+                  child: const Text(
+                    "No submissions found",
+                    style: TextStyle(fontSize: 18, color: Colors.black54),
+                  ),
+                )
+              : Column(
+                  children: [
+                    // last submission date
+                    Text(
+                      'Last Submission date: ${DateFormat('hh:MM a, dd MMM').format(assignment.submittedAt!)}',
+                      style: TextStyle(fontSize: 17, color: Colors.black54),
+                    ),
+                    // no of submissions until now
+                    Text(
+                      'No of submissions: ${assignment.submissionCount!}',
+                      style: TextStyle(fontSize: 17, color: Colors.black54),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
   }
 }

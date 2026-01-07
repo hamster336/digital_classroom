@@ -1,4 +1,4 @@
-import 'package:mobile_app/model/required_enums.dart';
+import 'package:mobile_app/shared/required_enums.dart';
 
 class Notice {
   final String title;
