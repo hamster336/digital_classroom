@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/model/custom_widgets.dart';
-import 'package:mobile_app/model/notice.dart';
-import 'package:mobile_app/model/required_enums.dart';
-import 'package:mobile_app/presentation/assignment_screen.dart';
-import 'package:mobile_app/presentation/notes_screen.dart';
-import 'package:mobile_app/presentation/schedules.dart';
-import 'package:mobile_app/presentation/user_profile.dart';
+import 'package:mobile_app/shared/custom_widgets.dart';
+import 'package:mobile_app/notices/models/notice.dart';
+import 'package:mobile_app/shared/required_enums.dart';
+import 'package:mobile_app/assignments/view/assignment_screen.dart';
+import 'package:mobile_app/notes/view/notes_screen.dart';
+import 'package:mobile_app/schedules/view/schedules.dart';
+import 'package:mobile_app/profile/view/user_profile.dart';
 // import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {

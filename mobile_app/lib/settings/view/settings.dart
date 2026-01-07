@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/model/custom_widgets.dart';
+import 'package:mobile_app/shared/custom_widgets.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -19,12 +19,7 @@ class _SettingsState extends State<Settings> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
 
       body: SingleChildScrollView(
         child: Padding(
