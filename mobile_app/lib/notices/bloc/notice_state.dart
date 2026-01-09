@@ -28,6 +28,8 @@ final class NoticeLoaded extends NoticeState {
     }
   }
 
+  int get noticeLength => notices.length;
+
   NoticeLoaded copyWith({List<Notice>? notices, NoticeFilter? filter}) {
     return NoticeLoaded(
       notices: notices ?? this.notices,

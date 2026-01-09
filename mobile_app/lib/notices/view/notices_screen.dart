@@ -4,19 +4,8 @@ import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
-class NoticesScreen extends StatefulWidget {
+class NoticesScreen extends StatelessWidget {
   const NoticesScreen({super.key});
-
-  @override
-  State<NoticesScreen> createState() => _NoticesScreenState();
-}
-
-class _NoticesScreenState extends State<NoticesScreen> {
-  @override
-  void initState() {
-    context.read<NoticeBloc>().add(LoadNotices());
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
+import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
+import 'package:mobile_app/notices/bloc/notice_bloc.dart';
+import 'package:mobile_app/resources/view/resources_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
-import 'package:mobile_app/notices/models/notice.dart';
-import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/assignments/view/assignment_screen.dart';
 import 'package:mobile_app/notes/view/notes_screen.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
-import 'package:mobile_app/profile/view/user_profile.dart';
-// import 'package:intl/intl.dart';
+import 'package:mobile_app/user/view/user_profile.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +55,7 @@ class HomeScreen extends StatelessWidget {
             child: SafeArea(
               bottom: false,
               child: ListTile(
+                // greetings with user name
                 title: const Text(
                   'Hi, Jane Doe!',
                   style: TextStyle(
@@ -52,11 +65,13 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
+                // User Role
                 subtitle: const Text(
-                  // DateFormat('dd MMM yyy').format(DateTime.now()),
-                  '6th Sem, BCT',
+                  'Student | 6th Sem, BCT',
                   style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
+
+                // Profile button
                 trailing: IconButton(
                   onPressed: () => Navigator.push(
                     context,
@@ -83,21 +98,42 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: .spaceEvenly,
                         children: [
+                          // no of subjects
                           Expanded(
                             child: CustomWidgets.infoCard(size, 6, 'Classes'),
                           ),
+
+                          // pending assignments
                           Expanded(
-                            child: CustomWidgets.infoCard(
-                              size,
-                              12,
-                              'Assignments',
+                            child: BlocBuilder<AssignmentBloc, AssignmentState>(
+                              builder: (context, state) {
+                                if (state is! AssignmentLoaded) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return CustomWidgets.infoCard(
+                                  size,
+                                  state.pendingCount,
+                                  'Assignments',
+                                );
+                              },
                             ),
                           ),
+
+                          // latest notices
                           Expanded(
-                            child: CustomWidgets.infoCard(
-                              size,
-                              3,
-                              'New Notices',
+                            child: BlocBuilder<NoticeBloc, NoticeState>(
+                              builder: (context, state) {
+                                if (state is! NoticeLoaded) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return CustomWidgets.infoCard(
+                                  size,
+                                  state.noticeLength,
+                                  'New Notices',
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -160,7 +196,7 @@ class HomeScreen extends StatelessWidget {
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const Schedules(),
+                                builder: (_) => const ResourcesScreen(),
                               ),
                             ),
                           ),
@@ -174,43 +210,56 @@ class HomeScreen extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 10),
                         child: const Text(
                           'Upcoming',
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
-
-                      SizedBox(height: size.height * 0.01),
-
-                      // upcoming events cards
-                      CustomWidgets.homeScrenNoticeCard(
-                        Notice(
-                          title: 'Research proposal submission',
-                          publishedAt: DateTime(2026, 1, 5, 14, 12, 22),
-                          description: 'description',
-                          priority: NoticePriority.urgent,
-                        ),
-                      ),
-                      SizedBox(height: size.height * 0.01),
-                      CustomWidgets.homeScrenNoticeCard(
-                        Notice(
-                          title: 'AI assignment submission',
-                          publishedAt: DateTime(2026, 1, 4, 08, 56, 01),
-                          description: 'description',
-                          priority: NoticePriority.info,
-                        ),
-                      ),
-                      SizedBox(height: size.height * 0.01),
-                      CustomWidgets.homeScrenNoticeCard(
-                        Notice(
-                          title: 'FU cup team selection',
-                          publishedAt: DateTime(2026, 1, 2, 23, 55, 12),
-                          description: 'description',
-                          priority: NoticePriority.important,
-                        ),
-                      ),
-                      SizedBox(height: size.height * 0.01),
                     ]),
                   ),
                 ),
+
+                // upcoming events cards
+                BlocBuilder<UpcomingBloc, UpcomingState>(
+                  builder: (context, state) {
+                    if (state is! UpcomingLoaded) {
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: size.height * 0.02),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      );
+                    }
+
+                    final events = state.displayEvents;
+
+                    if (events.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(top: size.height * 0.02),
+                            child: const Text(
+                              'No upcoming events',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        childCount: events.length,
+                        (context, index) {
+                          return CustomWidgets.homeScreenCard(events[index]);
+                        },
+                      ),
+                    );
+                  },
+                ),
+
+                SliverToBoxAdapter(child: SizedBox(height: size.height * 0.01)),
               ],
             ),
           ),

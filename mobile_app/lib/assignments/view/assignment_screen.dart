@@ -4,19 +4,8 @@ import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
-class AssignmentScreen extends StatefulWidget {
+class AssignmentScreen extends StatelessWidget {
   const AssignmentScreen({super.key});
-
-  @override
-  State<AssignmentScreen> createState() => _AssignmentScreenState();
-}
-
-class _AssignmentScreenState extends State<AssignmentScreen> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<AssignmentBloc>().add(LoadAssignments());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +19,22 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
+          crossAxisAlignment: .start,
           children: [
+            // total and pending assignments count
+            BlocBuilder<AssignmentBloc, AssignmentState>(
+              builder: (context, state) {
+                if (state is! AssignmentLoaded) return const SizedBox.shrink();
+
+                return Text(
+                  'Pending ${state.pendingCount} . Total ${state.totalCount}',
+                  style: TextStyle(fontSize: 18, color: Colors.black54),
+                );
+              },
+            ),
+
+            SizedBox(height: size.height * 0.01),
+
             // filter buttons
             BlocBuilder<AssignmentBloc, AssignmentState>(
               builder: (context, state) {
@@ -74,8 +78,9 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
             Expanded(
               child: BlocBuilder<AssignmentBloc, AssignmentState>(
                 builder: (context, state) {
-                  if (state is AssignmentLoading)
+                  if (state is AssignmentLoading) {
                     return const SizedBox.shrink();
+                  }
 
                   if (state is AssignmentLoaded) {
                     final assignments = state.displayAssignments;
