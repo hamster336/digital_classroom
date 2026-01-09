@@ -78,9 +78,6 @@ class _AppShellState extends State<AppShell> {
           ),
         ],
         labelTextStyle: WidgetStateProperty.all(TextStyle(fontSize: 16)),
-        elevation: 10,
-        indicatorColor: Colors.transparent,
-        // backgroundColor: Colors.white,
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
+import 'package:mobile_app/home/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/assignments/view/assignment_details_screen.dart';
@@ -106,15 +107,16 @@ class CustomWidgets {
   }
 
   // Notice card
-  static Widget homeScrenNoticeCard(Notice notice) {
+  static Widget homeScreenCard(Upcoming event) {
     Color cardColor = Colors.blue;
-    if (notice.priority == NoticePriority.urgent) {
+    if (event.priority == UpcomingEventPriority.urgent) {
       cardColor = Colors.red;
-    } else if (notice.priority == NoticePriority.important) {
+    } else if (event.priority == UpcomingEventPriority.medium) {
       cardColor = Colors.yellow.shade700;
     }
 
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         color: cardColor,
@@ -122,10 +124,11 @@ class CustomWidgets {
       child: Card(
         margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
         color: Colors.white,
+        elevation: 2,
         child: ListTile(
-          title: Text(notice.title, style: TextStyle(fontSize: 20)),
+          title: Text(event.title, style: TextStyle(fontSize: 18)),
           subtitle: Text(
-            formatTimeForHome(notice.publishedAt),
+            formatTimeForHome(event.eventAt),
             style: TextStyle(color: Colors.black54),
           ),
         ),
@@ -567,5 +570,10 @@ class CustomWidgets {
         ),
       ),
     );
+  }
+
+  // user info tiles
+  static Widget userInfoTiles() {
+    return ListTile();
   }
 }
