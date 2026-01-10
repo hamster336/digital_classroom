@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/home/view/home_screen.dart';
 import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/settings/view/settings.dart';
+import 'package:mobile_app/user/models/app_user.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  final AppUser user;
+  const AppShell({super.key, required this.user});
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -13,12 +15,8 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int currentPageIndex = 0;
 
-  final List<Widget> pages = const [HomeScreen(), NoticesScreen(), Settings()];
-
   @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
-
     return Scaffold(
       // body: pages[currentPageIndex],
       body: IndexedStack(
@@ -26,7 +24,9 @@ class _AppShellState extends State<AppShell> {
         children: [
           Navigator(
             onGenerateRoute: (settings) {
-              return MaterialPageRoute(builder: (_) => const HomeScreen());
+              return MaterialPageRoute(
+                builder: (_) => HomeScreen(user: widget.user),
+              );
             },
           ),
           Navigator(

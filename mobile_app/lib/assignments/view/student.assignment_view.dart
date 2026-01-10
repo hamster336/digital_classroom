@@ -4,8 +4,8 @@ import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
-class AssignmentScreen extends StatelessWidget {
-  const AssignmentScreen({super.key});
+class StudentAssignmentView extends StatelessWidget {
+  const StudentAssignmentView({super.key});
 
   @override
   Widget build(BuildContext context) {

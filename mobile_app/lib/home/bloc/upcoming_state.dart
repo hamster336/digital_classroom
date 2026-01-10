@@ -12,7 +12,8 @@ final class UpcomingLoaded extends UpcomingState {
   List<Upcoming> get displayEvents {
     final now = DateTime.now();
 
-    final upcoming = events.where((e) => !e.eventAt.isBefore(now)).toList();
+    // final upcoming = events.where((e) => !e.eventAt.isBefore(now)).toList();
+    final upcoming = events.where((e) => now.isBefore(e.eventAt)).toList();
 
     upcoming.sort((a, b) => a.eventAt.compareTo(b.eventAt));
 

@@ -1,4 +1,4 @@
-import 'package:mobile_app/user/models/user.dart';
+import 'package:mobile_app/user/models/app_user.dart';
 
 class Teacher extends AppUser {
   final String empId;
@@ -11,6 +11,7 @@ class Teacher extends AppUser {
     required super.name,
     required super.email,
     required super.createdAt,
+    required super.role,
     super.avatarPath,
     required this.empId,
     required this.subjectIds,

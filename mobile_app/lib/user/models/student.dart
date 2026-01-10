@@ -1,4 +1,4 @@
-import 'package:mobile_app/user/models/user.dart';
+import 'package:mobile_app/user/models/app_user.dart';
 
 class Student extends AppUser {
   final String rollNumber;
@@ -11,6 +11,7 @@ class Student extends AppUser {
     required super.name,
     required super.email,
     required super.createdAt,
+    required super.role,
     super.avatarPath,
     required this.rollNumber,
     required this.grade,

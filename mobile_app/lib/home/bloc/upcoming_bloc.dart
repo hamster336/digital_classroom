@@ -8,12 +8,15 @@ part 'upcoming_event.dart';
 part 'upcoming_state.dart';
 
 class UpcomingBloc extends Bloc<UpcomingEvent, UpcomingState> {
-  UpcomingBloc() : super(UpcomingLoading()) {
+  final AssignmentRepo assignRepo;
+  final NoticeRepo noticeRepo;
+  UpcomingBloc({required this.assignRepo, required this.noticeRepo})
+    : super(UpcomingLoading()) {
     on<LoadUpcomingEvents>((event, emit) {
       emit(UpcomingLoading());
 
-      final notices = NoticeRepo().getNotice;
-      final assignments = AssignmentRepo().getAssignments;
+      final notices = noticeRepo.fetchNotices();
+      final assignments = assignRepo.fetchAssignments();
 
       final upcoming = [
         ...assignments.map((a) => a.toUpcoming()),

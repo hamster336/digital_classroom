@@ -116,7 +116,7 @@ class CustomWidgets {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         color: cardColor,
@@ -137,23 +137,25 @@ class CustomWidgets {
   }
 
   // format time for homescreen notice card
-  static String formatTimeForHome(DateTime publishedAt) {
+  static String formatTimeForHome(DateTime scheduledAt) {
     final now = DateTime.now();
-    final difference = now.difference(publishedAt).inDays;
+    final today = DateTime(now.year, now.month, now.day);
+    final date = DateTime(scheduledAt.year, scheduledAt.month, scheduledAt.day);
+    final diff = date.difference(today);
 
-    if (difference == 0) {
-      return 'Today, ${DateFormat('hh:mm a').format(publishedAt)}';
+    if (diff.inDays == 0) {
+      return 'Today, ${DateFormat('hh:mm a').format(scheduledAt)}';
     }
 
-    if (difference == 1) {
-      return 'Yesterday, ${DateFormat('hh:mm a').format(publishedAt)}';
+    if (diff.inDays == 1) {
+      return 'Tomorrow, ${DateFormat('hh:mm a').format(scheduledAt)}';
     }
 
-    if (difference <= 7) {
-      return DateFormat('EEEE, hh:mm a').format(publishedAt);
+    if (diff.inDays < 7) {
+      return DateFormat('EEEE, hh:mm a').format(scheduledAt);
     }
 
-    return DateFormat('dd MMM, hh:mm a').format(publishedAt);
+    return DateFormat('dd MMM, hh:mm a').format(scheduledAt);
   }
 
   // filter buttons
@@ -450,13 +452,15 @@ class CustomWidgets {
   // format time for assignment cards
   static String formatDueTime(DateTime time) {
     final now = DateTime.now();
-    final diff = time.difference(now);
+    final today = DateTime(now.year, now.month, now.day);
+    final date = DateTime(time.year, time.month, time.day);
+    final diff = date.difference(today);
 
     if (diff.isNegative) {
       return '${DateFormat('dd MMM y').format(time)} (Passed)';
     }
 
-    if (diff.inHours < 24) {
+    if (diff.inDays < 1) {
       return 'Today, ${DateFormat('hh:mm a').format(time)}';
     }
 

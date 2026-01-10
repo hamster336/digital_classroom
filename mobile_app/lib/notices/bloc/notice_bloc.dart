@@ -9,7 +9,8 @@ part 'notice_event.dart';
 part 'notice_state.dart';
 
 class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
-  NoticeBloc() : super(NoticeLoading()) {
+  final NoticeRepo repository;
+  NoticeBloc(this.repository) : super(NoticeLoading()) {
     // event handlers
     on<LoadNotices>(_loadNotices);
     on<FilterNotices>(_filterNotices);
@@ -23,7 +24,7 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
     emit(NoticeLoading());
 
     try {
-      final notices = NoticeRepo().getNotice;
+      final notices = repository.fetchNotices();
       emit(NoticeLoaded(notices: notices));
     } catch (ex) {
       emit(NoticeError(message: 'Failed to load notices!'));
