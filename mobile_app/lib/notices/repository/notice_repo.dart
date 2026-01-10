@@ -2,7 +2,7 @@ import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
 class NoticeRepo {
-  final notices = [
+  final _notices = [
     Notice(
       title: 'Winter Holidays',
       publishedAt: DateTime(2026, 1, 5, 14, 12, 22),
@@ -42,5 +42,7 @@ class NoticeRepo {
     ),
   ];
 
-  List<Notice> get getNotice => notices;
+  List<Notice> fetchNotices() {
+    return List.unmodifiable(_notices);
+  }
 }

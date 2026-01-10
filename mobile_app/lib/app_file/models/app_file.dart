@@ -2,7 +2,7 @@ import 'package:mobile_app/shared/required_enums.dart';
 
 class AppFile {
   final String id;
-  final String teacherId;
+  final String uploaderId;
   final String filePath;
   final String fileName;
   final FileType fileType;
@@ -11,7 +11,7 @@ class AppFile {
 
   AppFile({
     required this.id,
-    required this.teacherId,
+    required this.uploaderId,
     required this.filePath,
     required this.fileName,
     required this.fileType, 

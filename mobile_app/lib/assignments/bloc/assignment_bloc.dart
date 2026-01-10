@@ -9,7 +9,8 @@ part 'assignment_event.dart';
 part 'assignment_state.dart';
 
 class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
-  AssignmentBloc() : super(AssignmentLoading()) {
+  final AssignmentRepo repository;
+  AssignmentBloc(this.repository) : super(AssignmentLoading()) {
     on<LoadAssignments>(_loadAssignments);
     on<FilterAssignments>(_filterAssignments);
   }
@@ -22,7 +23,7 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
     emit(AssignmentLoading());
 
     try {
-      final List<Assignment> list = AssignmentRepo().getAssignments;
+      final List<Assignment> list = repository.fetchAssignments();
       emit(AssignmentLoaded(assignments: list));
     } catch (ex) {
       emit(AssignmentError(message: 'Failed to Load Assignments'));

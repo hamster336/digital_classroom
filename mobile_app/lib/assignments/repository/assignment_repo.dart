@@ -1,10 +1,11 @@
+import 'package:flutter/widgets.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
 class AssignmentRepo {
-  final list = [
+  final _list = [
     Assignment(
-      id: '1',
+      id: UniqueKey().toString(),
       title: 'AI lab report',
       description:
           'All the students are expected to submit their lab report on AI by 10th of January.',
@@ -45,5 +46,8 @@ class AssignmentRepo {
     ),
   ];
 
-  List<Assignment> get getAssignments => list;
+  // fetch assignments
+  List<Assignment> fetchAssignments() {
+    return List.unmodifiable(_list);
+  }
 }
