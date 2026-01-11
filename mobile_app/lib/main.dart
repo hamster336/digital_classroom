@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
-import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
+import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo.dart';
+import 'package:mobile_app/classroom/repository/classroom_repo.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/repository/notice_repo.dart';
+import 'package:mobile_app/submission/bloc/submission_bloc.dart';
+import 'package:mobile_app/submission/repository/submission_repo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +28,11 @@ class MyApp extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (_) => AssignmentRepo()),
-        RepositoryProvider(create: (_) => NoticeRepo()),
         RepositoryProvider(create: (_) => AuthRepo()),
+        RepositoryProvider(create: (_) => NoticeRepo()),
+        RepositoryProvider(create: (_) => ClassroomRepo()),
+        RepositoryProvider(create: (_) => AssignmentRepo()),
+        RepositoryProvider(create: (_) => SubmissionRepo()),
       ],
       child: MultiBlocProvider(
         // injecting blocs
@@ -36,19 +41,27 @@ class MyApp extends StatelessWidget {
             create: (context) =>
                 NoticeBloc(context.read<NoticeRepo>())..add(LoadNotices()),
           ),
+
           BlocProvider(
-            create: (context) =>
-                AssignmentBloc(context.read<AssignmentRepo>())
-                  ..add(LoadAssignments()),
+            create: (context) => StudentsAssignmentBloc(
+              assignmentRepo: context.read<AssignmentRepo>(),
+              submissionRepo: context.read<SubmissionRepo>(),
+            ),
           ),
+
           BlocProvider(
             create: (context) => UpcomingBloc(
               assignRepo: context.read<AssignmentRepo>(),
               noticeRepo: context.read<NoticeRepo>(),
             )..add(LoadUpcomingEvents()),
           ),
+
           BlocProvider(
             create: (context) => AuthBloc()..add(AuthCheckRequested()),
+          ),
+
+          BlocProvider(
+            create: (context) => SubmissionBloc(context.read<SubmissionRepo>()),
           ),
         ],
         child: MaterialApp(

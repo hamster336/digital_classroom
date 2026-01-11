@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/assignments/view/student.assignment_view.dart';
 import 'package:mobile_app/assignments/view/teacher.assignment_view.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
-import 'package:mobile_app/notes/view/student.notes_view.dart';
 import 'package:mobile_app/notes/view/teacher.notes_view.dart';
 import 'package:mobile_app/resources/view/resources_screen.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
+import 'package:mobile_app/user/models/teacher.dart';
 import 'package:mobile_app/user/view/user_profile.dart';
 
 class TeacherHomeView extends StatelessWidget {
-  const TeacherHomeView({super.key});
+  final Teacher teacher;
+  const TeacherHomeView({super.key, required this.teacher});
 
   @override
   Widget build(BuildContext context) {

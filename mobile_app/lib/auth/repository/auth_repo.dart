@@ -1,5 +1,6 @@
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/user/models/app_user.dart';
+import 'package:mobile_app/user/models/student.dart';
 import 'package:mobile_app/user/models/teacher.dart';
 
 class AuthRepo {
@@ -8,13 +9,12 @@ class AuthRepo {
 
   // dummy student data
   // AppUser? user = Student(
-  //   id: '1',
+  //   id: 'stud1',
   //   name: 'Jane Doe',
   //   email: 'janedoe@dummy.com',
   //   createdAt: DateTime(2026, 01, 01),
   //   rollNumber: '143',
-  //   grade: '6th Sem',
-  //   section: 'BCT',
+  //   classId: '1',
   //   subjectIds: [],
   //   role: UserRoles.student,
   // );

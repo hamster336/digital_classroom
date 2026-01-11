@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
+import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
@@ -22,9 +22,11 @@ class StudentAssignmentView extends StatelessWidget {
           crossAxisAlignment: .start,
           children: [
             // total and pending assignments count
-            BlocBuilder<AssignmentBloc, AssignmentState>(
+            BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
               builder: (context, state) {
-                if (state is! AssignmentLoaded) return const SizedBox.shrink();
+                if (state is! StudentAssignmentLoaded) {
+                  return const SizedBox.shrink();
+                }
 
                 return Text(
                   'Pending ${state.pendingCount} . Total ${state.totalCount}',
@@ -36,9 +38,11 @@ class StudentAssignmentView extends StatelessWidget {
             SizedBox(height: size.height * 0.01),
 
             // filter buttons
-            BlocBuilder<AssignmentBloc, AssignmentState>(
+            BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
               builder: (context, state) {
-                if (state is! AssignmentLoaded) return const SizedBox.shrink();
+                if (state is! StudentAssignmentLoaded) {
+                  return const SizedBox.shrink();
+                }
 
                 final currentFilter = state.filter;
 
@@ -47,7 +51,7 @@ class StudentAssignmentView extends StatelessWidget {
                     CustomWidgets.assignmentFilterButton(
                       label: 'Pending',
                       isSelected: currentFilter == AssignmentFilter.pending,
-                      onTap: () => context.read<AssignmentBloc>().add(
+                      onTap: () => context.read<StudentsAssignmentBloc>().add(
                         FilterAssignments(filter: AssignmentFilter.pending),
                       ),
                     ),
@@ -55,7 +59,7 @@ class StudentAssignmentView extends StatelessWidget {
                     CustomWidgets.assignmentFilterButton(
                       label: 'Overdue',
                       isSelected: currentFilter == AssignmentFilter.overdue,
-                      onTap: () => context.read<AssignmentBloc>().add(
+                      onTap: () => context.read<StudentsAssignmentBloc>().add(
                         FilterAssignments(filter: AssignmentFilter.overdue),
                       ),
                     ),
@@ -63,7 +67,7 @@ class StudentAssignmentView extends StatelessWidget {
                     CustomWidgets.assignmentFilterButton(
                       label: 'Completed',
                       isSelected: currentFilter == AssignmentFilter.completed,
-                      onTap: () => context.read<AssignmentBloc>().add(
+                      onTap: () => context.read<StudentsAssignmentBloc>().add(
                         FilterAssignments(filter: AssignmentFilter.completed),
                       ),
                     ),
@@ -76,36 +80,38 @@ class StudentAssignmentView extends StatelessWidget {
 
             // show the assignments
             Expanded(
-              child: BlocBuilder<AssignmentBloc, AssignmentState>(
-                builder: (context, state) {
-                  if (state is AssignmentLoading) {
-                    return const SizedBox.shrink();
-                  }
+              child:
+                  BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
+                    builder: (context, assignmentState) {
+                      if (assignmentState is StudentAssignmentLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  if (state is AssignmentLoaded) {
-                    final assignments = state.displayAssignments;
-                    if (assignments.isEmpty) {
-                      return Center(
-                        child: const Text(
-                          'No assingments available',
-                          style: TextStyle(fontSize: 17),
-                        ),
-                      );
-                    }
+                      if (assignmentState is StudentAssignmentLoaded) {
+                        final assignments = assignmentState.showAssignments();
+                        if (assignments.isEmpty) {
+                          return Center(
+                            child: const Text(
+                              'No assingments available',
+                              style: TextStyle(fontSize: 17),
+                            ),
+                          );
+                        }
 
-                    return ListView.builder(
-                      itemCount: assignments.length,
-                      itemBuilder: (_, index) {
-                        return CustomWidgets.assignmentCards(
-                          context,
-                          assignments[index],
+                        return ListView.builder(
+                          itemCount: assignments.length,
+                          itemBuilder: (_, index) {
+                            return CustomWidgets.assignmentCards(
+                              context,
+                              assignments[index],
+                            );
+                          },
                         );
-                      },
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
             ),
           ],
         ),
