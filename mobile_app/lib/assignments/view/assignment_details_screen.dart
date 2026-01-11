@@ -54,9 +54,10 @@ class AssignmentDetailsScreen extends StatelessWidget {
                       foregroundColor: Colors.white,
                     ),
                     child: Text(
-                      (assignment.submitted)
-                          ? 'Resubmit Assignment'
-                          : 'Submit Assignment',
+                      // (assignment.submitted)
+                      //     ? 'Resubmit Assignment'
+                      //     : 
+                          'Submit Assignment',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 17,

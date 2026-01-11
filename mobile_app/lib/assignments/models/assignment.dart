@@ -5,12 +5,11 @@ class Assignment {
   String title;
   String description;
   DateTime issuedAt;
+  String classId;
+  String teacherId;
   DateTime dueDate;
-  DateTime? submittedAt;
   AssignmentPriority priority;
   String? issueFilepath;
-  String? submissionFilepath;
-  bool submitted;
   int? submissionCount;
 
   Assignment({
@@ -19,12 +18,11 @@ class Assignment {
     required this.description,
     required this.issuedAt,
     required this.dueDate,
-    this.submittedAt,
+    required this.classId,
+    required this.teacherId,
     required this.priority,
-    required this.submitted,
     this.issueFilepath,
-    this.submissionFilepath,
-    this.submissionCount
+    this.submissionCount,
   });
 
   Assignment copyWith({
@@ -32,12 +30,11 @@ class Assignment {
     String? description,
     DateTime? issuedAt,
     DateTime? dueDate,
-    DateTime? submittedAt,
+    String? classId,
+    String? teacherId,
     AssignmentPriority? priority,
     String? issueFilepath,
-    String? submissionFilepath,
-    bool? submitted,
-    int? submissionCount
+    int? submissionCount,
   }) {
     return Assignment(
       id: id,
@@ -45,12 +42,11 @@ class Assignment {
       description: description ?? this.description,
       issuedAt: issuedAt ?? this.issuedAt,
       dueDate: dueDate ?? this.dueDate,
-      submittedAt: submittedAt ?? this.submittedAt,
+      classId: this.classId,
+      teacherId: this.teacherId,
       priority: priority ?? this.priority,
       issueFilepath: issueFilepath ?? this.issueFilepath,
-      submissionFilepath: submissionFilepath ?? this.submissionFilepath,
-      submitted: submitted ?? this.submitted,
-      submissionCount: submissionCount ?? this.submissionCount
+      submissionCount: submissionCount ?? this.submissionCount,
     );
   }
 }

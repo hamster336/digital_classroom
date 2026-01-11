@@ -508,7 +508,9 @@ class CustomWidgets {
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(10),
-          child: (!assignment.submitted)
+          child:
+              ((assignment.submissionCount == null ||
+                  assignment.submissionCount == 0))
               ? Center(
                   child: const Text(
                     "No submissions found",
@@ -533,11 +535,7 @@ class CustomWidgets {
                             ),
 
                             Text(
-                              (assignment.submittedAt == null)
-                                  ? 'No data found'
-                                  : DateFormat(
-                                      'hh:MM a, dd MMM',
-                                    ).format(assignment.submittedAt!),
+                              'No data found',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black54,
@@ -557,9 +555,7 @@ class CustomWidgets {
                               ),
                             ),
                             Text(
-                              (assignment.submittedAt == null)
-                                  ? 'No data found'
-                                  : '${assignment.submissionCount!}',
+                              'No data found',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black54,

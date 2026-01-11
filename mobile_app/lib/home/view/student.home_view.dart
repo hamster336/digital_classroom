@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/assignments/bloc/assignment_bloc.dart';
+import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/resources/view/resources_screen.dart';
@@ -8,10 +8,25 @@ import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/assignments/view/student.assignment_view.dart';
 import 'package:mobile_app/notes/view/student.notes_view.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
+import 'package:mobile_app/user/models/student.dart';
 import 'package:mobile_app/user/view/user_profile.dart';
 
-class StudentHomeView extends StatelessWidget {
-  const StudentHomeView({super.key});
+class StudentHomeView extends StatefulWidget {
+  final Student student;
+  const StudentHomeView({super.key, required this.student});
+
+  @override
+  State<StudentHomeView> createState() => _StudentHomeViewState();
+}
+
+class _StudentHomeViewState extends State<StudentHomeView> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<StudentsAssignmentBloc>().add(
+      LoadClassAssignments(studentId: widget.student.id),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,19 +110,23 @@ class StudentHomeView extends StatelessWidget {
 
                           // pending assignments
                           Expanded(
-                            child: BlocBuilder<AssignmentBloc, AssignmentState>(
-                              builder: (context, state) {
-                                if (state is! AssignmentLoaded) {
-                                  return const SizedBox.shrink();
-                                }
+                            child:
+                                BlocBuilder<
+                                  StudentsAssignmentBloc,
+                                  StudentsAssignmentState
+                                >(
+                                  builder: (context, state) {
+                                    if (state is! StudentAssignmentLoaded) {
+                                      return const SizedBox.shrink();
+                                    }
 
-                                return CustomWidgets.infoCard(
-                                  size,
-                                  state.pendingCount,
-                                  'Assignments',
-                                );
-                              },
-                            ),
+                                    return CustomWidgets.infoCard(
+                                      size,
+                                      state.pendingCount,
+                                      'Assignments',
+                                    );
+                                  },
+                                ),
                           ),
 
                           // latest notices
