@@ -4,12 +4,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.dart';
+import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo.dart';
+import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/repository/notice_repo.dart';
+import 'package:mobile_app/subject/bloc/subject_bloc.dart';
+import 'package:mobile_app/subject/repository/subject_repo.dart';
 import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
 
@@ -33,6 +37,8 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (_) => ClassroomRepo()),
         RepositoryProvider(create: (_) => AssignmentRepo()),
         RepositoryProvider(create: (_) => SubmissionRepo()),
+        RepositoryProvider(create: (_) => ClassroomRepo()),
+        RepositoryProvider(create: (_) => SubjectRepo()),
       ],
       child: MultiBlocProvider(
         // injecting blocs
@@ -46,6 +52,11 @@ class MyApp extends StatelessWidget {
             create: (context) => StudentsAssignmentBloc(
               assignmentRepo: context.read<AssignmentRepo>(),
               submissionRepo: context.read<SubmissionRepo>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => TeacherAssignmentBloc(
+              context.read<AssignmentRepo>()
             ),
           ),
 
@@ -63,6 +74,13 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => SubmissionBloc(context.read<SubmissionRepo>()),
           ),
+
+          BlocProvider(
+            create: (context) => ClassroomBloc(context.read<ClassroomRepo>()),
+          ),
+          BlocProvider(
+            create: (context) => SubjectBloc(context.read<SubjectRepo>()),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -78,7 +96,7 @@ class MyApp extends StatelessWidget {
               backgroundColor: Colors.white,
               titleTextStyle: TextStyle(
                 fontFamily: 'Afacad',
-                fontSize: 30,
+                fontSize: 25,
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
                 letterSpacing: 0.5,

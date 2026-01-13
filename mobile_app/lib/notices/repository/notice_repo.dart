@@ -4,6 +4,7 @@ import 'package:mobile_app/shared/required_enums.dart';
 class NoticeRepo {
   final _notices = [
     Notice(
+      id: 'N1',
       title: '6th sem Mid terms',
       publishedAt: DateTime(2026, 1, 6, 14, 12, 22),
       description:
@@ -12,6 +13,7 @@ class NoticeRepo {
       scheduledAt: DateTime(2026, 01, 22, 10, 30),
     ),
     Notice(
+      id: 'N2',
       title: 'Winter Holidays',
       publishedAt: DateTime(2026, 1, 5, 14, 12, 22),
       description:
@@ -20,6 +22,7 @@ class NoticeRepo {
       scheduledAt: DateTime(2026, 01, 10),
     ),
     Notice(
+      id: 'N3',
       title: 'Proposal Defense',
       publishedAt: DateTime(2026, 1, 5, 08, 56, 01),
       description:
@@ -28,6 +31,7 @@ class NoticeRepo {
       scheduledAt: DateTime(2026, 01, 10, 10, 00),
     ),
     Notice(
+      id: 'N4',
       title: 'FU cup team selection',
       publishedAt: DateTime(2026, 1, 2, 23, 55, 12),
       description:
@@ -35,6 +39,7 @@ class NoticeRepo {
       priority: NoticePriority.important,
     ),
     Notice(
+      id: 'N5',
       title: 'Winter Holidays',
       publishedAt: DateTime(2025, 12, 31, 14, 12, 22),
       description:
@@ -42,6 +47,7 @@ class NoticeRepo {
       priority: NoticePriority.info,
     ),
     Notice(
+      id: 'N6',
       title: 'Proposal Defense',
       publishedAt: DateTime(2025, 12, 23, 08, 56, 01),
       description:

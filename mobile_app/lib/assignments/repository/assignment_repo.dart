@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
@@ -12,9 +12,9 @@ class AssignmentRepo {
       issuedAt: DateTime(2026, 01, 06, 12, 23),
       dueDate: DateTime(2026, 01, 10, 08, 00),
       priority: AssignmentPriority.medium,
-
-      classId: 'CL1',
+      classId: 'cl8',
       teacherId: 'T1',
+      subjectId: 'sub6',
     ),
     Assignment(
       id: 'assign2',
@@ -24,8 +24,7 @@ class AssignmentRepo {
       issuedAt: DateTime(2025, 12, 25, 10, 00),
       dueDate: DateTime(2026, 01, 06, 15, 00),
       priority: AssignmentPriority.urgent,
-
-      classId: 'CL1',
+      classId: 'cl8',
       teacherId: 'T1',
     ),
     Assignment(
@@ -36,9 +35,9 @@ class AssignmentRepo {
       issuedAt: DateTime(2026, 01, 02, 18, 47),
       dueDate: DateTime(2026, 02, 01, 14, 30),
       priority: AssignmentPriority.normal,
-
-      classId: 'CL1',
+      classId: 'cl8',
       teacherId: 'T1',
+      subjectId: 'sub11',
     ),
     Assignment(
       id: 'assign4',
@@ -48,9 +47,9 @@ class AssignmentRepo {
       issuedAt: DateTime(2025, 12, 25, 13, 10),
       dueDate: DateTime(2026, 01, 5, 15, 00),
       priority: AssignmentPriority.normal,
-
-      classId: 'CL1',
+      classId: 'cl8',
       teacherId: 'T1',
+      subjectId: 'sub7',
     ),
     Assignment(
       id: 'assign5',
@@ -60,14 +59,24 @@ class AssignmentRepo {
       issuedAt: DateTime(2026, 01, 10, 13, 10),
       dueDate: DateTime(2026, 02, 5, 15, 00),
       priority: AssignmentPriority.medium,
-
-      classId: 'CL1',
+      classId: 'cl8',
       teacherId: 'T1',
+      subjectId: 'sub9',
     ),
   ];
 
   // fetch assignments
   List<Assignment> fetchAssignments() {
     return List.unmodifiable(_list);
+  }
+
+  List<Assignment> fetchTeachersAssignment(String teacherId, String classId) {
+    return _list
+        .where((a) => a.classId == classId && a.teacherId == teacherId)
+        .toList();
+  }
+
+  List<Assignment> fetchStudentsAssignment(String classId) {
+    return _list.where((a) => a.classId == classId).toList();
   }
 }

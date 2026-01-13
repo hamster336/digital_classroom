@@ -6,6 +6,7 @@ import 'package:mobile_app/assignments/repository/assignment_repo.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/submission/model/submission.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
+import 'package:mobile_app/user/models/student.dart';
 
 part 'student.assignment_event.dart';
 part 'student.assignment_state.dart';
@@ -32,7 +33,7 @@ class StudentsAssignmentBloc
     try {
       final List<Assignment> assignments = assignmentRepo.fetchAssignments();
       final List<Submission> submissions = submissionRepo.fetchSubmissions(
-        event.studentId,
+        event.student.id,
       );
       emit(
         StudentAssignmentLoaded(

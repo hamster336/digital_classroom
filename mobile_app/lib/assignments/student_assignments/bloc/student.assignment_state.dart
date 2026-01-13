@@ -53,8 +53,6 @@ final class StudentAssignmentLoaded extends StudentsAssignmentState {
 
   // get no of remaining assignments
   int get pendingCount {
-    final now = DateTime.now();
-
     // set  of submission ids for fast lookup
     final submittedAssignmentIds = submissions
         .map((s) => s.assignmentId)

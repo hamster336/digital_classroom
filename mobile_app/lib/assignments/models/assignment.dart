@@ -6,6 +6,7 @@ class Assignment {
   String description;
   DateTime issuedAt;
   String classId;
+  String? subjectId;
   String teacherId;
   DateTime dueDate;
   AssignmentPriority priority;
@@ -19,6 +20,7 @@ class Assignment {
     required this.issuedAt,
     required this.dueDate,
     required this.classId,
+    this.subjectId,
     required this.teacherId,
     required this.priority,
     this.issueFilepath,

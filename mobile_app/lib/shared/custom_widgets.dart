@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
+import 'package:mobile_app/assignments/view/teacher.assignment_details_screen.dart';
+import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/home/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
-import 'package:mobile_app/assignments/view/assignment_details_screen.dart';
+import 'package:mobile_app/assignments/view/student.assignment_details_screen.dart';
 
 class CustomWidgets {
   // custom textFields
@@ -350,7 +352,8 @@ class CustomWidgets {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => AssignmentDetailsScreen(assignment: assignment),
+          builder: (_) =>
+              StudentAssignmentDetailsScreen(assignment: assignment),
         ),
       ),
       child: Container(
@@ -572,8 +575,177 @@ class CustomWidgets {
     );
   }
 
-  // user info tiles
+  // user info tiles for profile screen
   static Widget userInfoTiles() {
     return ListTile();
+  }
+
+  // class cards for teacher to select a class
+  static Widget classCards(Classroom classroom, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: Color(0xFF2AB3AA),
+      ),
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        elevation: 3,
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF2AB3AA),
+            ),
+            child: Icon(Icons.groups, color: Colors.white, size: 25),
+          ),
+          title: Text(
+            (classroom.faculty != null)
+                ? '${classroom.name} | ${classroom.faculty}'
+                : classroom.name,
+            style: TextStyle(fontSize: 18),
+          ),
+          subtitle: Text(
+            '${classroom.studentCount} students',
+            style: TextStyle(color: Colors.black54, fontSize: 17),
+          ),
+          trailing: InkWell(onTap: onTap, child: Icon(Icons.chevron_right)),
+        ),
+      ),
+    );
+  }
+
+  // static assignment cards for teacher
+  static Widget teachersAssignmentCards(
+    BuildContext context,
+    Assignment assignment, {
+    bool detailed = false,
+  }) {
+    Color cardColor = Colors.blue;
+
+    if (assignment.priority == AssignmentPriority.urgent) {
+      cardColor = Colors.red;
+    } else if (assignment.priority == AssignmentPriority.medium) {
+      cardColor = Colors.yellow.shade700;
+    }
+
+    return InkWell(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TeacherAssignmentDetailScreen(assignment: assignment),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(top: 5, bottom: 5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          color: cardColor,
+        ),
+        child: Card(
+          margin: const EdgeInsets.only(left: 5),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Row(
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    // assignment title
+                    Flexible(
+                      child: Text(
+                        assignment.title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: .visible,
+                      ),
+                    ),
+
+                    const SizedBox(width: 5),
+
+                    // Update button
+                    if (!detailed)
+                      Row(
+                        children: [
+                          IconButton(
+                            padding: .zero,
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.edit,
+                              opticalSize: 20,
+                              color: Color(0xFF2AB3AA),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            padding: .zero,
+                            icon: const Icon(
+                              Icons.delete,
+                              opticalSize: 20,
+                              color: Color(0xFF2AB3AA),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+
+                // issue date
+                if (detailed)
+                  Text(
+                    'Issued: ${formatIssuedTime(assignment.issuedAt)}',
+                    style: TextStyle(color: Colors.black45),
+                  ),
+
+                if (detailed) const SizedBox(height: 10),
+
+                // description of the assignment
+                Text(
+                  assignment.description,
+                  style: TextStyle(fontSize: 17, color: Colors.black54),
+                ),
+
+                const SizedBox(height: 10),
+
+                // due time
+                if (detailed)
+                  Row(
+                    children: [
+                      Icon(Icons.timer, size: 20, color: Colors.black45),
+                      const SizedBox(width: 5),
+
+                      Text(
+                        'Due: ${formatDueTime(assignment.dueDate)}',
+                        style: TextStyle(color: Colors.black45),
+                      ),
+
+                      Spacer(),
+
+                      // show how much time has passed in percentage
+                      Text(
+                        '${(getPercentage(assignment.issuedAt, assignment.dueDate) * 100).toInt()}%',
+                        style: TextStyle(color: Colors.black45),
+                      ),
+                    ],
+                  ),
+
+                // time passed since issued indicator
+                if (detailed) const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: getPercentage(assignment.issuedAt, assignment.dueDate),
+                  color: Color(0xFF2AB3AA),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
