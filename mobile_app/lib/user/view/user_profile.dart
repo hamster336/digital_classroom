@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/user/models/app_user.dart';
+import 'package:mobile_app/user/models/student.dart';
 
 class UserProfile extends StatelessWidget {
-  const UserProfile({super.key});
+  final AppUser user;
+  const UserProfile({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
+    bool student = (user is Student) ? true : false;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -62,7 +66,7 @@ class UserProfile extends StatelessWidget {
                 ),
                 SizedBox(height: size.height * 0.01),
                 Text(
-                  'Username',
+                  user.name,
                   style: TextStyle(
                     fontSize: size.width * 0.075,
                     color: Colors.white,
@@ -81,10 +85,22 @@ class UserProfile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Color.fromARGB(255, 94, 204, 197),
                     borderRadius: BorderRadius.all(Radius.circular(20)),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 2,
+                        offset: Offset(1, 3),
+                        color: Colors.black26,
+                      ),
+                    ],
                   ),
                   child: Text(
-                    'User Role',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    (student) ? 'Student' : 'Teacher',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ],

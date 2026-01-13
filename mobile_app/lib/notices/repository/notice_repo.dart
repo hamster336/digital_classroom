@@ -4,6 +4,15 @@ import 'package:mobile_app/shared/required_enums.dart';
 class NoticeRepo {
   final _notices = [
     Notice(
+      id: 'N0',
+      title: 'Sports Week 2082',
+      publishedAt: DateTime(2026, 1, 12, 14, 12, 22),
+      description:
+          "This is to notrify all that this year's sports week will start from 27th of January.",
+      priority: NoticePriority.important,
+      scheduledAt: DateTime(2026, 01, 27, 10, 30),
+    ),
+    Notice(
       id: 'N1',
       title: '6th sem Mid terms',
       publishedAt: DateTime(2026, 1, 6, 14, 12, 22),

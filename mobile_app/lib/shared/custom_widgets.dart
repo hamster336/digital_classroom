@@ -575,11 +575,6 @@ class CustomWidgets {
     );
   }
 
-  // user info tiles for profile screen
-  static Widget userInfoTiles() {
-    return ListTile();
-  }
-
   // class cards for teacher to select a class
   static Widget classCards(Classroom classroom, VoidCallback onTap) {
     return Container(
@@ -588,36 +583,39 @@ class CustomWidgets {
         borderRadius: BorderRadius.all(Radius.circular(12)),
         color: Color(0xFF2AB3AA),
       ),
-      child: Card(
-        margin: const EdgeInsets.only(left: 5),
-        color: Colors.white,
-        elevation: 3,
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF2AB3AA),
+      child: InkWell(
+        onTap: onTap,
+        child: Card(
+          margin: const EdgeInsets.only(left: 5),
+          color: Colors.white,
+          elevation: 3,
+          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF2AB3AA),
+              ),
+              child: Icon(Icons.groups, color: Colors.white, size: 25),
             ),
-            child: Icon(Icons.groups, color: Colors.white, size: 25),
+            title: Text(
+              (classroom.faculty != null)
+                  ? '${classroom.name} | ${classroom.faculty}'
+                  : classroom.name,
+              style: TextStyle(fontSize: 18),
+            ),
+            subtitle: Text(
+              '${classroom.studentCount} students',
+              style: TextStyle(color: Colors.black54, fontSize: 17),
+            ),
+            trailing: Icon(Icons.chevron_right),
           ),
-          title: Text(
-            (classroom.faculty != null)
-                ? '${classroom.name} | ${classroom.faculty}'
-                : classroom.name,
-            style: TextStyle(fontSize: 18),
-          ),
-          subtitle: Text(
-            '${classroom.studentCount} students',
-            style: TextStyle(color: Colors.black54, fontSize: 17),
-          ),
-          trailing: InkWell(onTap: onTap, child: Icon(Icons.chevron_right)),
         ),
       ),
     );
   }
 
-  // static assignment cards for teacher
+  // assignment cards for teacher
   static Widget teachersAssignmentCards(
     BuildContext context,
     Assignment assignment, {
@@ -747,5 +745,110 @@ class CustomWidgets {
         ),
       ),
     );
+  }
+
+  // class details widget
+  static Widget showClassDetails(BuildContext context, Classroom cls) {
+    return AlertDialog(
+      title: Center(
+        child: const Text(
+          'Class Details',
+          style: TextStyle(color: Colors.black54, fontSize: 20),
+        ),
+      ),
+      content: Column(
+        mainAxisSize: .min,
+        children: [
+          Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              Column(
+                mainAxisSize: .min,
+                children: [
+                  const Text('Name: ', style: TextStyle(fontSize: 18)),
+                  Text(
+                    cls.name,
+                    style: TextStyle(color: Colors.black54, fontSize: 18),
+                  ),
+                ],
+              ),
+
+              Column(
+                mainAxisSize: .min,
+                children: [
+                  const Text('Faculty: ', style: TextStyle(fontSize: 18)),
+                  Text(
+                    (cls.faculty != null) ? cls.faculty! : '-',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 15),
+
+          Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              Column(
+                mainAxisSize: .min,
+                children: [
+                  const Text('Start Year: ', style: TextStyle(fontSize: 18)),
+                  Text(
+                    '${cls.startYear}',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),
+                  ),
+                ],
+              ),
+
+              Column(
+                mainAxisSize: .min,
+                children: [
+                  const Text('End Year: ', style: TextStyle(fontSize: 18)),
+                  Text(
+                    '${cls.endYear}',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+
+          Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              Column(
+                mainAxisSize: .min,
+                children: [
+                  const Text('Students: ', style: TextStyle(fontSize: 18)),
+                  Text(
+                    '${cls.studentCount}',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),
+                  ),
+                ],
+              ),
+
+              Column(
+                mainAxisSize: .min,
+                children: [
+                  const Text('Created on: ', style: TextStyle(fontSize: 18)),
+                  Text(
+                    DateFormat('dd MMM, y').format(cls.createdAt),
+                    style: TextStyle(color: Colors.black54, fontSize: 18),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // user info tiles for profile screen
+  static Widget userInfoTiles() {
+    return ListTile();
   }
 }

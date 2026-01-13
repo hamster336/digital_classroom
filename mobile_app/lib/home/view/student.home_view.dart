@@ -24,7 +24,10 @@ class _StudentHomeViewState extends State<StudentHomeView> {
   @override
   void initState() {
     super.initState();
-
+    // upcoming events
+    context.read<UpcomingBloc>().add(
+      LoadStudentsEvents(classId: widget.student.id),
+    );
     // assignments
     context.read<StudentsAssignmentBloc>().add(
       LoadClassAssignments(student: widget.student),
@@ -91,7 +94,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                 trailing: IconButton(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const UserProfile()),
+                    MaterialPageRoute(builder: (_) => UserProfile(user: widget.student,)),
                   ),
                   style: IconButton.styleFrom(backgroundColor: Colors.white),
                   icon: Icon(Icons.person, color: Colors.green, size: 30),
@@ -204,7 +207,6 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                           ),
                         ],
                       ),
-
                       Row(
                         mainAxisAlignment: .spaceEvenly,
                         crossAxisAlignment: .start,
@@ -217,7 +219,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const Schedules(),
+                                builder: (_) =>
+                                    Schedules(classId: widget.student.classId),
                               ),
                             ),
                           ),

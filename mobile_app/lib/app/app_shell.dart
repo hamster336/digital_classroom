@@ -3,7 +3,6 @@ import 'package:mobile_app/home/view/home_screen.dart';
 import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/settings/view/settings.dart';
 import 'package:mobile_app/user/models/app_user.dart';
-import 'package:mobile_app/user/view/user_profile.dart';
 
 class AppShell extends StatefulWidget {
   final AppUser user;

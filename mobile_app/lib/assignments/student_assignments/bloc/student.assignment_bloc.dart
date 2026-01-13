@@ -31,7 +31,8 @@ class StudentsAssignmentBloc
     emit(StudentAssignmentLoading());
 
     try {
-      final List<Assignment> assignments = assignmentRepo.fetchAssignments();
+      final List<Assignment> assignments = assignmentRepo
+          .fetchStudentsAssignment(event.student.classId);
       final List<Submission> submissions = submissionRepo.fetchSubmissions(
         event.student.id,
       );

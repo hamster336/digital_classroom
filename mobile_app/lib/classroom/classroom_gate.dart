@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
+import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class ClassroomGate extends StatelessWidget {
-  final Widget Function(String classId) destinationBuilder;
-  const ClassroomGate({super.key, required this.destinationBuilder});
+  final void Function(BuildContext context, Classroom classroom) onClassSelected;
+  const ClassroomGate({super.key, required this.onClassSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +36,7 @@ class ClassroomGate extends StatelessWidget {
               final cls = classes[index];
               return CustomWidgets.classCards(
                 cls,
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => destinationBuilder(cls.id)),
-                ),
+                () => onClassSelected(context, cls)
               );
             },
           );

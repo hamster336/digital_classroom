@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/user/models/app_user.dart';
 import 'package:mobile_app/user/models/student.dart';

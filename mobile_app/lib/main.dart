@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
             create: (context) => UpcomingBloc(
               assignRepo: context.read<AssignmentRepo>(),
               noticeRepo: context.read<NoticeRepo>(),
-            )..add(LoadUpcomingEvents()),
+            ),
           ),
 
           BlocProvider(
