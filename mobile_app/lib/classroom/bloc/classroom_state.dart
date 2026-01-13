@@ -2,14 +2,13 @@ part of 'classroom_bloc.dart';
 
 sealed class ClassroomState {}
 
-final class ClassroomInitial extends ClassroomState {}
-
 final class ClassLoading extends ClassroomState {}
 
 final class ClassesLoaded extends ClassroomState {
   final List<Classroom> classes;
+  final UserRoles role;
 
-  ClassesLoaded({required this.classes});
+  ClassesLoaded({required this.classes, required this.role});
 }
 
 final class ClassError extends ClassroomState {

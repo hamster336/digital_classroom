@@ -4,8 +4,8 @@ sealed class StudentsAssignmentEvent {}
 
 // common events for students and teachers
 final class LoadClassAssignments extends StudentsAssignmentEvent {
-  final String studentId;
-  LoadClassAssignments({required this.studentId});
+  final Student student;
+  LoadClassAssignments({required this.student});
 }
 
 // events for teachers

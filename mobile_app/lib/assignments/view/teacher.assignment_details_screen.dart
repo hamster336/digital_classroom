@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
-class AssignmentDetailsScreen extends StatelessWidget {
+class TeacherAssignmentDetailScreen extends StatelessWidget {
   final Assignment assignment;
-  const AssignmentDetailsScreen({super.key, required this.assignment});
+  const TeacherAssignmentDetailScreen({super.key, required this.assignment});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsetsGeometry.symmetric(horizontal: 10),
@@ -25,7 +24,7 @@ class AssignmentDetailsScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.black45),
               ),
               const SizedBox(height: 5),
-              CustomWidgets.assignmentCards(
+              CustomWidgets.teachersAssignmentCards(
                 context,
                 assignment,
                 detailed: true,
@@ -39,33 +38,8 @@ class AssignmentDetailsScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.black45),
               ),
               const SizedBox(height: 5),
-              CustomWidgets.submissionDetails(assignment),
 
               const SizedBox(height: 15),
-
-              // submit assignment
-              Row(
-                children: [
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF2AB3AA),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text(
-                      // (assignment.submitted)
-                      //     ? 'Resubmit Assignment'
-                      //     : 
-                          'Submit Assignment',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),

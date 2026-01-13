@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/view/teacher.assignment_view.dart';
+import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
+import 'package:mobile_app/classroom/classroom_gate.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notes/view/teacher.notes_view.dart';
-import 'package:mobile_app/resources/view/resources_screen.dart';
+import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/user/models/teacher.dart';
 import 'package:mobile_app/user/view/user_profile.dart';
 
-class TeacherHomeView extends StatelessWidget {
+class TeacherHomeView extends StatefulWidget {
   final Teacher teacher;
   const TeacherHomeView({super.key, required this.teacher});
+
+  @override
+  State<TeacherHomeView> createState() => _TeacherHomeViewState();
+}
+
+class _TeacherHomeViewState extends State<TeacherHomeView> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ClassroomBloc>().add(
+      LoadTeachersClasses(teacher: widget.teacher),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +98,48 @@ class TeacherHomeView extends StatelessWidget {
                   padding: const EdgeInsetsGeometry.symmetric(horizontal: 10),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
+                      // general information
+                      Row(
+                        mainAxisAlignment: .spaceEvenly,
+                        children: [
+                          // no of subjects
+                          Expanded(
+                            child: BlocBuilder<ClassroomBloc, ClassroomState>(
+                              builder: (context, state) {
+                                if (state is! ClassesLoaded) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return CustomWidgets.infoCard(
+                                  size,
+                                  state.classes.length,
+                                  'Classes',
+                                );
+                              },
+                            ),
+                          ),
+
+                          // latest notices
+                          Expanded(
+                            child: BlocBuilder<NoticeBloc, NoticeState>(
+                              builder: (context, state) {
+                                if (state is! NoticeLoaded) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return CustomWidgets.infoCard(
+                                  size,
+                                  state.noticeLength,
+                                  'New Notices',
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: size.height * 0.015),
+
                       // learning materials and resources
                       Row(
                         mainAxisAlignment: .spaceEvenly,
@@ -92,7 +149,7 @@ class TeacherHomeView extends StatelessWidget {
                             size,
                             Icons.note_alt_rounded,
                             'Notes',
-                            'Add Notes',
+                            'Manage Notes',
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -104,11 +161,14 @@ class TeacherHomeView extends StatelessWidget {
                             size,
                             Icons.note_rounded,
                             'Assignments',
-                            'View assignments',
+                            'Manage assignments',
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const TeacherAssignmentView(),
+                                builder: (_) => ClassroomGate(
+                                  destinationBuilder: (classId) =>
+                                      TeacherAssignmentView(teacherId: widget.teacher.id, classId: classId),
+                                ),
                               ),
                             ),
                           ),
@@ -132,15 +192,10 @@ class TeacherHomeView extends StatelessWidget {
                           ),
                           CustomWidgets.resrcCard(
                             size,
-                            Icons.note_alt_rounded,
-                            'Resources',
-                            'Learning materials',
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ResourcesScreen(),
-                              ),
-                            ),
+                            Icons.info,
+                            'Class Details',
+                            'See class details',
+                            () => () {},
                           ),
                         ],
                       ),
@@ -158,7 +213,7 @@ class TeacherHomeView extends StatelessWidget {
                     ]),
                   ),
                 ),
-                
+
                 // upcoming events cards
                 BlocBuilder<UpcomingBloc, UpcomingState>(
                   builder: (context, state) {

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
+import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
-import 'package:mobile_app/resources/view/resources_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/assignments/view/student.assignment_view.dart';
 import 'package:mobile_app/notes/view/student.notes_view.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
+import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/user/models/student.dart';
 import 'package:mobile_app/user/view/user_profile.dart';
 
@@ -23,8 +24,18 @@ class _StudentHomeViewState extends State<StudentHomeView> {
   @override
   void initState() {
     super.initState();
+
+    // assignments
     context.read<StudentsAssignmentBloc>().add(
-      LoadClassAssignments(studentId: widget.student.id),
+      LoadClassAssignments(student: widget.student),
+    );
+    // load class details
+    context.read<ClassroomBloc>().add(
+      LoadStudentsClass(student: widget.student),
+    );
+    // load subjects details
+    context.read<SubjectBloc>().add(
+      LoadStudentsSubject(student: widget.student),
     );
   }
 
@@ -104,8 +115,20 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                         mainAxisAlignment: .spaceEvenly,
                         children: [
                           // no of subjects
-                          Expanded(
-                            child: CustomWidgets.infoCard(size, 6, 'Classes'),
+                          BlocBuilder<SubjectBloc, SubjectState>(
+                            builder: (context, state) {
+                              if (state is! SubjectLoaded) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return Expanded(
+                                child: CustomWidgets.infoCard(
+                                  size,
+                                  state.subejcts.length,
+                                  'Subjects',
+                                ),
+                              );
+                            },
                           ),
 
                           // pending assignments
@@ -181,6 +204,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                           ),
                         ],
                       ),
+
                       Row(
                         mainAxisAlignment: .spaceEvenly,
                         crossAxisAlignment: .start,
@@ -199,19 +223,13 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                           ),
                           CustomWidgets.resrcCard(
                             size,
-                            Icons.note_alt_rounded,
-                            'Resources',
-                            'Learning materials',
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ResourcesScreen(),
-                              ),
-                            ),
+                            Icons.info,
+                            'Class Info',
+                            'See class details',
+                            () => () {},
                           ),
                         ],
                       ),
-
                       SizedBox(height: size.height * 0.015),
 
                       // upcoming events text

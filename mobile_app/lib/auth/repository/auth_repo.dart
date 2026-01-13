@@ -8,28 +8,26 @@ class AuthRepo {
   // AppUser? user;
 
   // dummy student data
-  // AppUser? user = Student(
+  // AppUser? get getUser => Student(
   //   id: 'stud1',
   //   name: 'Jane Doe',
   //   email: 'janedoe@dummy.com',
   //   createdAt: DateTime(2026, 01, 01),
   //   rollNumber: '143',
-  //   classId: '1',
-  //   subjectIds: [],
+  //   classId: 'cl8',
+  //   subjectIds: ['sub6', 'sub7', 'sub9', 'sub10', 'sub11', 'sub12'],
   //   role: UserRoles.student,
   // );
 
   // dummy teacher data
-  AppUser? user = Teacher(
-    id: 'ID01',
+  AppUser? get getUser => Teacher(
+    id: 'T1',
     name: 'Jane Doe',
     email: 'jane.doe@example.com',
     createdAt: DateTime(2025, 12, 25),
-    empId: 'Rg01',
+    empId: 'Emp01',
     subjectIds: [],
-    classIds: [],
+    classIds: ['cl1', 'cl2', 'cl3', 'cl5', 'cl6', 'cl8'],
     role: UserRoles.teacher,
   );
-
-  AppUser? get getUser => user;
 }
