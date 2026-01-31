@@ -24,15 +24,17 @@ class _StudentHomeViewState extends State<StudentHomeView> {
   @override
   void initState() {
     super.initState();
-
+    // upcoming events
+    context.read<UpcomingBloc>().add(
+      LoadStudentsEvents(classId: widget.student.id),
+    );
     // assignments
     context.read<StudentsAssignmentBloc>().add(
       LoadClassAssignments(student: widget.student),
     );
     // load class details
-    context.read<ClassroomBloc>().add(
-      LoadStudentsClass(student: widget.student),
-    );
+    context.read<ClassroomBloc>().add(LoadClasses(user: widget.student));
+
     // load subjects details
     context.read<SubjectBloc>().add(
       LoadStudentsSubject(student: widget.student),
@@ -72,8 +74,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
               bottom: false,
               child: ListTile(
                 // greetings with user name
-                title: const Text(
-                  'Hi, Jane Doe!',
+                title: Text(
+                  'Hi, ${widget.student.name}',
                   style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.w600,
@@ -82,16 +84,31 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                 ),
 
                 // User Role
-                subtitle: const Text(
-                  'Student | 6th Sem, BCT',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+                subtitle: BlocBuilder<ClassroomBloc, ClassroomState>(
+                  builder: (context, state) {
+                    if (state is! ClassesLoaded) {
+                      return Text(
+                        'Loading....',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      );
+                    }
+
+                    final cls = state.classes.first;
+
+                    return Text(
+                      'Student | ${cls.name}',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    );
+                  },
                 ),
 
                 // Profile button
                 trailing: IconButton(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const UserProfile()),
+                    MaterialPageRoute(
+                      builder: (_) => UserProfile(user: widget.student),
+                    ),
                   ),
                   style: IconButton.styleFrom(backgroundColor: Colors.white),
                   icon: Icon(Icons.person, color: Colors.green, size: 30),
@@ -204,7 +221,6 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                           ),
                         ],
                       ),
-
                       Row(
                         mainAxisAlignment: .spaceEvenly,
                         crossAxisAlignment: .start,
@@ -217,7 +233,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const Schedules(),
+                                builder: (_) =>
+                                    Schedules(classId: widget.student.classId),
                               ),
                             ),
                           ),

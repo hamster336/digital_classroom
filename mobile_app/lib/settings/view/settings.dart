@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class Settings extends StatefulWidget {
@@ -175,5 +177,28 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void _logOut() {}
+  // logout method
+  void _logOut() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log Out', style: TextStyle(color: Colors.red)),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              context.read<AuthBloc>().add(LogoutRequested());
+              Navigator.pop(context);
+            },
+            child: const Text('Ok', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }

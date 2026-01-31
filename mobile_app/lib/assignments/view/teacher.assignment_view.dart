@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
+import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class TeacherAssignmentView extends StatefulWidget {
   final String teacherId;
-  final String classId;
+  final Classroom cls;
   const TeacherAssignmentView({
     super.key,
-    required this.classId,
+    required this.cls,
     required this.teacherId,
   });
 
@@ -23,7 +24,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
     context.read<TeacherAssignmentBloc>().add(
       LoadTeacherAssignments(
         teacherId: widget.teacherId,
-        classId: widget.classId,
+        classId: widget.cls.id,
       ),
     );
   }

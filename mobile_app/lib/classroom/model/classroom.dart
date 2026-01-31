@@ -18,4 +18,17 @@ class Classroom {
     required this.studentCount,
     required this.isActive,
   });
+
+  factory Classroom.fromMap(Map<String, dynamic> map) {
+    return Classroom(
+      id: map['id'],
+      name: map['name'],
+      faculty: map['faculty'] ?? '',
+      startYear: (map['start_year']),
+      endYear: map['end_year'],
+      createdAt: DateTime.parse(map['created_at']),
+      studentCount: map['student_count'],
+      isActive: map['is_active'],
+    );
+  }
 }

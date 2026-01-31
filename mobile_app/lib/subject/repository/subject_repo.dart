@@ -26,11 +26,31 @@ class SubjectRepo {
       teacherId: 'ID01',
     ),
     Subject(id: 'sub6', name: 'AI', classId: 'cl8', teacherId: 'ID01'),
-    Subject(id: 'sub9', name: 'Communication System', classId: 'cl8', teacherId: 'ID02'),
+    Subject(
+      id: 'sub9',
+      name: 'Communication System',
+      classId: 'cl8',
+      teacherId: 'ID02',
+    ),
     Subject(id: 'sub7', name: 'DBMS', classId: 'cl8', teacherId: 'ID03'),
-    Subject(id: 'sub10', name: 'Research Methodology', classId: 'cl8', teacherId: 'ID04'),
-    Subject(id: 'sub11', name: 'Engineering Economics', classId: 'cl8', teacherId: 'ID05'),
-    Subject(id: 'sub12', name: 'Project & Organization Management', classId: 'cl8', teacherId: 'ID06'),
+    Subject(
+      id: 'sub10',
+      name: 'Research Methodology',
+      classId: 'cl8',
+      teacherId: 'ID04',
+    ),
+    Subject(
+      id: 'sub11',
+      name: 'Engineering Economics',
+      classId: 'cl8',
+      teacherId: 'ID05',
+    ),
+    Subject(
+      id: 'sub12',
+      name: 'Project & Organization Management',
+      classId: 'cl8',
+      teacherId: 'ID06',
+    ),
   ];
 
   List<Subject> teachersSubjects(Teacher teacher) {

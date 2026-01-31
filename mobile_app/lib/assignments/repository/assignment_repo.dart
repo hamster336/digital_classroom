@@ -1,4 +1,3 @@
-
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
@@ -25,7 +24,7 @@ class AssignmentRepo {
       dueDate: DateTime(2026, 01, 06, 15, 00),
       priority: AssignmentPriority.urgent,
       classId: 'cl8',
-      teacherId: 'T1',
+      teacherId: 'T2',
     ),
     Assignment(
       id: 'assign3',
@@ -36,7 +35,7 @@ class AssignmentRepo {
       dueDate: DateTime(2026, 02, 01, 14, 30),
       priority: AssignmentPriority.normal,
       classId: 'cl8',
-      teacherId: 'T1',
+      teacherId: 'T3',
       subjectId: 'sub11',
     ),
     Assignment(
@@ -48,7 +47,7 @@ class AssignmentRepo {
       dueDate: DateTime(2026, 01, 5, 15, 00),
       priority: AssignmentPriority.normal,
       classId: 'cl8',
-      teacherId: 'T1',
+      teacherId: 'T4',
       subjectId: 'sub7',
     ),
     Assignment(
@@ -60,20 +59,23 @@ class AssignmentRepo {
       dueDate: DateTime(2026, 02, 5, 15, 00),
       priority: AssignmentPriority.medium,
       classId: 'cl8',
-      teacherId: 'T1',
+      teacherId: 'T5',
       subjectId: 'sub9',
     ),
   ];
 
   // fetch assignments
-  List<Assignment> fetchAssignments() {
-    return List.unmodifiable(_list);
-  }
-
-  List<Assignment> fetchTeachersAssignment(String teacherId, String classId) {
-    return _list
-        .where((a) => a.classId == classId && a.teacherId == teacherId)
-        .toList();
+  List<Assignment> fetchTeachersAssignment({
+    required String teacherId,
+    String? classId,
+  }) {
+    if (classId == null) {
+      return _list.where((a) => a.teacherId == teacherId).toList();
+    } else {
+      return _list
+          .where((a) => a.classId == classId && a.teacherId == teacherId)
+          .toList();
+    }
   }
 
   List<Assignment> fetchStudentsAssignment(String classId) {

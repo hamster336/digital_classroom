@@ -1,8 +1,10 @@
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/user/models/app_user.dart';
 import 'package:mobile_app/user/models/student.dart';
-import 'package:mobile_app/user/models/teacher.dart';
 
-class ClassroomRepo {
+abstract class ClassroomRepo {
+  Future<List<Classroom>> fetchClasses(AppUser user);
+
   final classes = [
     Classroom(
       id: 'cl1',
@@ -97,13 +99,15 @@ class ClassroomRepo {
     ),
   ];
 
-  List<Classroom> fetchClassesForTeacher(Teacher teacher) {
-    return classes
-        .where((c) => c.isActive && teacher.classIds.contains(c.id))
-        .toList();
-  }
+  // List<Classroom> fetchClassesForTeacher(Teacher teacher) {
+  //   return classes
+  //       .where((c) => c.isActive && teacher.classIds.contains(c.id))
+  //       .toList();
+  // }
 
-  Classroom fetchStudentClassDetails(Student student) {
-    return classes.singleWhere((c) => c.id == student.classId);
-  }
+  // Classroom fetchStudentClassDetails(Student student) {
+    
+
+  //   return classes.singleWhere((c) => c.id == student.classId);
+  // }
 }

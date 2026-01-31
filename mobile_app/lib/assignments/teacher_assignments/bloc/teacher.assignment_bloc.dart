@@ -20,7 +20,7 @@ class TeacherAssignmentBloc extends Bloc<TeacherAssignmentEvent, TeacherAssignme
     emit(TeacherAssignmentLoading());
 
     try{
-      final assignments = repository.fetchTeachersAssignment(event.teacherId, event.classId);
+      final assignments = repository.fetchTeachersAssignment(teacherId:  event.teacherId, classId:  event.classId);
       emit(TeacherAssignmentLoaded(assignments: assignments));
     } catch (e) {
       emit(TeacherAssignmentError(message: e.toString()));

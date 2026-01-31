@@ -23,8 +23,9 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
   @override
   void initState() {
     super.initState();
-    context.read<ClassroomBloc>().add(
-      LoadTeachersClasses(teacher: widget.teacher),
+    context.read<ClassroomBloc>().add(LoadClasses(user: widget.teacher));
+    context.read<UpcomingBloc>().add(
+      LoadTeachersEvents(teacherId: widget.teacher.id),
     );
   }
 
@@ -80,7 +81,9 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                 trailing: IconButton(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const UserProfile()),
+                    MaterialPageRoute(
+                      builder: (_) => UserProfile(user: widget.teacher),
+                    ),
                   ),
                   style: IconButton.styleFrom(backgroundColor: Colors.white),
                   icon: Icon(Icons.person, color: Colors.green, size: 30),
@@ -107,7 +110,11 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             child: BlocBuilder<ClassroomBloc, ClassroomState>(
                               builder: (context, state) {
                                 if (state is! ClassesLoaded) {
-                                  return const SizedBox.shrink();
+                                  return CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'Classes',
+                                  );
                                 }
 
                                 return CustomWidgets.infoCard(
@@ -166,8 +173,17 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ClassroomGate(
-                                  destinationBuilder: (classId) =>
-                                      TeacherAssignmentView(teacherId: widget.teacher.id, classId: classId),
+                                  onClassSelected: (context, classroom) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => TeacherAssignmentView(
+                                          cls: classroom,
+                                          teacherId: widget.teacher.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -186,7 +202,17 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const Schedules(),
+                                builder: (_) => ClassroomGate(
+                                  onClassSelected: (context, classroom) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            Schedules(classId: classroom.id),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
@@ -195,7 +221,23 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             Icons.info,
                             'Class Details',
                             'See class details',
-                            () => () {},
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ClassroomGate(
+                                  onClassSelected: (context, classroom) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) =>
+                                          CustomWidgets.showClassDetails(
+                                            context,
+                                            classroom,
+                                          ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
