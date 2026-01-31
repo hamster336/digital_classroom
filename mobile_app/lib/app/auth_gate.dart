@@ -12,14 +12,20 @@ class AuthGate extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is AuthLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (state is Authenticated) {
-          return AppShell(user: state.user,);
+          return AppShell(user: state.user);
         }
 
-        return LoginScreen();
+        if (state is Unauthenticated || state is AuthFailure) {
+          return const LoginScreen();
+        }
+
+        return const SizedBox.shrink();
       },
     );
   }

@@ -1,10 +1,10 @@
+import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/user/models/app_user.dart';
 
 class Teacher extends AppUser {
   final String empId;
   final List<String> subjectIds;
   final List<String> classIds;
-  bool? isClassTeacher;
 
   Teacher({
     required super.id,
@@ -17,4 +17,18 @@ class Teacher extends AppUser {
     required this.subjectIds,
     required this.classIds,
   });
+
+  factory Teacher.fromMap(Map<String, dynamic> user, Map<String, dynamic> teacherData) {
+     return Teacher(
+        id: user['id'],
+        name: user['full_name'],
+        email: user['email'],
+        createdAt: DateTime.parse(user['created_at']),
+        role: UserRoles.teacher,
+        avatarPath: user['avatar_url'],
+        empId: teacherData['employee_id'],
+        subjectIds: List<String>.from(teacherData['subject_ids'] ?? []),
+        classIds: List<String>.from(teacherData['class_ids'] ?? []),
+      );
+  }
 }

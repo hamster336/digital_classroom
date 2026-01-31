@@ -17,15 +17,10 @@ class CustomWidgets {
     required bool obscureText,
   }) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         label: Text(label, style: TextStyle(fontSize: 20)),
-        suffixIcon: (suffixIcon == null)
-            ? null
-            : Icon(
-                suffixIcon,
-                size: 30,
-                // color: Color.fromARGB(100, 59, 141, 155),
-              ),
+        suffixIcon: (suffixIcon == null) ? null : Icon(suffixIcon, size: 30),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
       ),
       obscureText: obscureText,
@@ -850,5 +845,21 @@ class CustomWidgets {
   // user info tiles for profile screen
   static Widget userInfoTiles() {
     return ListTile();
+  }
+
+  // show Alert Dialog box with ok button only
+  static void customAltertBox(BuildContext context, String text) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(text, style: TextStyle(fontSize: 18)),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Ok'),
+          ),
+        ],
+      ),
+    );
   }
 }

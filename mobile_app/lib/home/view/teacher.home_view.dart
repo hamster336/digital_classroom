@@ -23,9 +23,7 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
   @override
   void initState() {
     super.initState();
-    context.read<ClassroomBloc>().add(
-      LoadTeachersClasses(teacher: widget.teacher),
-    );
+    context.read<ClassroomBloc>().add(LoadClasses(user: widget.teacher));
     context.read<UpcomingBloc>().add(
       LoadTeachersEvents(teacherId: widget.teacher.id),
     );
@@ -112,7 +110,11 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             child: BlocBuilder<ClassroomBloc, ClassroomState>(
                               builder: (context, state) {
                                 if (state is! ClassesLoaded) {
-                                  return const SizedBox.shrink();
+                                  return CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'Classes',
+                                  );
                                 }
 
                                 return CustomWidgets.infoCard(

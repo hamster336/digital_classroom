@@ -6,9 +6,8 @@ final class ClassLoading extends ClassroomState {}
 
 final class ClassesLoaded extends ClassroomState {
   final List<Classroom> classes;
-  final UserRoles role;
 
-  ClassesLoaded({required this.classes, required this.role});
+  ClassesLoaded({required this.classes});
 }
 
 final class ClassError extends ClassroomState {
