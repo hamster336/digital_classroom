@@ -9,16 +9,18 @@ import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
+import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
 import 'package:mobile_app/supabase/credentials/supabase.crendentials.dart';
 import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/repository/notice_repo.dart';
 import 'package:mobile_app/supabase/services/authetication_services.dart';
+import 'package:mobile_app/supabase/services/classroom_services.dart';
 import 'package:mobile_app/supabase/services/students_services.dart';
+import 'package:mobile_app/supabase/services/subject_services.dart';
 import 'package:mobile_app/supabase/services/teachers_services.dart';
 import 'package:mobile_app/supabase/services/user_services.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
-import 'package:mobile_app/subject/repository/subject_repo.dart';
 import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -60,19 +62,19 @@ class MyApp extends StatelessWidget {
 
         RepositoryProvider(
           create: (_) => ClassroomRepoImpl(
-            studentService: StudentsServices(
-              client: SupabaseCredentials.client,
-            ),
-            teacherService: TeachersServices(
-              client: SupabaseCredentials.client,
-            ),
+            service: ClassroomServices(client: SupabaseCredentials.client),
+          ),
+        ),
+
+        RepositoryProvider(
+          create: (_) => SubjectRepoImpl(
+            service: SubjectServices(client: SupabaseCredentials.client)
           ),
         ),
 
         RepositoryProvider(create: (_) => NoticeRepo()),
         RepositoryProvider(create: (_) => AssignmentRepo()),
         RepositoryProvider(create: (_) => SubmissionRepo()),
-        RepositoryProvider(create: (_) => SubjectRepo()),
       ],
       child: MultiBlocProvider(
         // injecting blocs
@@ -101,7 +103,8 @@ class MyApp extends StatelessWidget {
           ),
 
           BlocProvider(
-            create: (context) => AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
+            create: (context) =>
+                AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
             // ..add(AuthCheckRequested()),
           ),
 
@@ -110,10 +113,11 @@ class MyApp extends StatelessWidget {
           ),
 
           BlocProvider(
-            create: (context) => ClassroomBloc(context.read<ClassroomRepoImpl>()),
+            create: (context) =>
+                ClassroomBloc(context.read<ClassroomRepoImpl>()),
           ),
           BlocProvider(
-            create: (context) => SubjectBloc(context.read<SubjectRepo>()),
+            create: (context) => SubjectBloc(context.read<SubjectRepoImpl>()),
           ),
         ],
         child: MaterialApp(

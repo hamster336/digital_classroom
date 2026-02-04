@@ -37,7 +37,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
 
     // load subjects details
     context.read<SubjectBloc>().add(
-      LoadStudentsSubject(student: widget.student),
+      LoadSubjects(subjectIds: widget.student.subjectIds),
     );
   }
 
@@ -135,7 +135,13 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                           BlocBuilder<SubjectBloc, SubjectState>(
                             builder: (context, state) {
                               if (state is! SubjectLoaded) {
-                                return const SizedBox.shrink();
+                                return Expanded(
+                                  child: CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'Subjects',
+                                  ),
+                                );
                               }
 
                               return Expanded(
@@ -157,7 +163,11 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                                 >(
                                   builder: (context, state) {
                                     if (state is! StudentAssignmentLoaded) {
-                                      return const SizedBox.shrink();
+                                      return CustomWidgets.infoCard(
+                                        size,
+                                        0,
+                                        'Assignments',
+                                      );
                                     }
 
                                     return CustomWidgets.infoCard(
@@ -174,7 +184,11 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             child: BlocBuilder<NoticeBloc, NoticeState>(
                               builder: (context, state) {
                                 if (state is! NoticeLoaded) {
-                                  return const SizedBox.shrink();
+                                  return CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'New Notices',
+                                  );
                                 }
 
                                 return CustomWidgets.infoCard(

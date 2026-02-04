@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/app/app_shell.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
@@ -25,30 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    // return BlocListener<AuthBloc, AuthState>(
-    //   listener: (context, state) {
-    //     if (state is AuthLoading) {
-    //       showDialog(
-    //         context: context,
-    //         barrierDismissible: false,
-    //         builder: (_) => const Center(child: CircularProgressIndicator()),
-    //       );
-    //     }
-
-    //     if (state is Authenticated) {
-    //       Navigator.pop(context); // close loader
-    //       Navigator.push(
-    //         context,
-    //         MaterialPageRoute(builder: (_) => AppShell(user: state.user)),
-    //       );
-    //     }
-
-    //     if (state is AuthFailure) {
-    //       Navigator.pop(context); // close loader
-    //       CustomWidgets.customAltertBox(context, state.message);
-    //     }
-    //   },
       return Scaffold(
         resizeToAvoidBottomInset: true,
         body: Center(
