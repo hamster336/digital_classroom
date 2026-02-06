@@ -2,7 +2,17 @@ part of 'notice_bloc.dart';
 
 sealed class NoticeEvent {}
 
-final class LoadNotices extends NoticeEvent {}
+final class LoadNotices extends NoticeEvent {
+  final NoticeFilter currentFilter;
+
+  LoadNotices({required this.currentFilter});
+}
+
+final class RefreshNotices extends NoticeEvent {
+  final NoticeFilter currentFilter;
+
+  RefreshNotices({required this.currentFilter});
+}
 
 final class FilterNotices extends NoticeEvent {
   final NoticeFilter filter ;

@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/view/teacher.assignment_view.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/classroom_gate.dart';
-import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notes/view/teacher.notes_view.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/user/models/teacher.dart';
-import 'package:mobile_app/user/view/user_profile.dart';
+import 'package:mobile_app/user/view/teacher_profile_screen.dart';
 
 class TeacherHomeView extends StatefulWidget {
   final Teacher teacher;
@@ -25,7 +25,7 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
     super.initState();
     context.read<ClassroomBloc>().add(LoadClasses(user: widget.teacher));
     context.read<UpcomingBloc>().add(
-      LoadTeachersEvents(teacherId: widget.teacher.id),
+      LoadEvents(subjectIds: widget.teacher.subjectIds),
     );
   }
 
@@ -82,7 +82,8 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UserProfile(user: widget.teacher),
+                      builder: (_) =>
+                          TeacherProfileScreen(teacher: widget.teacher),
                     ),
                   ),
                   style: IconButton.styleFrom(backgroundColor: Colors.white),
@@ -131,12 +132,16 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             child: BlocBuilder<NoticeBloc, NoticeState>(
                               builder: (context, state) {
                                 if (state is! NoticeLoaded) {
-                                  return const SizedBox.shrink();
+                                  return CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'New Notices',
+                                  );
                                 }
 
                                 return CustomWidgets.infoCard(
                                   size,
-                                  state.noticeLength,
+                                  100,  // dummy data
                                   'New Notices',
                                 );
                               },
@@ -263,7 +268,15 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.only(top: size.height * 0.02),
-                          child: Center(child: CircularProgressIndicator()),
+                          child: Center(
+                            child: const Text(
+                              'Loading...',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     }

@@ -1,6 +1,7 @@
 import 'package:mobile_app/shared/required_enums.dart';
 
 abstract class AppUser {
+  // admin, student, teacher
   final String id;
   final String name;
   final String email;

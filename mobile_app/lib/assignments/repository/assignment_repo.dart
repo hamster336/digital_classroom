@@ -24,7 +24,8 @@ class AssignmentRepo {
       dueDate: DateTime(2026, 01, 06, 15, 00),
       priority: AssignmentPriority.urgent,
       classId: 'cl8',
-      teacherId: 'T2',
+      teacherId: 'T2', 
+      subjectId: 'sub1',
     ),
     Assignment(
       id: 'assign3',

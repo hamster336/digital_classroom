@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
-import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/assignments/view/student.assignment_view.dart';
@@ -10,7 +10,7 @@ import 'package:mobile_app/notes/view/student.notes_view.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/user/models/student.dart';
-import 'package:mobile_app/user/view/user_profile.dart';
+import 'package:mobile_app/user/view/student_profile_screen.dart';
 
 class StudentHomeView extends StatefulWidget {
   final Student student;
@@ -26,7 +26,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
     super.initState();
     // upcoming events
     context.read<UpcomingBloc>().add(
-      LoadStudentsEvents(classId: widget.student.id),
+      LoadEvents(subjectIds: widget.student.subjectIds),
     );
     // assignments
     context.read<StudentsAssignmentBloc>().add(
@@ -107,7 +107,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UserProfile(user: widget.student),
+                      builder: (_) =>
+                          StudentProfileScreen(student: widget.student),
                     ),
                   ),
                   style: IconButton.styleFrom(backgroundColor: Colors.white),
@@ -193,7 +194,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
 
                                 return CustomWidgets.infoCard(
                                   size,
-                                  state.noticeLength,
+                                  100,
                                   'New Notices',
                                 );
                               },

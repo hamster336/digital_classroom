@@ -14,18 +14,19 @@ class StudentsServices {
   Future<List<Map<String, dynamic>>> fetchSubjects(
     List<String> subjectIds,
   ) async {
-    List<Map<String, dynamic>> list = [];
+    return await client.from('subjects').select().inFilter('id', subjectIds);
+    // List<Map<String, dynamic>> list = [];
 
-    for (var id in subjectIds) {
-      final sub = await client
-          .from('subjects')
-          .select()
-          .eq('id', id)
-          .limit(1)
-          .single();
+    // for (var id in subjectIds) {
+    //   final sub = await client
+    //       .from('subjects')
+    //       .select()
+    //       .eq('id', id)
+    //       .limit(1)
+    //       .single();
 
-      list.add(sub);
-    }
-    return list;
+    //   list.add(sub);
+    // }
+    // return list;
   }
 }

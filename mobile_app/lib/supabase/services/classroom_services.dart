@@ -19,18 +19,6 @@ class ClassroomServices {
   Future<List<Map<String, dynamic>>> fetchTeacherClasses(
     List<String> classIds,
   ) async {
-    List<Map<String, dynamic>> list = [];
-
-    for (var id in classIds) {
-      final cls = await client
-          .from('classroom')
-          .select()
-          .eq('id', id)
-          .limit(1)
-          .single();
-
-      list.add(cls);
-    }
-    return list;
+    return await client.from('classroom').select().inFilter('id', classIds);
   }
 }
