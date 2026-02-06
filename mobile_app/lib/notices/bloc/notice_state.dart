@@ -2,13 +2,25 @@ part of 'notice_bloc.dart';
 
 sealed class NoticeState {}
 
-final class NoticeLoading extends NoticeState {}
+final class NoticeLoading extends NoticeState {
+  final List<Notice> notices;
+  final bool firstLoad;
+
+  NoticeLoading({required this.notices, this.firstLoad = false});
+}
 
 final class NoticeLoaded extends NoticeState {
   final List<Notice> notices;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
   final NoticeFilter filter;
 
-  NoticeLoaded({required this.notices, this.filter = NoticeFilter.all});
+  NoticeLoaded({
+    required this.notices,
+    this.filter = NoticeFilter.all,
+    required this.hasReachedMax,
+    this.isLoadingMore = false,
+  });
 
   // return notices based on priority
   List<Notice> get displayNotices {
@@ -28,11 +40,14 @@ final class NoticeLoaded extends NoticeState {
     }
   }
 
-  int get noticeLength => notices.length;
-
-  NoticeLoaded copyWith({List<Notice>? notices, NoticeFilter? filter}) {
+  NoticeLoaded copyWith({
+    List<Notice>? notices,
+    bool? hasReachedMax,
+    NoticeFilter? filter,
+  }) {
     return NoticeLoaded(
       notices: notices ?? this.notices,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       filter: filter ?? this.filter,
     );
   }

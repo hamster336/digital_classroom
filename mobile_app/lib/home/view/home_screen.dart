@@ -13,19 +13,16 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = user;
+
     // decide the view based on the role
-    if(currentUser is Student){
+    if (currentUser is Student) {
       return StudentHomeView(student: currentUser);
     }
-    
-    if(currentUser is Teacher){
-      return TeacherHomeView(teacher: currentUser,);
+
+    if (currentUser is Teacher) {
+      return TeacherHomeView(teacher: currentUser);
     }
 
     return LoginScreen();
-
-    // return user.role == UserRoles.student
-    //     ? const StudentHomeView()
-    //     : const TeacherHomeView();
   }
 }

@@ -31,7 +31,7 @@ class Student extends AppUser {
         avatarPath: user['avatar_url'],
         rollNumber: studentData['roll_number'],
         classId: studentData['class_id'],
-        subjectIds: List<String>.from(studentData['subject_ids'] ?? []),
+        subjectIds: List<String>.from(studentData['subject_ids']),
     );
   }
 }

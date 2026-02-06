@@ -27,8 +27,8 @@ class Teacher extends AppUser {
         role: UserRoles.teacher,
         avatarPath: user['avatar_url'],
         empId: teacherData['employee_id'],
-        subjectIds: List<String>.from(teacherData['subject_ids'] ?? []),
-        classIds: List<String>.from(teacherData['class_ids'] ?? []),
+        subjectIds: List<String>.from(teacherData['subject_ids']),
+        classIds: List<String>.from(teacherData['class_ids']),
       );
   }
 }

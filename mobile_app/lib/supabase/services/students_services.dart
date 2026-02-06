@@ -10,13 +10,23 @@ class StudentsServices {
     return await client.from('student').select().eq('id', uid).maybeSingle();
   }
 
-  // fetch class details for student from db
-  Future<Map<String, dynamic>> fetchClass(String classId) async {
-    return await client
-        .from('classroom')
-        .select()
-        .eq('id', classId)
-        .limit(1)
-        .single();
+  // fetch subjects
+  Future<List<Map<String, dynamic>>> fetchSubjects(
+    List<String> subjectIds,
+  ) async {
+    return await client.from('subjects').select().inFilter('id', subjectIds);
+    // List<Map<String, dynamic>> list = [];
+
+    // for (var id in subjectIds) {
+    //   final sub = await client
+    //       .from('subjects')
+    //       .select()
+    //       .eq('id', id)
+    //       .limit(1)
+    //       .single();
+
+    //   list.add(sub);
+    // }
+    // return list;
   }
 }

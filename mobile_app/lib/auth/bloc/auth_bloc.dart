@@ -9,7 +9,6 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepoImpl repository;
-  late final StreamSubscription<AuthState> _authSub;
 
   AuthBloc(this.repository) : super(AuthLoading()) {
     on<AppStarted>(_appStarted);

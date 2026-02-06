@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
-import 'package:mobile_app/home/model/upcoming.dart';
+import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/assignments/view/student.assignment_details_screen.dart';
@@ -848,14 +848,24 @@ class CustomWidgets {
   }
 
   // show Alert Dialog box with ok button only
-  static void customAltertBox(BuildContext context, String text) {
+  static void customAltertBox(
+    BuildContext context,
+    String text,
+    VoidCallback? onTap,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         content: Text(text, style: TextStyle(fontSize: 18)),
         actions: [
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+
+              if(onTap != null){
+                onTap();
+              }
+            },
             child: const Text('Ok'),
           ),
         ],

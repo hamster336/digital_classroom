@@ -11,6 +11,7 @@ part 'classroom_state.dart';
 
 class ClassroomBloc extends Bloc<ClassroomEvent, ClassroomState> {
   final ClassroomRepoImpl repository;
+  
   ClassroomBloc(this.repository) : super(ClassLoading()) {
     on<LoadClasses>(_loadClassDetails);
   }

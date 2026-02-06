@@ -1,12 +1,12 @@
 import 'package:mobile_app/shared/required_enums.dart';
 
 class Assignment {
-  String id;
+  String? id;
   String title;
   String description;
   DateTime issuedAt;
   String classId;
-  String? subjectId;
+  String subjectId;
   String teacherId;
   DateTime dueDate;
   AssignmentPriority priority;
@@ -14,26 +14,53 @@ class Assignment {
   int? submissionCount;
 
   Assignment({
-    required this.id,
+    this.id,
     required this.title,
     required this.description,
     required this.issuedAt,
     required this.dueDate,
     required this.classId,
-    this.subjectId,
+    required this.subjectId,
     required this.teacherId,
     required this.priority,
     this.issueFilepath,
     this.submissionCount,
   });
 
+  factory Assignment.fromMap(Map<String, dynamic> map) {
+    return Assignment(
+      id: map['id'],
+      title: map['title'],
+      description: map['description'],
+      issuedAt: DateTime.parse(map['issued_at']),
+      dueDate: DateTime.parse(map['due_date']),
+      subjectId: map['subject_id'],
+      classId: map['class_id'],
+      teacherId: map['teacher_id'],
+      priority: getPriority(map['priority']),
+      issueFilepath: map['issue_file_path'],
+      submissionCount: map['submission_count']
+    );
+  }
+
+  static Map<String, dynamic> toMap(Assignment a) {
+    return {
+      'title' : a.title,
+      'description' : a.description,
+      'issued_at' : a.issuedAt.toIso8601String(),
+      'due_date' : a.dueDate.toIso8601String(),
+      'subject_id' : a.subjectId,
+      'class_id' : a.classId,
+      'teacher_id' : a.teacherId,
+      'priority' : setPriority(a.priority),
+    };
+  }
+
   Assignment copyWith({
     String? title,
     String? description,
     DateTime? issuedAt,
     DateTime? dueDate,
-    String? classId,
-    String? teacherId,
     AssignmentPriority? priority,
     String? issueFilepath,
     int? submissionCount,
@@ -44,11 +71,24 @@ class Assignment {
       description: description ?? this.description,
       issuedAt: issuedAt ?? this.issuedAt,
       dueDate: dueDate ?? this.dueDate,
-      classId: this.classId,
-      teacherId: this.teacherId,
+      classId: classId,
+      subjectId: subjectId,
+      teacherId: teacherId,
       priority: priority ?? this.priority,
       issueFilepath: issueFilepath ?? this.issueFilepath,
       submissionCount: submissionCount ?? this.submissionCount,
     );
+  }
+
+  static AssignmentPriority getPriority(String s) {
+    if (s == 'urgent') return AssignmentPriority.urgent;
+    if (s == 'medium') return AssignmentPriority.medium;
+    return AssignmentPriority.normal;
+  }
+
+  static String setPriority(AssignmentPriority p) {
+    if(p == AssignmentPriority.urgent) return 'urgent';
+    if(p == AssignmentPriority.medium) return 'medium';
+    return 'normal';
   }
 }

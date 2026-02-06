@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
-import 'package:mobile_app/home/bloc/upcoming_bloc.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/assignments/view/student.assignment_view.dart';
@@ -10,7 +10,7 @@ import 'package:mobile_app/notes/view/student.notes_view.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/user/models/student.dart';
-import 'package:mobile_app/user/view/user_profile.dart';
+import 'package:mobile_app/user/view/student_profile_screen.dart';
 
 class StudentHomeView extends StatefulWidget {
   final Student student;
@@ -26,7 +26,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
     super.initState();
     // upcoming events
     context.read<UpcomingBloc>().add(
-      LoadStudentsEvents(classId: widget.student.id),
+      LoadEvents(subjectIds: widget.student.subjectIds),
     );
     // assignments
     context.read<StudentsAssignmentBloc>().add(
@@ -37,7 +37,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
 
     // load subjects details
     context.read<SubjectBloc>().add(
-      LoadStudentsSubject(student: widget.student),
+      LoadSubjects(subjectIds: widget.student.subjectIds),
     );
   }
 
@@ -107,7 +107,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UserProfile(user: widget.student),
+                      builder: (_) =>
+                          StudentProfileScreen(student: widget.student),
                     ),
                   ),
                   style: IconButton.styleFrom(backgroundColor: Colors.white),
@@ -135,7 +136,13 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                           BlocBuilder<SubjectBloc, SubjectState>(
                             builder: (context, state) {
                               if (state is! SubjectLoaded) {
-                                return const SizedBox.shrink();
+                                return Expanded(
+                                  child: CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'Subjects',
+                                  ),
+                                );
                               }
 
                               return Expanded(
@@ -157,7 +164,11 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                                 >(
                                   builder: (context, state) {
                                     if (state is! StudentAssignmentLoaded) {
-                                      return const SizedBox.shrink();
+                                      return CustomWidgets.infoCard(
+                                        size,
+                                        0,
+                                        'Assignments',
+                                      );
                                     }
 
                                     return CustomWidgets.infoCard(
@@ -174,12 +185,16 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             child: BlocBuilder<NoticeBloc, NoticeState>(
                               builder: (context, state) {
                                 if (state is! NoticeLoaded) {
-                                  return const SizedBox.shrink();
+                                  return CustomWidgets.infoCard(
+                                    size,
+                                    0,
+                                    'New Notices',
+                                  );
                                 }
 
                                 return CustomWidgets.infoCard(
                                   size,
-                                  state.noticeLength,
+                                  100,
                                   'New Notices',
                                 );
                               },

@@ -2,18 +2,53 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:mobile_app/notices/models/notice.dart';
-import 'package:mobile_app/notices/repository/notice_repo.dart';
+import 'package:mobile_app/notices/repository/notice_repo_impl.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
 part 'notice_event.dart';
 part 'notice_state.dart';
 
 class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
-  final NoticeRepo repository;
-  NoticeBloc(this.repository) : super(NoticeLoading()) {
-    // event handlers
+  final NoticeRepoImpl repository;
+  NoticeBloc(this.repository)
+    : super(NoticeLoading(notices: [], firstLoad: true)) {
     on<LoadNotices>(_loadNotices);
+    on<RefreshNotices>(_refreshNotices);
     on<FilterNotices>(_filterNotices);
+  }
+
+  static const int pageSize = 10;
+
+  // refresh notices
+  Future<void> _refreshNotices(
+    RefreshNotices event,
+    Emitter<NoticeState> emit,
+  ) async {
+    List<Notice> existingNotices = [];
+    if (state is NoticeLoaded) {
+      existingNotices = (state as NoticeLoaded).displayNotices;
+    }
+
+    emit(NoticeLoading(notices: (existingNotices)));
+
+    try {
+      int from = 0;
+
+      final newNotices = await repository.loadNotices(
+        from: from,
+        limit: pageSize,
+      );
+
+      emit(
+        NoticeLoaded(
+          notices: newNotices,
+          filter: event.currentFilter,
+          hasReachedMax: newNotices.length < pageSize,
+        ),
+      );
+    } catch (e) {
+      emit(NoticeError(message: e.toString()));
+    }
   }
 
   // load notices
@@ -21,13 +56,43 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
     LoadNotices event,
     Emitter<NoticeState> emit,
   ) async {
-    emit(NoticeLoading());
+    if (state is NoticeLoaded && (state as NoticeLoaded).hasReachedMax) return;
 
     try {
-      final notices = repository.fetchNotices();
-      emit(NoticeLoaded(notices: notices));
-    } catch (ex) {
-      emit(NoticeError(message: 'Failed to load notices!'));
+      final currentState = state;
+
+      List<Notice> oldNotices = [];
+      int from = 0;
+
+      if (currentState is NoticeLoaded) {
+        oldNotices = currentState.notices;
+        from = oldNotices.length;
+      }
+
+      emit(
+        NoticeLoaded(
+          notices: oldNotices,
+          hasReachedMax: false,
+          isLoadingMore: true,
+        ),
+      );
+
+      final newNotices = await repository.loadNotices(
+        from: from,
+        limit: pageSize,
+      );
+
+      // await Future.delayed(const Duration(seconds: 3));
+
+      emit(
+        NoticeLoaded(
+          notices: oldNotices + newNotices,
+          hasReachedMax: newNotices.length < pageSize,
+          isLoadingMore: false,
+        ),
+      );
+    } catch (e) {
+      emit(NoticeError(message: e.toString()));
     }
   }
 

@@ -1,5 +1,5 @@
 import 'package:mobile_app/assignments/models/assignment.dart';
-import 'package:mobile_app/home/model/upcoming.dart';
+import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 
@@ -15,7 +15,7 @@ extension AssignmentMapper on Assignment {
 }
 
 extension NoticeMapper on Notice {
-  Upcoming toUpcomingt() {
+  Upcoming toUpcoming() {
     return Upcoming(
       title: title,
       eventAt: scheduledAt!,
