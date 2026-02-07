@@ -24,36 +24,11 @@ class AuthRepoImpl extends AuthRepo {
   // login method
   @override
   Future<void> login(String email, String password) async {
-    final res = await authService.login(email: email, password: password);
+    final res = await authService.signIn(email: email, password: password);
 
-    if(res.user == null){
+    if (res.user == null) {
       throw Exception('Authentication Failed');
     }
-    // final resUser = res.user;
-
-    // if (resUser == null) {
-    //   throw Exception('Authentication Failed!');
-    // }
-    // final user = await userService.fetchUserData(resUser.id);
-    // if (user == null) {
-    //   throw Exception('User profile not found');
-    // }
-
-    // final role = user['role'];
-
-    // if (role == 'student') {
-    //   final studentData = await studentService.fetchStudentData(resUser.id);
-    //   if (studentData == null) throw Exception('Student profile not found');
-
-    //   return Student.fromMap(user, studentData);
-    // } else if (role == 'teacher') {
-    //   final teacherData = await teacherService.fetchTeacherData(resUser.id);
-    //   if (teacherData == null) throw Exception('Teacher profile not found');
-
-    //   return Teacher.fromMap(user, teacherData);
-    // } else {
-    //   throw Exception('Invalid user');
-    // }
   }
 
   // logout method
@@ -96,5 +71,17 @@ class AuthRepoImpl extends AuthRepo {
     }
 
     throw Exception('Invalid role');
+  }
+
+  // change password
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+    try {
+      await authService.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }
