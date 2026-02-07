@@ -5,7 +5,10 @@ class AuthenticationServices {
 
   AuthenticationServices({required this.client});
   // login
-  Future<AuthResponse> login({required String email, required String password}) async {
+  Future<AuthResponse> signIn({
+    required String email,
+    required String password,
+  }) async {
     return await client.auth.signInWithPassword(
       email: email,
       password: password,
@@ -17,5 +20,29 @@ class AuthenticationServices {
     await client.auth.signOut();
   }
 
-  User? get currentUser => client.auth.currentUser;
+  // change password
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final email = client.auth.currentUser?.email;
+
+    if (email == null) {
+      throw Exception('Error occured');
+    }
+
+    try {
+      // reauthenticate user
+      final response = await signIn(email: email, password: oldPassword);
+
+      if (response.user == null) {
+        throw Exception('Old password is incorrect');
+      }
+
+      // Update password
+      await client.auth.updateUser(UserAttributes(password: newPassword));
+    } catch (e) {
+      throw Exception('Failed to change password: ${e.toString()}');
+    }
+  }
 }

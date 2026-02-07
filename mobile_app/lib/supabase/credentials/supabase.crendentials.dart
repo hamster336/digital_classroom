@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseCredentials {

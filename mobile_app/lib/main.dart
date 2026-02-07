@@ -28,13 +28,13 @@ import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
 import 'package:mobile_app/upcoming/repository/upcoming_repo_impl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([.portraitUp]);
 
-  await Supabase.initialize(
+  await sb.Supabase.initialize(
     url: SupabaseCredentials.APIURL,
     anonKey: SupabaseCredentials.APIKEY,
   );
@@ -94,14 +94,15 @@ class MyApp extends StatelessWidget {
         // submission repo
         RepositoryProvider(create: (_) => SubmissionRepo()),
       ],
-      
+
       child: MultiBlocProvider(
         // injecting blocs
         providers: [
           // notice bloc
           BlocProvider(
             create: (context) =>
-                NoticeBloc(context.read<NoticeRepoImpl>())..add(LoadNotices(currentFilter: NoticeFilter.all)),
+                NoticeBloc(context.read<NoticeRepoImpl>())
+                  ..add(LoadNotices(currentFilter: NoticeFilter.all)),
             child: NoticesScreen(),
           ),
           // student assignment bloc
@@ -141,6 +142,7 @@ class MyApp extends StatelessWidget {
             create: (context) => SubjectBloc(context.read<SubjectRepoImpl>()),
           ),
         ],
+
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Academia',
@@ -168,7 +170,15 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
-          home: const AuthGate(),
+          home: const AuthGate()
+          // BlocListener<AuthBloc, AuthState>(
+          //   listener: (context, state) {
+          //     if(state is AuthFailure){
+          //       CustomWidgets.customAltertBox(context, state.message, (){});
+          //     }
+          //   },
+          //   child: const AuthGate(),
+          // ),
           // home: const LoginScreen(),
         ),
       ),

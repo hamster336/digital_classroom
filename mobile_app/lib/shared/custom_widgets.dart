@@ -862,13 +862,42 @@ class CustomWidgets {
             onPressed: () {
               Navigator.pop(context);
 
-              if(onTap != null){
+              if (onTap != null) {
                 onTap();
               }
             },
             child: const Text('Ok'),
           ),
         ],
+      ),
+    );
+  }
+
+  // custom buttons
+  static Widget customButton(Size size, String text, VoidCallback onTap,) {
+    return Container(
+      width: size.width * 0.65,
+      height: size.height * 0.06,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: <Color>[Color(0xFF3B8D9B), Color(0xFF00FFB7)],
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(30)),
+      ),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        child:Text(
+          text,
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
