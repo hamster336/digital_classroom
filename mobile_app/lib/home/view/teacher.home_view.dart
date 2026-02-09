@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/assignments/view/teacher.assignment_view.dart';
+import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_view.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/classroom_gate.dart';
+import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notes/view/teacher.notes_view.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
@@ -23,7 +24,13 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
   @override
   void initState() {
     super.initState();
+    // class details
     context.read<ClassroomBloc>().add(LoadClasses(user: widget.teacher));
+    // subjects
+    context.read<SubjectBloc>().add(
+      LoadSubjects(subjectIds: widget.teacher.subjectIds),
+    );
+    // upcoming events
     context.read<UpcomingBloc>().add(
       LoadEvents(subjectIds: widget.teacher.subjectIds),
     );
@@ -141,7 +148,7 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
 
                                 return CustomWidgets.infoCard(
                                   size,
-                                  100,  // dummy data
+                                  100, // dummy data
                                   'New Notices',
                                 );
                               },

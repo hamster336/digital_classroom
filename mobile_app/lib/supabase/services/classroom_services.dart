@@ -19,6 +19,10 @@ class ClassroomServices {
   Future<List<Map<String, dynamic>>> fetchTeacherClasses(
     List<String> classIds,
   ) async {
-    return await client.from('classroom').select().inFilter('id', classIds);
+    return await client
+        .from('classroom')
+        .select()
+        .inFilter('id', classIds)
+        .eq('is_active', true);
   }
 }

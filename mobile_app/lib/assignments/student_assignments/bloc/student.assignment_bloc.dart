@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
-import 'package:mobile_app/assignments/repository/assignment_repo.dart';
+import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/submission/model/submission.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
@@ -13,7 +13,7 @@ part 'student.assignment_state.dart';
 
 class StudentsAssignmentBloc
     extends Bloc<StudentsAssignmentEvent, StudentsAssignmentState> {
-  final AssignmentRepo assignmentRepo;
+  final AssignmentRepoImpl assignmentRepo;
   final SubmissionRepo submissionRepo;
   StudentsAssignmentBloc({
     required this.assignmentRepo,
@@ -31,11 +31,13 @@ class StudentsAssignmentBloc
     emit(StudentAssignmentLoading());
 
     try {
-      final List<Assignment> assignments = assignmentRepo
-          .fetchStudentsAssignment(event.student.classId);
-      final List<Submission> submissions = submissionRepo.fetchSubmissions(
-        event.student.id,
-      );
+      final List<Assignment> assignments = await assignmentRepo
+          .loadStudentsAssignments(
+            event.student.classId,
+            event.student.subjectIds,
+          );
+      final List<Submission> submissions = [];
+      
       emit(
         StudentAssignmentLoaded(
           assignments: assignments,

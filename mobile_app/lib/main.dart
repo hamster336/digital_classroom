@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
+import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
-import 'package:mobile_app/assignments/repository/assignment_repo.dart';
 import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
@@ -14,6 +14,7 @@ import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
 import 'package:mobile_app/supabase/credentials/supabase.crendentials.dart';
+import 'package:mobile_app/supabase/services/assignment_services.dart';
 import 'package:mobile_app/supabase/services/upcoming_services.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
@@ -90,7 +91,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // assignment repo
-        RepositoryProvider(create: (_) => AssignmentRepo()),
+        RepositoryProvider(
+          create: (_) => AssignmentRepoImpl(
+            services: AssignmentServices(client: SupabaseCredentials.client),
+          ),
+        ),
         // submission repo
         RepositoryProvider(create: (_) => SubmissionRepo()),
       ],
@@ -108,14 +113,14 @@ class MyApp extends StatelessWidget {
           // student assignment bloc
           BlocProvider(
             create: (context) => StudentsAssignmentBloc(
-              assignmentRepo: context.read<AssignmentRepo>(),
+              assignmentRepo: context.read<AssignmentRepoImpl>(),
               submissionRepo: context.read<SubmissionRepo>(),
             ),
           ),
           // teacher assignment bloc
           BlocProvider(
             create: (context) =>
-                TeacherAssignmentBloc(context.read<AssignmentRepo>()),
+                TeacherAssignmentBloc(context.read<AssignmentRepoImpl>()),
           ),
           // upcoming bloc
           BlocProvider(
@@ -170,16 +175,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
-          home: const AuthGate()
-          // BlocListener<AuthBloc, AuthState>(
-          //   listener: (context, state) {
-          //     if(state is AuthFailure){
-          //       CustomWidgets.customAltertBox(context, state.message, (){});
-          //     }
-          //   },
-          //   child: const AuthGate(),
-          // ),
-          // home: const LoginScreen(),
+          home: const AuthGate(),
         ),
       ),
     );

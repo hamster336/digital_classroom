@@ -9,24 +9,4 @@ class StudentsServices {
   Future<Map<String, dynamic>?> fetchStudentData(String uid) async {
     return await client.from('student').select().eq('id', uid).maybeSingle();
   }
-
-  // fetch subjects
-  Future<List<Map<String, dynamic>>> fetchSubjects(
-    List<String> subjectIds,
-  ) async {
-    return await client.from('subjects').select().inFilter('id', subjectIds);
-    // List<Map<String, dynamic>> list = [];
-
-    // for (var id in subjectIds) {
-    //   final sub = await client
-    //       .from('subjects')
-    //       .select()
-    //       .eq('id', id)
-    //       .limit(1)
-    //       .single();
-
-    //   list.add(sub);
-    // }
-    // return list;
-  }
 }

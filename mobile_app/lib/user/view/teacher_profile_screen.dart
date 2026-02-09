@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/user/models/teacher.dart';
 
 class TeacherProfileScreen extends StatelessWidget {
@@ -103,6 +105,25 @@ class TeacherProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+
+          SizedBox(height: size.height * 0.01),
+          CustomWidgets.userInfoTiles(
+            'assets/images/mail.png',
+            'Email',
+            teacher.email,
+          ),
+          Divider(),
+          CustomWidgets.userInfoTiles(
+            'assets/images/id.png',
+            'Employee ID',
+            teacher.empId,
+          ),
+          Divider(),
+          CustomWidgets.userInfoTiles(
+            'assets/images/shake.png',
+            'Since',
+            DateFormat('dd MMM y').format(teacher.createdAt),
           ),
         ],
       ),

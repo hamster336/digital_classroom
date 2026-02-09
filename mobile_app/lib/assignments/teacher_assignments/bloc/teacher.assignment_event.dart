@@ -8,18 +8,23 @@ final class LoadTeacherAssignments extends TeacherAssignmentEvent {
   LoadTeacherAssignments({required this.teacherId, required this.classId});
 }
 
-final class CreateAssignment extends TeacherAssignmentEvent {
+final class RefreshAssignments extends TeacherAssignmentEvent{
   final String classId;
   final String teacherId;
-  CreateAssignment({required this.teacherId, required this.classId});
+  RefreshAssignments({required this.teacherId, required this.classId});
 }
 
-final class UpdateAssignment extends TeacherAssignmentEvent{
-  final String assignmentId;
-  UpdateAssignment({required this.assignmentId});
+final class CreateAssignment extends TeacherAssignmentEvent {
+  final Assignment assignment;
+  CreateAssignment({required this.assignment});
+}
+
+final class UpdateAssignment extends TeacherAssignmentEvent {
+  final Assignment assignment;
+  UpdateAssignment({required this.assignment});
 }
 
 final class DeleteAssignment extends TeacherAssignmentEvent {
   final String assignmentId;
   DeleteAssignment({required this.assignmentId});
-} 
+}

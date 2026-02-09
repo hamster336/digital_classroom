@@ -64,6 +64,7 @@ class _NoticesScreenState extends State<NoticesScreen> {
 
           child: Column(
             children: [
+              // notice filter buttons
               BlocBuilder<NoticeBloc, NoticeState>(
                 builder: (context, state) {
                   final currentFilter = (state is NoticeLoaded)
@@ -109,6 +110,7 @@ class _NoticesScreenState extends State<NoticesScreen> {
                 },
               ),
               SizedBox(height: size.height * 0.01),
+
               // view notices
               Expanded(
                 child: RefreshIndicator(
@@ -123,7 +125,7 @@ class _NoticesScreenState extends State<NoticesScreen> {
 
                   child: BlocBuilder<NoticeBloc, NoticeState>(
                     builder: (context, state) {
-                      if (state is NoticeLoading && state.firstLoad) {
+                      if (state is NoticeLoading) {
                         return ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: const [
@@ -131,34 +133,6 @@ class _NoticesScreenState extends State<NoticesScreen> {
                             Center(child: CircularProgressIndicator()),
                           ],
                         );
-                      }
-
-                      if (state is NoticeLoading) {
-                        final notices = state.notices;
-
-                        return NoticeList(
-                          notices: notices,
-                          scrollController: _scrollController,
-                        );
-
-                        // return ListView.builder(
-                        //   controller: _scrollController,
-                        //   physics: AlwaysScrollableScrollPhysics(),
-                        //   itemCount: notices.length + 1,
-                        //   itemBuilder: (_, index) {
-                        //     if (index == notices.length) {
-                        //       return const Padding(
-                        //         padding: EdgeInsets.all(16),
-                        //         child: Center(
-                        //           child: CircularProgressIndicator(
-                        //             color: Color(0xFF2AB3AA),
-                        //           ),
-                        //         ),
-                        //       );
-                        //     }
-                        //     return CustomWidgets.noticeCard(notices[index]);
-                        //   },
-                        // );
                       }
 
                       if (state is NoticeLoaded) {
@@ -203,120 +177,6 @@ class _NoticesScreenState extends State<NoticesScreen> {
                   ),
                 ),
               ),
-
-              // BlocBuilder<NoticeBloc, NoticeState>(
-              //   buildWhen: (previous, current) => current is NoticeLoaded,
-              //   builder: (context, state) {
-              //     final currentFilter = (state is NoticeLoaded)
-              //         ? state.filter
-              //         : filter;
-
-              //     return Row(
-              //       children: [
-              //         CustomWidgets.noticeFilterButton(
-              //           label: 'All',
-              //           isSelected: currentFilter == NoticeFilter.all,
-              //           onTap: () {
-              //             filter = NoticeFilter.all;
-              //             context.read<NoticeBloc>().add(
-              //               FilterNotices(filter: NoticeFilter.all),
-              //             );
-              //           },
-              //         ),
-              //         const SizedBox(width: 5),
-              //         CustomWidgets.noticeFilterButton(
-              //           label: 'Important',
-              //           isSelected: currentFilter == NoticeFilter.important,
-              //           onTap: () {
-              //             filter = NoticeFilter.important;
-              //             context.read<NoticeBloc>().add(
-              //               FilterNotices(filter: NoticeFilter.important),
-              //             );
-              //           },
-              //         ),
-              //         const SizedBox(width: 5),
-              //         CustomWidgets.noticeFilterButton(
-              //           label: 'Urgent',
-              //           isSelected: currentFilter == NoticeFilter.urgent,
-              //           onTap: () {
-              //             filter = NoticeFilter.urgent;
-              //             context.read<NoticeBloc>().add(
-              //               FilterNotices(filter: NoticeFilter.urgent),
-              //             );
-              //           },
-              //         ),
-              //       ],
-              //     );
-              //   },
-              // ),
-
-              // SizedBox(height: size.height * 0.01),
-
-              // // show notices
-              // Expanded(
-              //   child: BlocBuilder<NoticeBloc, NoticeState>(
-              //     builder: (context, state) {
-              //       if (state is NoticeLoading && state.firstLoad) {
-              //         return const Center(
-              //           child: CircularProgressIndicator(
-              //             color: Color(0xFF2AB3AA),
-              //           ),
-              //         );
-              //       }
-
-              //       if (state is NoticeLoading) {
-              //         return NoticeList(
-              //           notices: state.notices,
-              //           showBottomLoader: true,
-              //         );
-              //       }
-
-              //       if (state is NoticeLoaded) {
-              //         final notices = state.displayNotices;
-              //         if (notices.isEmpty) {
-              //           return Center(
-              //             child: const Text(
-              //               'No notices available',
-              //               style: TextStyle(fontSize: 18),
-              //             ),
-              //           );
-              //         }
-
-              //         return RefreshIndicator(
-              //           onRefresh: () async {
-              //             final bloc = context.read<NoticeBloc>();
-              //             bloc.add(RefreshNotices(currentFilter: filter));
-
-              //             await bloc.stream.firstWhere(
-              //               (state) =>
-              //                   state is NoticeLoaded || state is NoticeError,
-              //             );
-              //           },
-              //           child: NoticeList(
-              //             notices: notices,
-              //             showBottomLoader: state.isLoadingMore,
-              //           ),
-              //         );
-
-              //         // return ListView.builder(
-              //         //   itemCount:
-              //         //       notices.length + (state.isLoadingMore ? 1 : 0),
-              //         //   itemBuilder: (context, index) {
-              //         //     if (index == notices.length) {
-              //         //       return const Padding(
-              //         //         padding: EdgeInsets.symmetric(vertical: 16),
-              //         //         child: Center(child: CircularProgressIndicator()),
-              //         //       );
-              //         //     }
-              //         //     return CustomWidgets.noticeCard(notices[index]);
-              //         //   },
-              //         // );
-              //       }
-
-              //       return const SizedBox.shrink();
-              //     },
-              //   ),
-              // ),
             ],
           ),
         ),
