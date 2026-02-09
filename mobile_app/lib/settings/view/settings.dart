@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
+import 'package:mobile_app/auth/view/change_password_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class Settings extends StatefulWidget {
@@ -89,7 +90,12 @@ class _SettingsState extends State<Settings> {
                     ),
                     child: CustomWidgets.navigateSettings(
                       'Change Password',
-                      () {},
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChangePasswordScreen(),
+                        ),
+                      ),
                     ),
                   ),
                 ),
