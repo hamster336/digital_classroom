@@ -10,8 +10,7 @@ part 'notice_state.dart';
 
 class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
   final NoticeRepoImpl repository;
-  NoticeBloc(this.repository)
-    : super(NoticeLoading(notices: [], firstLoad: true)) {
+  NoticeBloc(this.repository) : super(NoticeLoading()) {
     on<LoadNotices>(_loadNotices);
     on<RefreshNotices>(_refreshNotices);
     on<FilterNotices>(_filterNotices);
@@ -24,13 +23,6 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
     RefreshNotices event,
     Emitter<NoticeState> emit,
   ) async {
-    List<Notice> existingNotices = [];
-    if (state is NoticeLoaded) {
-      existingNotices = (state as NoticeLoaded).displayNotices;
-    }
-
-    emit(NoticeLoading(notices: (existingNotices)));
-
     try {
       int from = 0;
 
@@ -69,20 +61,22 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
         from = oldNotices.length;
       }
 
-      emit(
-        NoticeLoaded(
-          notices: oldNotices,
-          hasReachedMax: false,
-          isLoadingMore: true,
-        ),
-      );
+      if (oldNotices.isEmpty) {   // true for firstLoad only
+        emit(NoticeLoading());
+      } else {    // for first load, do not emit empty list instead emit loading state
+        emit(
+          NoticeLoaded(
+            notices: oldNotices,
+            hasReachedMax: false,
+            isLoadingMore: true,
+          ),
+        );
+      }
 
       final newNotices = await repository.loadNotices(
         from: from,
         limit: pageSize,
       );
-
-      // await Future.delayed(const Duration(seconds: 3));
 
       emit(
         NoticeLoaded(

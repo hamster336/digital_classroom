@@ -25,8 +25,8 @@ class TeacherAssignmentDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               CustomWidgets.teachersAssignmentCards(
-                context,
-                assignment,
+                context: context,
+                assignment: assignment,
                 detailed: true,
               ),
 

@@ -101,7 +101,7 @@ class StudentAssignmentView extends StatelessWidget {
                         return ListView.builder(
                           itemCount: assignments.length,
                           itemBuilder: (_, index) {
-                            return CustomWidgets.assignmentCards(
+                            return CustomWidgets.studentAssignmentCards(
                               context,
                               assignments[index],
                             );

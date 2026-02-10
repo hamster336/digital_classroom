@@ -25,7 +25,7 @@ class StudentAssignmentDetailsScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.black45),
               ),
               const SizedBox(height: 5),
-              CustomWidgets.assignmentCards(
+              CustomWidgets.studentAssignmentCards(
                 context,
                 assignment,
                 detailed: true,

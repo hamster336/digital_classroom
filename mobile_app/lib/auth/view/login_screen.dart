@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
+import 'package:mobile_app/auth/view/forgot_password_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Center(
@@ -95,7 +97,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             // forgot password
                             TextButton(
-                              onPressed: () {},
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ForgotPasswordScreen(),
+                                ),
+                              ),
                               child: const Text(
                                 'Forgot Password?',
                                 style: TextStyle(fontSize: 18),
@@ -146,6 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: CircularProgressIndicator(color: Color(0xFF2AB3AA)),
       ),
     );
+    
     context.read<AuthBloc>().add(LoginRequested(email: email, password: psw));
   }
 }

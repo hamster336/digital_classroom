@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
-import 'package:mobile_app/assignments/view/teacher.assignment_details_screen.dart';
+import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
-import 'package:mobile_app/assignments/view/student.assignment_details_screen.dart';
+import 'package:mobile_app/assignments/view/student_view/student.assignment_details_screen.dart';
 
 class CustomWidgets {
   // custom textFields
@@ -15,14 +15,22 @@ class CustomWidgets {
     required String label,
     IconData? suffixIcon,
     required bool obscureText,
+    bool enabled = true,
+    int? maxLines = 1,
+    TextCapitalization cap = .none,
+    FocusNode? focusNode,
   }) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
+      enabled: enabled,
+      maxLines: maxLines,
       decoration: InputDecoration(
-        label: Text(label, style: TextStyle(fontSize: 20)),
+        labelText: label,
         suffixIcon: (suffixIcon == null) ? null : Icon(suffixIcon, size: 30),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
       ),
+      textCapitalization: cap,
       obscureText: obscureText,
     );
   }
@@ -327,7 +335,7 @@ class CustomWidgets {
   }
 
   // assignment cards
-  static Widget assignmentCards(
+  static Widget studentAssignmentCards(
     BuildContext context,
     Assignment assignment, {
     bool detailed = false,
@@ -611,17 +619,22 @@ class CustomWidgets {
   }
 
   // assignment cards for teacher
-  static Widget teachersAssignmentCards(
-    BuildContext context,
-    Assignment assignment, {
+  static Widget teachersAssignmentCards({
+    required BuildContext context,
+    required Assignment assignment,
+    VoidCallback? onEdit,
+    VoidCallback? onDelete,
     bool detailed = false,
   }) {
     Color cardColor = Colors.blue;
+    String priority = 'Normal';
 
     if (assignment.priority == AssignmentPriority.urgent) {
       cardColor = Colors.red;
+      priority = 'Urgent';
     } else if (assignment.priority == AssignmentPriority.medium) {
       cardColor = Colors.yellow.shade700;
+      priority = 'Medium';
     }
 
     return InkWell(
@@ -662,30 +675,43 @@ class CustomWidgets {
 
                     const SizedBox(width: 5),
 
-                    // Update button
-                    if (!detailed)
-                      Row(
-                        children: [
-                          IconButton(
-                            padding: .zero,
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.edit,
-                              opticalSize: 20,
-                              color: Color(0xFF2AB3AA),
+                    // Update/delete buttons or priority
+                    (!detailed)
+                        ? Row(
+                            children: [
+                              IconButton(
+                                padding: .zero,
+                                onPressed: onEdit,
+                                icon: const Icon(
+                                  Icons.edit,
+                                  opticalSize: 20,
+                                  color: Color(0xFF2AB3AA),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: onDelete,
+                                padding: .zero,
+                                icon: const Icon(
+                                  Icons.delete,
+                                  opticalSize: 20,
+                                  color: Color(0xFF2AB3AA),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(15),
+                              ),
+                              color: cardColor.withValues(alpha: 0.2),
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              priority,
+                              style: TextStyle(color: cardColor),
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            padding: .zero,
-                            icon: const Icon(
-                              Icons.delete,
-                              opticalSize: 20,
-                              color: Color(0xFF2AB3AA),
-                            ),
-                          ),
-                        ],
-                      ),
                   ],
                 ),
 
@@ -843,8 +869,22 @@ class CustomWidgets {
   }
 
   // user info tiles for profile screen
-  static Widget userInfoTiles() {
-    return ListTile();
+  static Widget userInfoTiles(String asset, String title, String subtitle) {
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 22,
+        backgroundColor: Colors.white,
+        child: Image(image: AssetImage(asset)),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+    );
   }
 
   // show Alert Dialog box with ok button only
@@ -874,7 +914,7 @@ class CustomWidgets {
   }
 
   // custom buttons
-  static Widget customButton(Size size, String text, VoidCallback onTap,) {
+  static Widget customButton(Size size, String text, VoidCallback onTap) {
     return Container(
       width: size.width * 0.65,
       height: size.height * 0.06,
@@ -890,14 +930,44 @@ class CustomWidgets {
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
         ),
-        child:Text(
+        child: Text(
           text,
           style: TextStyle(
-            fontSize: 28,
+            shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+            fontSize: 26,
             fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
             color: Colors.white,
           ),
         ),
+      ),
+    );
+  }
+
+  // pop up menu item
+  static PopupMenuItem<String> customMenuItem(String value, String text) {
+    return PopupMenuItem(
+      value: value,
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  // menu item picker
+  static Widget customMenuItemPicker(
+    TextEditingController controller,
+    String label,
+    Widget suffixIcon,
+  ) {
+    return TextField(
+      controller: controller,
+      readOnly: true,
+      decoration: InputDecoration(
+        labelText: label,
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }

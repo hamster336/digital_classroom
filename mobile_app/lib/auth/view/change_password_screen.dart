@@ -105,8 +105,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) {
-        dialogContext = context;
+      builder: (dialogCtx) {
+        dialogContext = dialogCtx;
         return const Center(
           child: CircularProgressIndicator(color: Color(0xFF2AB3AA)),
         );
