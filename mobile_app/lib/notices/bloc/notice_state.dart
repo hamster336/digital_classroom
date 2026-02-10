@@ -2,12 +2,7 @@ part of 'notice_bloc.dart';
 
 sealed class NoticeState {}
 
-final class NoticeLoading extends NoticeState {
-  final List<Notice> notices;
-  final bool firstLoad;
-
-  NoticeLoading({required this.notices, this.firstLoad = false});
-}
+final class NoticeLoading extends NoticeState {}
 
 final class NoticeLoaded extends NoticeState {
   final List<Notice> notices;

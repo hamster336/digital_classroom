@@ -48,15 +48,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
+    final currentState = state;
+
+    if (currentState is! Authenticated) {
+      throw Exception('User not logged in');
+    }
+
     emit(AuthLoading());
     try {
       await repository.logout();
       emit(Unauthenticated());
     } catch (e) {
       emit(AuthFailure(message: e.toString()));
+      emit(currentState);
     }
   }
 
+  // change password
   Future<void> _changePassword(
     ChangePassword event,
     Emitter<AuthState> emit,
@@ -75,7 +83,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await repository.changePassword(event.oldPassword, event.newPassword);
 
       emit(PasswordChangeSuccess());
-      
+
       emit(Authenticated(user: currentState.user));
     } catch (e) {
       emit(AuthFailure(message: e.toString()));

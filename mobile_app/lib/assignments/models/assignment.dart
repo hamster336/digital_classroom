@@ -39,21 +39,25 @@ class Assignment {
       teacherId: map['teacher_id'],
       priority: getPriority(map['priority']),
       issueFilepath: map['issue_file_path'],
-      submissionCount: map['submission_count']
+      submissionCount: map['submission_count'],
     );
   }
 
   static Map<String, dynamic> toMap(Assignment a) {
-    return {
-      'title' : a.title,
-      'description' : a.description,
-      'issued_at' : a.issuedAt.toIso8601String(),
-      'due_date' : a.dueDate.toIso8601String(),
-      'subject_id' : a.subjectId,
-      'class_id' : a.classId,
-      'teacher_id' : a.teacherId,
-      'priority' : setPriority(a.priority),
+    final map = {
+      'title': a.title,
+      'description': a.description,
+      'issued_at': a.issuedAt.toIso8601String(),
+      'due_date': a.dueDate.toIso8601String(),
+      'subject_id': a.subjectId,
+      'class_id': a.classId,
+      'teacher_id': a.teacherId,
+      'priority': setPriority(a.priority),
     };
+
+    if (a.id != null) map['id'] = a.id!;
+
+    return map;
   }
 
   Assignment copyWith({
@@ -61,6 +65,7 @@ class Assignment {
     String? description,
     DateTime? issuedAt,
     DateTime? dueDate,
+    String? subjectId,
     AssignmentPriority? priority,
     String? issueFilepath,
     int? submissionCount,
@@ -72,7 +77,7 @@ class Assignment {
       issuedAt: issuedAt ?? this.issuedAt,
       dueDate: dueDate ?? this.dueDate,
       classId: classId,
-      subjectId: subjectId,
+      subjectId: subjectId ?? this.subjectId,
       teacherId: teacherId,
       priority: priority ?? this.priority,
       issueFilepath: issueFilepath ?? this.issueFilepath,
@@ -87,8 +92,8 @@ class Assignment {
   }
 
   static String setPriority(AssignmentPriority p) {
-    if(p == AssignmentPriority.urgent) return 'urgent';
-    if(p == AssignmentPriority.medium) return 'medium';
+    if (p == AssignmentPriority.urgent) return 'urgent';
+    if (p == AssignmentPriority.medium) return 'medium';
     return 'normal';
   }
 }

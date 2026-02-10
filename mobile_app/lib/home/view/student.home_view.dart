@@ -5,7 +5,7 @@ import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
-import 'package:mobile_app/assignments/view/student.assignment_view.dart';
+import 'package:mobile_app/assignments/view/student_view/student.assignment_view.dart';
 import 'package:mobile_app/notes/view/student.notes_view.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
@@ -86,33 +86,42 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                 // User Role
                 subtitle: BlocBuilder<ClassroomBloc, ClassroomState>(
                   builder: (context, state) {
-                    if (state is! ClassesLoaded) {
-                      return Text(
-                        'Loading....',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      );
-                    }
-
-                    final cls = state.classes.first;
+                    final cls = (state is ClassesLoaded)
+                        ? state.classes.first
+                        : null;
 
                     return Text(
-                      'Student | ${cls.name}',
+                      (cls == null) ? 'Loading...' : 'Student | ${cls.name}',
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     );
                   },
                 ),
 
                 // Profile button
-                trailing: IconButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          StudentProfileScreen(student: widget.student),
-                    ),
-                  ),
-                  style: IconButton.styleFrom(backgroundColor: Colors.white),
-                  icon: Icon(Icons.person, color: Colors.green, size: 30),
+                trailing: BlocBuilder<ClassroomBloc, ClassroomState>(
+                  builder: (context, state) {
+                    final cls = (state is ClassesLoaded)
+                        ? state.classes.first
+                        : null;
+
+                    return IconButton(
+                      onPressed: (cls == null)
+                          ? () {}
+                          : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => StudentProfileScreen(
+                                  student: widget.student,
+                                  cls: cls,
+                                ),
+                              ),
+                            ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white,
+                      ),
+                      icon: Icon(Icons.person, color: Colors.green, size: 30),
+                    );
+                  },
                 ),
               ),
             ),
@@ -214,7 +223,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             size,
                             Icons.note_alt_rounded,
                             'Notes',
-                            'Access your study notes',
+                            'Access your study materials',
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -226,7 +235,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             size,
                             Icons.note_rounded,
                             'Assignments',
-                            'Track your homework',
+                            'Track your all homework',
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -253,12 +262,31 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                               ),
                             ),
                           ),
-                          CustomWidgets.resrcCard(
-                            size,
-                            Icons.info,
-                            'Class Info',
-                            'See class details',
-                            () => () {},
+                          BlocBuilder<ClassroomBloc, ClassroomState>(
+                            builder: (context, state) {
+                              final cls = (state is ClassesLoaded)
+                                  ? state.classes.first
+                                  : null;
+
+                              return CustomWidgets.resrcCard(
+                                size,
+                                Icons.info,
+                                'Class Info',
+                                'See class details',
+                                (cls == null)
+                                    ? () {}
+                                    : () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              CustomWidgets.showClassDetails(
+                                                context,
+                                                cls,
+                                              ),
+                                        );
+                                      },
+                              );
+                            },
                           ),
                         ],
                       ),

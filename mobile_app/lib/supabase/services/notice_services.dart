@@ -18,11 +18,4 @@ class NoticeServices {
         .order('published_at', ascending: false)
         .range(from, to);
   }
-
-  // // fetch number of unread notices
-  // Future<int> fetchUnreadNoticeCount(String userId) async {
-  //   final res = await client.from('notices').select().not('seen_by', 'cs', '{$userId}');
-
-  //   return res.length;
-  // }
 }
