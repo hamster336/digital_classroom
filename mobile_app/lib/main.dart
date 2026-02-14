@@ -9,12 +9,17 @@ import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
+import 'package:mobile_app/notes/bloc/notes_bloc.dart';
+import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
 import 'package:mobile_app/notices/repository/notice_repo_impl.dart';
 import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
+import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
 import 'package:mobile_app/supabase/credentials/supabase.crendentials.dart';
 import 'package:mobile_app/supabase/services/assignment_services.dart';
+import 'package:mobile_app/supabase/services/notes_services.dart';
+import 'package:mobile_app/supabase/services/submission_services.dart';
 import 'package:mobile_app/supabase/services/upcoming_services.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notices/bloc/notice_bloc.dart';
@@ -27,7 +32,6 @@ import 'package:mobile_app/supabase/services/teachers_services.dart';
 import 'package:mobile_app/supabase/services/user_services.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/submission/bloc/submission_bloc.dart';
-import 'package:mobile_app/submission/repository/submission_repo.dart';
 import 'package:mobile_app/upcoming/repository/upcoming_repo_impl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
@@ -97,7 +101,17 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // submission repo
-        RepositoryProvider(create: (_) => SubmissionRepo()),
+        RepositoryProvider(
+          create: (_) => SubmissionRepoImpl(
+            services: SubmissionServices(client: SupabaseCredentials.client),
+          ),
+        ),
+        // notes repo
+        RepositoryProvider(
+          create: (context) => NotesRepositoryImpl(
+            services: NotesServices(client: SupabaseCredentials.client),
+          ),
+        ),
       ],
 
       child: MultiBlocProvider(
@@ -114,11 +128,11 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => StudentsAssignmentBloc(
               assignmentRepo: context.read<AssignmentRepoImpl>(),
-              submissionRepo: context.read<SubmissionRepo>(),
+              submissionRepo: context.read<SubmissionRepoImpl>(),
             ),
           ),
           // teacher assignment bloc
-          BlocProvider(
+          BlocProvider(  
             create: (context) =>
                 TeacherAssignmentBloc(context.read<AssignmentRepoImpl>()),
           ),
@@ -135,7 +149,8 @@ class MyApp extends StatelessWidget {
           ),
           // submission bloc
           BlocProvider(
-            create: (context) => SubmissionBloc(context.read<SubmissionRepo>()),
+            create: (context) =>
+                SubmissionBloc(context.read<SubmissionRepoImpl>()),
           ),
           // classroom bloc
           BlocProvider(
@@ -145,6 +160,10 @@ class MyApp extends StatelessWidget {
           // subject bloc
           BlocProvider(
             create: (context) => SubjectBloc(context.read<SubjectRepoImpl>()),
+          ),
+          // notes bloc
+          BlocProvider(
+            create: (context) => NotesBloc(context.read<NotesRepositoryImpl>()),
           ),
         ],
 

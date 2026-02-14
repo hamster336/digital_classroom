@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
+import 'package:mobile_app/subject/bloc/subject_bloc.dart';
+import 'package:mobile_app/subject/model/subject.dart';
 
 class StudentAssignmentView extends StatelessWidget {
   const StudentAssignmentView({super.key});
@@ -84,7 +86,7 @@ class StudentAssignmentView extends StatelessWidget {
                   BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
                     builder: (context, assignmentState) {
                       if (assignmentState is StudentAssignmentLoading) {
-                        return const Center(child: CircularProgressIndicator());
+                        return CustomWidgets.customLoader();
                       }
 
                       if (assignmentState is StudentAssignmentLoaded) {
@@ -101,9 +103,26 @@ class StudentAssignmentView extends StatelessWidget {
                         return ListView.builder(
                           itemCount: assignments.length,
                           itemBuilder: (_, index) {
-                            return CustomWidgets.studentAssignmentCards(
-                              context,
-                              assignments[index],
+                            return BlocBuilder<SubjectBloc, SubjectState>(
+                              builder: (context, state) {
+                                final subjects = (state is SubjectLoaded)
+                                    ? state.subjects
+                                    : [];
+
+                                final sub =
+                                    subjects.firstWhere(
+                                          (s) =>
+                                              s.id ==
+                                              assignments[index].subjectId,
+                                        )
+                                        as Subject;
+
+                                return CustomWidgets.studentAssignmentCards(
+                                  context: context,
+                                  assignment: assignments[index],
+                                  subjectName: sub.name,
+                                );
+                              },
                             );
                           },
                         );

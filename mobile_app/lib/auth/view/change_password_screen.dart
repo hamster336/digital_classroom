@@ -31,58 +31,62 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Change Password')),
-      body: Padding(
-        padding: const EdgeInsetsGeometry.symmetric(horizontal: 20),
-        child: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (dialogContext != null && Navigator.canPop(dialogContext!)) {
-              Navigator.pop(dialogContext!);
-              dialogContext = null;
-            }
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Padding(
+          padding: const EdgeInsetsGeometry.symmetric(horizontal: 20),
+          child: BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (dialogContext != null && Navigator.canPop(dialogContext!)) {
+                Navigator.pop(dialogContext!);
+                dialogContext = null;
+              }
 
-            if (state is AuthFailure) {
-              CustomWidgets.customAltertBox(context, state.message, () {});
-            }
+              if (state is AuthFailure) {
+                CustomWidgets.customAltertBox(context, state.message, () {});
+              }
 
-            if (state is PasswordChangeSuccess) {
-              CustomWidgets.customAltertBox(
-                context,
-                'Password changed successfully.',
-                () => Navigator.pop(context),
-              );
-            }
-          },
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: .min,
-              children: [
-                SizedBox(height: size.height * 0.05),
+              if (state is PasswordChangeSuccess) {
+                CustomWidgets.customAltertBox(
+                  context,
+                  'Password changed successfully.',
+                  () => Navigator.pop(context),
+                );
+              }
+            },
+            child: SizedBox.expand(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(height: size.height * 0.05),
 
-                CustomWidgets.customTextField(
-                  controller: oldPswController,
-                  label: 'Old Password',
-                  obscureText: false,
-                ),
-                SizedBox(height: size.height * 0.01),
-                CustomWidgets.customTextField(
-                  controller: newPswController,
-                  label: 'New Password',
-                  obscureText: false,
-                ),
-                SizedBox(height: size.height * 0.01),
-                CustomWidgets.customTextField(
-                  controller: confirmPswController,
-                  label: 'Confirm Password',
-                  obscureText: false,
-                ),
-                SizedBox(height: size.height * 0.05),
+                    CustomWidgets.customTextField(
+                      controller: oldPswController,
+                      label: 'Old Password',
+                      obscureText: false,
+                    ),
+                    SizedBox(height: size.height * 0.01),
+                    CustomWidgets.customTextField(
+                      controller: newPswController,
+                      label: 'New Password',
+                      obscureText: false,
+                    ),
+                    SizedBox(height: size.height * 0.01),
+                    CustomWidgets.customTextField(
+                      controller: confirmPswController,
+                      label: 'Confirm Password',
+                      obscureText: false,
+                    ),
+                    SizedBox(height: size.height * 0.05),
 
-                CustomWidgets.customButton(
-                  size,
-                  'Change Password',
-                  () async => _change(),
+                    CustomWidgets.customButton(
+                      size,
+                      'Change Password',
+                      () async => _change(),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -107,9 +111,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       context: context,
       builder: (dialogCtx) {
         dialogContext = dialogCtx;
-        return const Center(
-          child: CircularProgressIndicator(color: Color(0xFF2AB3AA)),
-        );
+        return CustomWidgets.customLoader();
       },
     );
 

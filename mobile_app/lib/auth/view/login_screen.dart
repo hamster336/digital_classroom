@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Center(
@@ -149,11 +149,11 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFF2AB3AA)),
+      builder: (context) => Center(
+        child: CustomWidgets.customLoader(),
       ),
     );
-    
+
     context.read<AuthBloc>().add(LoginRequested(email: email, password: psw));
   }
 }

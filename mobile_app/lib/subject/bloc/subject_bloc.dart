@@ -22,7 +22,7 @@ class SubjectBloc extends Bloc<SubjectEvent, SubjectState> {
 
     try {
       final subejcts = await repository.fetchSubjects(event.subjectIds);
-      emit(SubjectLoaded(subejcts: subejcts));
+      emit(SubjectLoaded(subjects: subejcts));
     } catch (e) {
       emit(SubjectError(message: e.toString()));
     }

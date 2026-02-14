@@ -39,6 +39,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
     context.read<SubjectBloc>().add(
       LoadSubjects(subjectIds: widget.student.subjectIds),
     );
+    
   }
 
   @override
@@ -157,7 +158,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                               return Expanded(
                                 child: CustomWidgets.infoCard(
                                   size,
-                                  state.subejcts.length,
+                                  state.subjects.length,
                                   'Subjects',
                                 ),
                               );
@@ -227,7 +228,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const StudentNotesView(),
+                                builder: (_) =>
+                                    StudentNotesView(student: widget.student),
                               ),
                             ),
                           ),
@@ -311,7 +313,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.only(top: size.height * 0.02),
-                          child: Center(child: CircularProgressIndicator()),
+                          child: CustomWidgets.customLoader(),
                         ),
                       );
                     }

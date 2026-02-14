@@ -34,7 +34,7 @@ final class StudentAssignmentLoaded extends StudentsAssignmentState {
             .where(
               (a) =>
                   !submittedAssignmentIds.contains(a.id) &&
-                  !a.dueDate.isBefore(now),
+                  a.dueDate.isAfter(now),
             )
             .toList();
       case AssignmentFilter.overdue:

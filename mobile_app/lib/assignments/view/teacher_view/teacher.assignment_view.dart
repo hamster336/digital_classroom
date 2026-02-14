@@ -4,10 +4,13 @@ import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignme
 import 'package:mobile_app/assignments/view/teacher_view/assignment_form.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
+import 'package:mobile_app/subject/bloc/subject_bloc.dart';
+import 'package:mobile_app/subject/model/subject.dart';
 
 class TeacherAssignmentView extends StatefulWidget {
   final String teacherId;
   final Classroom cls;
+
   const TeacherAssignmentView({
     super.key,
     required this.cls,
@@ -82,7 +85,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                   }
 
                   // for delete operation, create and update will occure in another screen
-                  if (state is DeletedAssignment) {
+                  if (state is DeleteAssignmentSuccess) {
                     CustomWidgets.customAltertBox(
                       context,
                       'Assignment deleted successfully.',
@@ -117,47 +120,65 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                         TeacherAssignmentState
                       >(
                         builder: (context, state) {
-                          if (state is! TeacherAssignmentLoaded) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                          if (state is TeacherAssignmentLoading) {
+                            return CustomWidgets.customLoader();
                           }
 
-                          final assignments = state.assignments;
+                          if (state is TeacherAssignmentLoaded) {
+                            final assignments = state.assignments;
 
-                          if (assignments.isEmpty) {
-                            return Center(
-                              child: const Text(
+                            if (assignments.isEmpty) {
+                              return CustomWidgets.customScrollableText(
+                                context,
                                 'No assignments available',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.black54,
-                                ),
-                              ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              itemCount: assignments.length,
+                              itemBuilder: (context, index) {
+                                return BlocBuilder<SubjectBloc, SubjectState>(
+                                  builder: (context, state) {
+                                    final subjects = (state is SubjectLoaded)
+                                        ? state.subjects
+                                        : [];
+
+                                    final sub =
+                                        subjects.firstWhere(
+                                              (s) =>
+                                                  s.id ==
+                                                  assignments[index].subjectId,
+                                            )
+                                            as Subject;
+
+                                    return CustomWidgets.teachersAssignmentCards(
+                                      context: context,
+                                      assignment: assignments[index],
+                                      subjectName: sub.name,
+                                      onEdit: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AssignmentForm(
+                                            initialAssignment:
+                                                assignments[index],
+                                            cls: widget.cls,
+                                            teacherId: widget.teacherId,
+                                          ),
+                                        ),
+                                      ),
+                                      onDelete: () async =>
+                                          _onDelete(assignments[index].id!),
+                                    );
+                                  },
+                                );
+                              },
                             );
                           }
 
-                          return ListView.builder(
-                            physics: AlwaysScrollableScrollPhysics(),
-                            itemCount: assignments.length,
-                            itemBuilder: (context, index) {
-                              return CustomWidgets.teachersAssignmentCards(
-                                context: context,
-                                assignment: assignments[index],
-                                onEdit: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AssignmentForm(
-                                      initialAssignment: assignments[index],
-                                      cls: widget.cls,
-                                      teacherId: widget.teacherId,
-                                    ),
-                                  ),
-                                ),
-                                onDelete: () async =>
-                                    _onDelete(assignments[index].id!),
-                              );
-                            },
+                          return CustomWidgets.customScrollableText(
+                            context,
+                            'Error occured :(\/Swipe down to refresh.',
                           );
                         },
                       ),
@@ -175,33 +196,16 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'Delete Assingment',
-            style: TextStyle(color: Colors.red),
-          ),
-          content: const Text(
-            'Are you sure you want to delete this assignment?',
-            style: TextStyle(fontSize: 18),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('No'),
-            ),
-
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                context.read<TeacherAssignmentBloc>().add(
-                  DeleteAssignment(assignmentId: assignmentId),
-                );
-              },
-              child: const Text('Yes', style: TextStyle(color: Colors.red)),
-            ),
-          ],
+        return CustomWidgets.customConformationBox(
+          context: context,
+          title: 'Delete Assingment',
+          content: 'Are you sure you want to delete this assignment?',
+          onConfirm: () async {
+            Navigator.pop(context);
+            context.read<TeacherAssignmentBloc>().add(
+              DeleteAssignment(assignmentId: assignmentId),
+            );
+          },
         );
       },
     );

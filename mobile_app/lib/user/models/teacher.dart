@@ -25,7 +25,7 @@ class Teacher extends AppUser {
         email: user['email'],
         createdAt: DateTime.parse(user['created_at']),
         role: UserRoles.teacher,
-        avatarPath: user['avatar_url'],
+        avatarPath: teacherData['avatar_url'],
         empId: teacherData['employee_id'],
         subjectIds: List<String>.from(teacherData['subject_ids']),
         classIds: List<String>.from(teacherData['class_ids']),

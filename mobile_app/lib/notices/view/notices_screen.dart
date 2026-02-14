@@ -128,9 +128,9 @@ class _NoticesScreenState extends State<NoticesScreen> {
                       if (state is NoticeLoading) {
                         return ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [
+                          children: [
                             SizedBox(height: 300),
-                            Center(child: CircularProgressIndicator()),
+                            CustomWidgets.customLoader(),
                           ],
                         );
                       }
@@ -151,26 +151,6 @@ class _NoticesScreenState extends State<NoticesScreen> {
                           scrollController: _scrollController,
                           showBottomLoader: state.isLoadingMore,
                         );
-
-                        // return ListView.builder(
-                        //   controller: _scrollController,
-                        //   physics: AlwaysScrollableScrollPhysics(),
-                        //   itemCount:
-                        //       notices.length + (state.isLoadingMore ? 1 : 0),
-                        //   itemBuilder: (_, index) {
-                        //     if (index == notices.length) {
-                        //       return const Padding(
-                        //         padding: EdgeInsets.all(16),
-                        //         child: Center(
-                        //           child: CircularProgressIndicator(
-                        //             color: Color(0xFF2AB3AA),
-                        //           ),
-                        //         ),
-                        //       );
-                        //     }
-                        //     return CustomWidgets.noticeCard(notices[index]);
-                        //   },
-                        // );
                       }
                       return const SizedBox.shrink();
                     },
