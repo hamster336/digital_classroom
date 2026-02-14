@@ -15,11 +15,18 @@ final class UpdateAssignment extends SubmissionEvent {
 
 final class LoadStudentSubmissions extends SubmissionEvent {
   final String studentId;
-  LoadStudentSubmissions({required  this.studentId});
+  LoadStudentSubmissions({required this.studentId});
+}
+
+final class LoadSingleSubmission extends SubmissionEvent {
+  final String studentId;
+  final String assignmentId;
+
+  LoadSingleSubmission({required this.studentId, required this.assignmentId});
 }
 
 // for teacher
 final class LoadAssignmentSubmission extends SubmissionEvent {
   final String assignmentId;
-  LoadAssignmentSubmission({required  this.assignmentId});
+  LoadAssignmentSubmission({required this.assignmentId});
 }

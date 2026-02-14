@@ -8,7 +8,9 @@ enum AssignmentPriority { urgent, medium, normal }
 
 enum AssignmentFilter { pending, completed, overdue }
 
-enum FileType { image, document, pdf, spreadsheet, presentation }
+enum TypeOfFile { image, document, pdf, spreadsheet, presentation }
+
+enum FileContext { notes, schedules, assignments }
 
 enum UpcomingEventType { notice, assignment }
 

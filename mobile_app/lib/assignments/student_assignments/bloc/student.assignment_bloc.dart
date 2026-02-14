@@ -5,7 +5,7 @@ import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/submission/model/submission.dart';
-import 'package:mobile_app/submission/repository/submission_repo.dart';
+import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
 import 'package:mobile_app/user/models/student.dart';
 
 part 'student.assignment_event.dart';
@@ -14,7 +14,8 @@ part 'student.assignment_state.dart';
 class StudentsAssignmentBloc
     extends Bloc<StudentsAssignmentEvent, StudentsAssignmentState> {
   final AssignmentRepoImpl assignmentRepo;
-  final SubmissionRepo submissionRepo;
+  final SubmissionRepoImpl submissionRepo;
+  
   StudentsAssignmentBloc({
     required this.assignmentRepo,
     required this.submissionRepo,

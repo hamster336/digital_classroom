@@ -81,7 +81,7 @@ class TeacherAssignmentBloc
     try {
       await repository.addAssignment(event.assignment);
 
-      emit(CreatedAssignment());
+      emit(CreateAssignmentSuccess());
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
       emit(currentState);
@@ -101,7 +101,7 @@ class TeacherAssignmentBloc
 
     try {
       await repository.updateAssignment(event.assignment);
-      emit(UpdatedAssignment());
+      emit(UpdateAssignmentSuccess());
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
       emit(currentState);
@@ -121,7 +121,7 @@ class TeacherAssignmentBloc
 
     try {
       await repository.deleteAssignment(event.assignmentId);
-      emit(DeletedAssignment());
+      emit(DeleteAssignmentSuccess());
       emit(TeacherAssignmentLoaded(assignments: currentState.assignments));
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));

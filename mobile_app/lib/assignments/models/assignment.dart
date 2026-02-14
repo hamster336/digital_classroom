@@ -11,7 +11,6 @@ class Assignment {
   DateTime dueDate;
   AssignmentPriority priority;
   String? issueFilepath;
-  int? submissionCount;
 
   Assignment({
     this.id,
@@ -24,7 +23,6 @@ class Assignment {
     required this.teacherId,
     required this.priority,
     this.issueFilepath,
-    this.submissionCount,
   });
 
   factory Assignment.fromMap(Map<String, dynamic> map) {
@@ -39,7 +37,6 @@ class Assignment {
       teacherId: map['teacher_id'],
       priority: getPriority(map['priority']),
       issueFilepath: map['issue_file_path'],
-      submissionCount: map['submission_count'],
     );
   }
 
@@ -47,8 +44,8 @@ class Assignment {
     final map = {
       'title': a.title,
       'description': a.description,
-      'issued_at': a.issuedAt.toIso8601String(),
-      'due_date': a.dueDate.toIso8601String(),
+      'issued_at': a.issuedAt.toUtc().toIso8601String(),
+      'due_date': a.dueDate.toUtc().toIso8601String(),
       'subject_id': a.subjectId,
       'class_id': a.classId,
       'teacher_id': a.teacherId,
@@ -81,7 +78,6 @@ class Assignment {
       teacherId: teacherId,
       priority: priority ?? this.priority,
       issueFilepath: issueFilepath ?? this.issueFilepath,
-      submissionCount: submissionCount ?? this.submissionCount,
     );
   }
 
