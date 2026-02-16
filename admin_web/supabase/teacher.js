@@ -1,11 +1,17 @@
-// supabase/teachers.js
 import { supabase } from "./client";
 
-/* CREATE */
-export const createTeacher = async (teacher) => {
+/** * CREATE: Add a new teacher 
+ */
+export const createTeacher = async (teacherData) => {
   const { data, error } = await supabase
     .from("teacher")
-    .insert([teacher])
+    .insert([{
+      // Matches your screenshot columns exactly
+      employee_id: teacherData.employeeId, 
+      subject_ids: teacherData.subjectIds, // text[] array
+      class_ids:   teacherData.classIds,   // text[] array
+      avatar_url:  teacherData.avatarUrl
+    }])
     .select()
     .single();
 
@@ -13,35 +19,30 @@ export const createTeacher = async (teacher) => {
   return data;
 };
 
-/* READ ALL */
+/** * READ ALL: Get all teachers 
+ */
 export const getAllTeachers = async () => {
   const { data, error } = await supabase
     .from("teacher")
     .select("*")
-    .order("created_at", { ascending: false });
+    // Sorting by employee_id since created_at is missing in your screenshot
+    .order("employee_id", { ascending: true }); 
 
   if (error) throw error;
   return data;
 };
 
-/* ================= READ BY ID ================= */
-export const getTeacherById = async (id) => {
-  const { data, error } = await supabase
-    .from("teacher")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error) throw error;
-  return data;
-};
-
-
-/* UPDATE */
+/** * UPDATE: Explicitly map the update fields
+ */
 export const updateTeacher = async (id, updates) => {
   const { data, error } = await supabase
     .from("teacher")
-    .update(updates)
+    .update({
+      employee_id: updates.employeeId,
+      subject_ids: updates.subjectIds,
+      class_ids:   updates.classIds,
+      avatar_url:  updates.avatarUrl
+    })
     .eq("id", id)
     .select()
     .single();
@@ -50,7 +51,8 @@ export const updateTeacher = async (id, updates) => {
   return data;
 };
 
-/* DELETE */
+/** * DELETE 
+ */
 export const deleteTeacher = async (id) => {
   const { error } = await supabase
     .from("teacher")
