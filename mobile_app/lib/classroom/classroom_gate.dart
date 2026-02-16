@@ -5,7 +5,9 @@ import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class ClassroomGate extends StatelessWidget {
-  final void Function(BuildContext context, Classroom classroom) onClassSelected;
+  final void Function(BuildContext context, Classroom classroom)
+  onClassSelected;
+
   const ClassroomGate({super.key, required this.onClassSelected});
 
   @override
@@ -15,12 +17,12 @@ class ClassroomGate extends StatelessWidget {
       appBar: AppBar(title: const Text('Select a class')),
       body: BlocBuilder<ClassroomBloc, ClassroomState>(
         builder: (context, state) {
-          if (state is! ClassesLoaded) {
-            return const Center(child: CircularProgressIndicator());
+          if (state is ClassLoading) {
+            return CustomWidgets.customLoader();
           }
-
-          final classes = state.classes;
-
+      
+          final classes = (state is ClassesLoaded) ? state.classes : [];
+      
           if (classes.isEmpty) {
             return const Center(
               child: Text(
@@ -29,14 +31,14 @@ class ClassroomGate extends StatelessWidget {
               ),
             );
           }
-
+      
           return ListView.builder(
             itemCount: classes.length,
             itemBuilder: (context, index) {
               final cls = classes[index];
               return CustomWidgets.classCards(
                 cls,
-                () => onClassSelected(context, cls)
+                () => onClassSelected(context, cls),
               );
             },
           );

@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/submission/model/submission.dart';
 import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
@@ -111,7 +115,7 @@ class CustomWidgets {
     );
   }
 
-  // Notice card
+  // home screen events card
   static Widget homeScreenCard(Upcoming event) {
     Color cardColor = Colors.blue;
     if (event.priority == UpcomingEventPriority.urgent) {
@@ -144,23 +148,23 @@ class CustomWidgets {
   // format time for homescreen notice card
   static String formatTimeForHome(DateTime scheduledAt) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final date = DateTime(scheduledAt.year, scheduledAt.month, scheduledAt.day);
-    final diff = date.difference(today);
+    final scheduled = scheduledAt.toLocal();
+
+    final diff = now.difference(scheduledAt);
 
     if (diff.inDays == 0) {
-      return 'Today, ${DateFormat('hh:mm a').format(scheduledAt)}';
+      return 'Today, ${DateFormat('hh:mm a').format(scheduled)}';
     }
 
     if (diff.inDays == 1) {
-      return 'Tomorrow, ${DateFormat('hh:mm a').format(scheduledAt)}';
+      return 'Tomorrow, ${DateFormat('hh:mm a').format(scheduled)}';
     }
 
     if (diff.inDays < 7) {
-      return DateFormat('EEEE, hh:mm a').format(scheduledAt);
+      return DateFormat('EEEE, hh:mm a').format(scheduled);
     }
 
-    return DateFormat('dd MMM, hh:mm a').format(scheduledAt);
+    return DateFormat('dd MMM, hh:mm a').format(scheduled);
   }
 
   // filter buttons
@@ -256,7 +260,8 @@ class CustomWidgets {
   // format time for notice cards
   static String formatIssuedTime(DateTime time) {
     final now = DateTime.now();
-    final diff = now.difference(time);
+    final localTime = time.toLocal();
+    final diff = now.difference(localTime);
 
     if (diff.inSeconds < 60) return 'now';
 
@@ -275,11 +280,11 @@ class CustomWidgets {
       return '$d day${d == 1 ? '' : 's'} ago';
     }
 
-    if (time.year < now.year) {
-      return 'on ${DateFormat('dd MMM y').format(time)}';
+    if (localTime.year < now.year) {
+      return 'on ${DateFormat('dd MMM y').format(localTime)}';
     }
 
-    return 'on ${DateFormat('dd MMM').format(time)}';
+    return 'on ${DateFormat('dd MMM').format(localTime)}';
   }
 
   // settings with toggles
@@ -335,9 +340,10 @@ class CustomWidgets {
   }
 
   // assignment cards
-  static Widget studentAssignmentCards(
-    BuildContext context,
-    Assignment assignment, {
+  static Widget studentAssignmentCards({
+    required BuildContext context,
+    required Assignment assignment,
+    required String subjectName,
     bool detailed = false,
   }) {
     Color cardColor = Colors.blue;
@@ -351,14 +357,26 @@ class CustomWidgets {
       priority = 'Medium';
     }
 
+    final percentage = getPercentage(assignment.issuedAt, assignment.dueDate);
+
     return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              StudentAssignmentDetailsScreen(assignment: assignment),
-        ),
-      ),
+      onTap: (detailed)
+          ? () {
+              log(DateFormat('hh:mm:ss a, dd MMM y').format(DateTime.now()));
+              log(
+                DateFormat('hh:mm:ss a, dd MMM y').format(assignment.issuedAt),
+              );
+              log(
+                DateFormat('hh:mm:ss a, dd MMM y').format(assignment.dueDate),
+              );
+            }
+          : () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    StudentAssignmentDetailsScreen(assignment: assignment),
+              ),
+            ),
       child: Container(
         margin: const EdgeInsets.only(top: 5, bottom: 5),
         decoration: BoxDecoration(
@@ -369,10 +387,20 @@ class CustomWidgets {
           margin: const EdgeInsets.only(left: 5),
           color: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
             child: Column(
               crossAxisAlignment: .start,
               children: [
+                // subject name
+                Text(
+                  subjectName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Color(0xFF2AB3AA),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
@@ -435,7 +463,7 @@ class CustomWidgets {
 
                       // show how much time has passed in percentage
                       Text(
-                        '${(getPercentage(assignment.issuedAt, assignment.dueDate) * 100).toInt()}%',
+                        '${(percentage * 100).toInt()}%',
                         style: TextStyle(color: Colors.black45),
                       ),
                     ],
@@ -444,7 +472,7 @@ class CustomWidgets {
                 // time passed since issued indicator
                 if (detailed) const SizedBox(height: 10),
                 LinearProgressIndicator(
-                  value: getPercentage(assignment.issuedAt, assignment.dueDate),
+                  value: percentage,
                   color: Color(0xFF2AB3AA),
                 ),
               ],
@@ -458,43 +486,55 @@ class CustomWidgets {
   // format time for assignment cards
   static String formatDueTime(DateTime time) {
     final now = DateTime.now();
+    final localDue = time.toLocal();
+
     final today = DateTime(now.year, now.month, now.day);
-    final date = DateTime(time.year, time.month, time.day);
-    final diff = date.difference(today);
+    final dueDate = DateTime(localDue.year, localDue.month, localDue.day);
 
-    if (diff.isNegative) {
-      return '${DateFormat('dd MMM y').format(time)} (Passed)';
+    final diffDays = dueDate.difference(today).inDays;
+
+    if (diffDays < 0) {
+      return '${DateFormat('dd MMM y').format(localDue)} (Passed)';
     }
 
-    if (diff.inDays < 1) {
-      return 'Today, ${DateFormat('hh:mm a').format(time)}';
+    if (diffDays == 0) {
+      return 'Today, ${DateFormat('hh:mm a').format(localDue)}';
     }
 
-    if (diff.inDays < 2) {
-      return 'Tomorrow, ${DateFormat('hh:mm a').format(time)}';
+    if (diffDays == 1) {
+      return 'Tomorrow, ${DateFormat('hh:mm a').format(localDue)}';
     }
 
-    if (diff.inDays < 7) return DateFormat('EEE, hh:mm a').format(time);
-    if (diff.inDays < 30) return '${diff.inDays} days remaining';
+    if (diffDays < 7) {
+      return DateFormat('EEE, hh:mm a').format(localDue);
+    }
 
-    return DateFormat('hh:mm a, dd MMM').format(time);
+    if (diffDays < 30) {
+      return '$diffDays days remaining';
+    }
+
+    return DateFormat('hh:mm a, dd MMM').format(localDue);
   }
 
   // get due date and time completion percentage
   static double getPercentage(DateTime issued, DateTime due) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final i = issued.millisecondsSinceEpoch;
-    final d = due.millisecondsSinceEpoch;
+    final now = DateTime.now().toUtc();
 
-    if (d <= i) return 1; // zero or invalid time range
-    if (d <= now) return 1; // if due date is passed
-    if (now < i) return 0; // if hasn't started yet
+    if (now.isAfter(due)) return 1; //
 
-    return ((now - i) / (d - i));
+    final totalDuration = due.difference(issued).inSeconds;
+
+    if (totalDuration <= 0) return 0; // zero or invalid time range
+
+    final elapsed = now.difference(issued).inSeconds;
+
+    final percentage = elapsed / totalDuration;
+
+    return percentage.clamp(0.0, 1.0);
   }
 
-  // assignment subission details
-  static Widget submissionDetails(Assignment assignment) {
+  // assignment subission details for student
+  static Widget submissionDetails(Assignment assignment, Submission? sub) {
     Color cardColor = Colors.blue;
 
     if (assignment.priority == AssignmentPriority.urgent) {
@@ -514,9 +554,7 @@ class CustomWidgets {
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(10),
-          child:
-              ((assignment.submissionCount == null ||
-                  assignment.submissionCount == 0))
+          child: (sub == null)
               ? Center(
                   child: const Text(
                     "No submissions found",
@@ -622,6 +660,7 @@ class CustomWidgets {
   static Widget teachersAssignmentCards({
     required BuildContext context,
     required Assignment assignment,
+    required String subjectName,
     VoidCallback? onEdit,
     VoidCallback? onDelete,
     bool detailed = false,
@@ -637,13 +676,18 @@ class CustomWidgets {
       priority = 'Medium';
     }
 
+    final percentage = getPercentage(assignment.issuedAt, assignment.dueDate);
+
     return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => TeacherAssignmentDetailScreen(assignment: assignment),
-        ),
-      ),
+      onTap: (detailed)
+          ? () {}
+          : () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    TeacherAssignmentDetailScreen(assignment: assignment),
+              ),
+            ),
       child: Container(
         margin: const EdgeInsets.only(top: 5, bottom: 5),
         decoration: BoxDecoration(
@@ -654,10 +698,20 @@ class CustomWidgets {
           margin: const EdgeInsets.only(left: 5),
           color: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
             child: Column(
               crossAxisAlignment: .start,
               children: [
+                // subject name
+                Text(
+                  subjectName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Color(0xFF2AB3AA),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
@@ -694,7 +748,7 @@ class CustomWidgets {
                                 icon: const Icon(
                                   Icons.delete,
                                   opticalSize: 20,
-                                  color: Color(0xFF2AB3AA),
+                                  color: Colors.red,
                                 ),
                               ),
                             ],
@@ -748,7 +802,7 @@ class CustomWidgets {
 
                       // show how much time has passed in percentage
                       Text(
-                        '${(getPercentage(assignment.issuedAt, assignment.dueDate) * 100).toInt()}%',
+                        '${(percentage * 100).toInt()}%',
                         style: TextStyle(color: Colors.black45),
                       ),
                     ],
@@ -757,7 +811,7 @@ class CustomWidgets {
                 // time passed since issued indicator
                 if (detailed) const SizedBox(height: 10),
                 LinearProgressIndicator(
-                  value: getPercentage(assignment.issuedAt, assignment.dueDate),
+                  value: percentage,
                   color: Color(0xFF2AB3AA),
                 ),
               ],
@@ -894,6 +948,7 @@ class CustomWidgets {
     VoidCallback? onTap,
   ) {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
         content: Text(text, style: TextStyle(fontSize: 18)),
@@ -969,6 +1024,256 @@ class CustomWidgets {
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
       ),
+    );
+  }
+
+  // notes cards for teacher
+  static Widget teacherNotesCard({
+    required AppFile note,
+    required String subjectName,
+    required VoidCallback onTap,
+    required VoidCallback onDelete,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: Color(0xFF2AB3AA),
+      ),
+
+      child: InkWell(
+        onTap: onTap,
+        child: Card(
+          margin: const EdgeInsets.only(left: 5),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  subjectName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2AB3AA),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    mainAxisAlignment: .start,
+                    children: [
+                      Text(
+                        note.fileName,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Spacer(),
+                      InkWell(
+                        onTap: onDelete,
+                        child: Icon(Icons.delete_rounded, color: Colors.red),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      formatSize(note.fileSize),
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '(${getFileLabel(note.mimeType)})',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      DateFormat('dd MMM').format(note.createdAt.toLocal()),
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // notes cards for student
+  static Widget studentrNotesCard({
+    required AppFile note,
+    required String subjectName,
+    required VoidCallback onTap,
+    required VoidCallback onDownload,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: Color(0xFF2AB3AA),
+      ),
+
+      child: InkWell(
+        onTap: onTap,
+        child: Card(
+          margin: const EdgeInsets.only(left: 5),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  subjectName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2AB3AA),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    mainAxisAlignment: .start,
+                    children: [
+                      Text(
+                        note.fileName,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Spacer(),
+                      InkWell(
+                        onTap: onDownload,
+                        child: Icon(Icons.save_alt_rounded),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      formatSize(note.fileSize),
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '(${getFileLabel(note.mimeType)})',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      DateFormat('dd MMM').format(note.createdAt.toLocal()),
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // format file type and labeling
+  static String getFileLabel(String mimeType) {
+    if (mimeType.startsWith('image/')) return 'img';
+
+    if (mimeType.startsWith('video/')) return 'vid';
+
+    if (mimeType.startsWith('audio/')) return 'aud';
+
+    if (mimeType == 'application/pdf') return 'pdf';
+
+    if (mimeType == 'application/msword' ||
+        mimeType ==
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return 'doc';
+    }
+    if (mimeType == 'application/vnd.ms-excel' ||
+        mimeType ==
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      return 'xls';
+    }
+    if (mimeType == 'application/vnd.ms-powerpoint' ||
+        mimeType ==
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+      return 'ppt';
+    }
+    if (mimeType == 'application/zip') return 'zip';
+
+    return 'file';
+  }
+
+  // format file size
+  static String formatSize(int bytes) {
+    if (bytes >= 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+    } else if (bytes >= 1024) {
+      return '${(bytes / 1024).toStringAsFixed(2)} KB';
+    } else {
+      return '$bytes B';
+    }
+  }
+
+  // custom circular progress indicator
+  static Widget customLoader() {
+    return const Center(
+      child: CircularProgressIndicator(color: Color(0xFF2AB3AA)),
+    );
+  }
+
+  // a scrollable text widget
+  static Widget customScrollableText(BuildContext context, String text) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(fontSize: 20, color: Colors.black54),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // custom confirmation box
+  static Widget customConformationBox({
+    required BuildContext context,
+    required String title,
+    required String content,
+    Color titleColor = Colors.red,
+    required VoidCallback onConfirm,
+  }) {
+    return AlertDialog(
+      title: Text(title, style: TextStyle(color: titleColor)),
+      content: Text(content, style: TextStyle(fontSize: 18)),
+      actions: [
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('No'),
+        ),
+
+        ElevatedButton(
+          onPressed: onConfirm,
+          child: const Text('Yes', style: TextStyle(color: Colors.red)),
+        ),
+      ],
     );
   }
 }

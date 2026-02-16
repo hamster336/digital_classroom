@@ -22,9 +22,9 @@ class NoticeList extends StatelessWidget {
       itemCount: notices.length + (showBottomLoader ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == notices.length) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator()),
+            child: CustomWidgets.customLoader(),
           );
         }
         return CustomWidgets.noticeCard(notices[index]);

@@ -14,11 +14,11 @@ final class TeacherAssignmentLoadingError extends TeacherAssignmentState {
   TeacherAssignmentLoadingError({required this.message});
 }
 
-final class CreatedAssignment extends TeacherAssignmentState {}
+final class CreateAssignmentSuccess extends TeacherAssignmentState {}
 
-final class UpdatedAssignment extends TeacherAssignmentState {}
+final class UpdateAssignmentSuccess extends TeacherAssignmentState {}
 
-final class DeletedAssignment extends TeacherAssignmentState {}
+final class DeleteAssignmentSuccess extends TeacherAssignmentState {}
 
 final class CreateAssignmentError extends TeacherAssignmentState {
   final String message;

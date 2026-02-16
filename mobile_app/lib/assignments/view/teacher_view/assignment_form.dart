@@ -98,7 +98,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 CustomWidgets.customAltertBox(context, state.message, () {});
               }
 
-              if (state is CreatedAssignment) {
+              if (state is CreateAssignmentSuccess) {
                 context.read<TeacherAssignmentBloc>().add(
                   RefreshAssignments(
                     teacherId: widget.teacherId,
@@ -112,7 +112,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 );
               }
 
-              if (state is UpdatedAssignment) {
+              if (state is UpdateAssignmentSuccess) {
                 context.read<TeacherAssignmentBloc>().add(
                   RefreshAssignments(
                     teacherId: widget.teacherId,
@@ -126,116 +126,110 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 );
               }
             },
-            child: Expanded(
-              child: BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
-                builder: (context, state) {
-                  if (state is TeacherAssignmentLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF2AB3AA),
+            child: BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
+              builder: (context, state) {
+                if (state is TeacherAssignmentLoading) {
+                  return CustomWidgets.customLoader();
+                }
+
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: .min,
+                    crossAxisAlignment: .center,
+                    children: [
+                      SizedBox(height: size.height * 0.02),
+
+                      // title field
+                      CustomWidgets.customTextField(
+                        controller: titleController,
+                        label: 'Title',
+                        obscureText: false,
+                        cap: .sentences,
+                        focusNode: titleFocus,
                       ),
-                    );
-                  }
 
-                  return SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: .min,
-                      crossAxisAlignment: .center,
-                      children: [
-                        SizedBox(height: size.height * 0.02),
+                      SizedBox(height: size.height * 0.015),
 
-                        // title field
-                        CustomWidgets.customTextField(
-                          controller: titleController,
-                          label: 'Title',
-                          obscureText: false,
-                          cap: .sentences,
-                          focusNode: titleFocus,
+                      // description field
+                      CustomWidgets.customTextField(
+                        controller: descriptionController,
+                        label: 'Description',
+                        obscureText: false,
+                        cap: .sentences,
+                        focusNode: descriptionFocus,
+                        maxLines: null,
+                      ),
+
+                      SizedBox(height: size.height * 0.015),
+
+                      // class field
+                      CustomWidgets.customTextField(
+                        controller: TextEditingController(
+                          text: widget.cls.name,
                         ),
+                        label: 'Class',
+                        obscureText: false,
+                        enabled: false,
+                      ),
 
-                        SizedBox(height: size.height * 0.015),
+                      SizedBox(height: size.height * 0.015),
 
-                        // description field
-                        CustomWidgets.customTextField(
-                          controller: descriptionController,
-                          label: 'Description',
-                          obscureText: false,
-                          cap: .sentences,
-                          focusNode: descriptionFocus,
-                          maxLines: null,
-                        ),
-
-                        SizedBox(height: size.height * 0.015),
-
-                        // class field
-                        CustomWidgets.customTextField(
-                          controller: TextEditingController(
-                            text: widget.cls.name,
-                          ),
-                          label: 'Class',
-                          obscureText: false,
-                          enabled: false,
-                        ),
-
-                        SizedBox(height: size.height * 0.015),
-
-                        // subject picker
-                        BlocBuilder<SubjectBloc, SubjectState>(
-                          builder: (context, state) {
-                            List<Subject> subjectList = (state is SubjectLoaded)
-                                ? state.subejcts
-                                : [];
-                            final classSubjects = subjectList
-                                .where((s) => s.classId == widget.cls.id)
-                                .toList();
-                            if (selectedSubjectId != null) {
-                              final subject = subjectList.firstWhere(
-                                (s) => s.id == selectedSubjectId,
-                              );
-                              subjectController.text = subject.name;
-                            }
-                            return CustomWidgets.customMenuItemPicker(
-                              subjectController,
-                              'Subject',
-                              _subjectPicker(classSubjects),
+                      // subject picker
+                      BlocBuilder<SubjectBloc, SubjectState>(
+                        builder: (context, state) {
+                          List<Subject> subjectList = (state is SubjectLoaded)
+                              ? state.subjects
+                              : [];
+                          final classSubjects = subjectList
+                              .where((s) => s.classId == widget.cls.id)
+                              .toList();
+                          if (selectedSubjectId != null) {
+                            final subject = subjectList.firstWhere(
+                              (s) => s.id == selectedSubjectId,
                             );
-                          },
-                        ),
+                            subjectController.text = subject.name;
+                          }
+                          return CustomWidgets.customMenuItemPicker(
+                            subjectController,
+                            'Subject',
+                            _subjectPicker(classSubjects),
+                          );
+                        },
+                      ),
 
-                        SizedBox(height: size.height * 0.015),
+                      SizedBox(height: size.height * 0.015),
 
-                        // due date picker
-                        CustomWidgets.customMenuItemPicker(
-                          dateController,
-                          'Due Date',
-                          _datePicker(),
-                        ),
+                      // due date picker
+                      CustomWidgets.customMenuItemPicker(
+                        dateController,
+                        'Due Date',
+                        _datePicker(),
+                      ),
 
-                        SizedBox(height: size.height * 0.015),
+                      SizedBox(height: size.height * 0.015),
 
-                        // assignment priority picker
-                        CustomWidgets.customMenuItemPicker(
-                          priorityController,
-                          'Priority',
-                          _priorityPicker(),
-                        ),
+                      // assignment priority picker
+                      CustomWidgets.customMenuItemPicker(
+                        priorityController,
+                        'Priority',
+                        _priorityPicker(),
+                      ),
 
-                        SizedBox(height: size.height * 0.03),
+                      SizedBox(height: size.height * 0.03),
 
-                        CustomWidgets.customButton(
-                          size,
-                          (widget.initialAssignment == null)
-                              ? 'Add Assignment'
-                              : 'Update Assignment',
-                          () => (widget.initialAssignment == null)
-                              ? _createAssignment()
-                              : _updateAssignment(),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      CustomWidgets.customButton(
+                        size,
+                        (widget.initialAssignment == null)
+                            ? 'Add Assignment'
+                            : 'Update Assignment',
+                        () => (widget.initialAssignment == null)
+                            ? _createAssignment()
+                            : _updateAssignment(),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),

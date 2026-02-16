@@ -47,10 +47,13 @@ class AuthRepoImpl extends AuthRepo {
 
     final uid = session.user.id;
 
-    final user = await userService.fetchUserData(uid);
-    if (user == null) {
+    final user = await userService.fetchUserData(uid);   
+    if (user == null) { 
       throw Exception('User profile not found');
     }
+
+    // user table bata aadha data aayo
+    
 
     final role = user['role'];
 

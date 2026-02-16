@@ -7,8 +7,9 @@ final class SubjectInitial extends SubjectState {}
 final class SubjectsLoading extends SubjectState {}
 
 final class SubjectLoaded extends SubjectState {
-  final List<Subject> subejcts;
-  SubjectLoaded({required this.subejcts});
+  final List<Subject> subjects;
+  
+  SubjectLoaded({required this.subjects});
 }
 
 final class SubjectError extends SubjectState {
