@@ -123,7 +123,7 @@ class TeacherProfileScreen extends StatelessWidget {
           CustomWidgets.userInfoTiles(
             'assets/images/shake.png',
             'Since',
-            DateFormat('dd MMM y').format(teacher.createdAt),
+            DateFormat('dd MMM y').format(teacher.createdAt.toLocal()),
           ),
         ],
       ),

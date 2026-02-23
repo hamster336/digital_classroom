@@ -1,11 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:file_saver/file_saver.dart';
+import 'package:flutter_media_store/flutter_media_store.dart';
 import 'package:mime/mime.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/shared/required_enums.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotesServices {
@@ -108,18 +108,22 @@ class NotesServices {
           .from('classroom_materials')
           .download(note.filePath);
 
-      // final directory = await getDownloadsDirectory();
-      // final file = File('${directory!.path}/${note.fileName}');
+      final mediaStore = FlutterMediaStore();
 
-      // await file.writeAsBytes(bytes);
-
-      await FileSaver.instance.saveFile(
-        name: note.fileName,
-        bytes: bytes,
-        mimeType: .other,
+      await mediaStore.saveFile(
+        fileData: bytes,
+        mimeType: note.mimeType,
+        rootFolderName: 'Download',
+        folderName: 'Academia',
+        fileName: note.fileName,
+        onSuccess: (uri, filePath) =>
+            log('File saved: ${filePath.toString()} $uri'),
+        onError: (errorMessage) {
+          log(errorMessage);
+        },
       );
     } catch (e) {
-      throw Exception(e.toString);
+      throw Exception(e.toString());
     }
   }
 }

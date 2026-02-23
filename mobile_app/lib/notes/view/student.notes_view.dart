@@ -80,7 +80,6 @@ class _StudentNotesViewState extends State<StudentNotesView> {
                   subjectIds: widget.student.subjectIds,
                 ),
               );
-               
             }
           },
           child: RefreshIndicator(
@@ -140,6 +139,7 @@ class _StudentNotesViewState extends State<StudentNotesView> {
                             note: note,
                             subjectName: sub.name,
                             onTap: () {},
+                            icon: Icons.file_download_outlined,
                             onDownload: () => context.read<NotesBloc>().add(
                               DownloadNote(note: note),
                             ),

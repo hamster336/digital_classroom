@@ -14,9 +14,17 @@ class StudentsServices {
   Future<int> fetchNumberOfStudents(String classId) async {
     final response = await client
         .from('student')
-        .select('class_id')
+        .count()
         .eq('class_id', classId);
 
-    return response.length;
+    return response;
+  }
+
+  // update last notice checked time
+  Future<void> updateLastNoticeChecked(String id, DateTime time) async {
+    await client
+        .from('student')
+        .update({'last_checked_notices': time.toIso8601String()})
+        .eq('id', id);
   }
 }

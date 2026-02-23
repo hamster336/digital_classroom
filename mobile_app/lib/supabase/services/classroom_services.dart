@@ -33,22 +33,5 @@ class ClassroomServices {
     );
 
     return List<Map<String, dynamic>>.from(response);
-
-    // final list = await client
-    //     .from('classroom')
-    //     .select()
-    //     .inFilter('id', classIds)
-    //     .eq('is_active', true);
-    // final studentsService = StudentsServices(client: client);
-    // await Future.wait(
-    //   list.map((map) async {
-    //     final classId = map['id'] as String;
-    //     // log(classId);
-    //     map['student_count'] = await studentsService.fetchNumberOfStudents(
-    //       classId,
-    //     );
-    //   }),
-    // );
-    // return list;
   }
 }
