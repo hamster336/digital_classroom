@@ -486,34 +486,31 @@ class CustomWidgets {
   // format time for assignment cards
   static String formatDueTime(DateTime time) {
     final now = DateTime.now();
-    final localDue = time.toLocal();
+    final dueLocal = time.toLocal();
 
-    final today = DateTime(now.year, now.month, now.day);
-    final dueDate = DateTime(localDue.year, localDue.month, localDue.day);
+    final diff = dueLocal.difference(now);
 
-    final diffDays = dueDate.difference(today).inDays;
-
-    if (diffDays < 0) {
-      return '${DateFormat('dd MMM y').format(localDue)} (Passed)';
+    if (diff.isNegative) {
+      return '${DateFormat('dd MMM y').format(dueLocal)} (Passed)';
     }
 
-    if (diffDays == 0) {
-      return 'Today, ${DateFormat('hh:mm a').format(localDue)}';
+    if (diff.inDays == 0) {
+      return 'Today, ${DateFormat('hh:mm a').format(dueLocal)}';
     }
 
-    if (diffDays == 1) {
-      return 'Tomorrow, ${DateFormat('hh:mm a').format(localDue)}';
+    if (diff.inDays == 1) {
+      return 'Tomorrow, ${DateFormat('hh:mm a').format(dueLocal)}';
     }
 
-    if (diffDays < 7) {
-      return DateFormat('EEE, hh:mm a').format(localDue);
+    if (diff.inDays < 7) {
+      return DateFormat('EEE, hh:mm a').format(dueLocal);
     }
 
-    if (diffDays < 30) {
-      return '$diffDays days remaining';
+    if (diff.inDays < 30) {
+      return '${diff.inDays} days remaining';
     }
 
-    return DateFormat('hh:mm a, dd MMM').format(localDue);
+    return DateFormat('hh:mm a, dd MMM').format(dueLocal);
   }
 
   // get due date and time completion percentage
@@ -1111,6 +1108,7 @@ class CustomWidgets {
     required AppFile note,
     required String subjectName,
     required VoidCallback onTap,
+    required IconData icon,
     required VoidCallback onDownload,
   }) {
     return Container(
@@ -1153,7 +1151,7 @@ class CustomWidgets {
                       Spacer(),
                       InkWell(
                         onTap: onDownload,
-                        child: Icon(Icons.save_alt_rounded),
+                        child: Icon(icon, size: 30, color: Colors.black54),
                       ),
                       const SizedBox(width: 5),
                     ],
@@ -1172,7 +1170,9 @@ class CustomWidgets {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      DateFormat('dd MMM').format(note.createdAt.toLocal()),
+                      DateFormat(
+                        'hh:mm a, dd MMM',
+                      ).format(note.createdAt.toLocal()),
                       style: TextStyle(color: Colors.black54),
                     ),
                   ],

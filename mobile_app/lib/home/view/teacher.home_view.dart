@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_view.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/classroom_gate.dart';
+import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notes/view/teacher.notes_view.dart';
-import 'package:mobile_app/notices/bloc/notice_bloc.dart';
 import 'package:mobile_app/schedules/view/schedules.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/user/models/teacher.dart';
@@ -33,6 +33,10 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
     // upcoming events
     context.read<UpcomingBloc>().add(
       LoadEvents(subjectIds: widget.teacher.subjectIds),
+    );
+    // unread notices bloc
+    context.read<UnreadCountBloc>().add(
+      LoadUnreadCount(lastChecked: widget.teacher.lastCheckedNotices),
     );
   }
 
@@ -74,6 +78,13 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                   'Upcomging Event Loading Error: ${state.message}',
                   () {},
                 );
+              }
+            },
+          ),
+          BlocListener<UnreadCountBloc, UnreadCountState>(
+            listener: (context, state) {
+              if (state is CountError) {
+                CustomWidgets.customAltertBox(context, state.message, () {});
               }
             },
           ),
@@ -172,23 +183,27 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
 
                             // latest notices
                             Expanded(
-                              child: BlocBuilder<NoticeBloc, NoticeState>(
-                                builder: (context, state) {
-                                  if (state is! NoticeLoaded) {
-                                    return CustomWidgets.infoCard(
-                                      size,
-                                      0,
-                                      'New Notices',
-                                    );
-                                  }
+                              child:
+                                  BlocBuilder<
+                                    UnreadCountBloc,
+                                    UnreadCountState
+                                  >(
+                                    builder: (context, state) {
+                                      if (state is! CountLoaded) {
+                                        return CustomWidgets.infoCard(
+                                          size,
+                                          0,
+                                          'New Notices',
+                                        );
+                                      }
 
-                                  return CustomWidgets.infoCard(
-                                    size,
-                                    100, // dummy data
-                                    'New Notices',
-                                  );
-                                },
-                              ),
+                                      return CustomWidgets.infoCard(
+                                        size,
+                                        state.count, // dummy data
+                                        'New Notices',
+                                      );
+                                    },
+                                  ),
                             ),
                           ],
                         ),

@@ -12,6 +12,7 @@ import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
 import 'package:mobile_app/notes/bloc/notes_bloc.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
 import 'package:mobile_app/notices/repository/notice_repo_impl.dart';
+import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
 import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
@@ -22,7 +23,7 @@ import 'package:mobile_app/supabase/services/notes_services.dart';
 import 'package:mobile_app/supabase/services/submission_services.dart';
 import 'package:mobile_app/supabase/services/upcoming_services.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
-import 'package:mobile_app/notices/bloc/notice_bloc.dart';
+import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
 import 'package:mobile_app/supabase/services/authetication_services.dart';
 import 'package:mobile_app/supabase/services/classroom_services.dart';
 import 'package:mobile_app/supabase/services/notice_services.dart';
@@ -85,7 +86,13 @@ class MyApp extends StatelessWidget {
         // Notice repo
         RepositoryProvider(
           create: (_) => NoticeRepoImpl(
-            service: NoticeServices(client: SupabaseCredentials.client),
+            noticeService: NoticeServices(client: SupabaseCredentials.client),
+            studentsService: StudentsServices(
+              client: SupabaseCredentials.client,
+            ),
+            teachersService: TeachersServices(
+              client: SupabaseCredentials.client,
+            ),
           ),
         ),
         // upcoming repo
@@ -124,6 +131,11 @@ class MyApp extends StatelessWidget {
                   ..add(LoadNotices(currentFilter: NoticeFilter.all)),
             child: NoticesScreen(),
           ),
+          // unread notices bloc
+          BlocProvider(
+            create: (context) =>
+                UnreadCountBloc(context.read<NoticeRepoImpl>()),
+          ),
           // student assignment bloc
           BlocProvider(
             create: (context) => StudentsAssignmentBloc(
@@ -132,7 +144,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
           // teacher assignment bloc
-          BlocProvider(  
+          BlocProvider(
             create: (context) =>
                 TeacherAssignmentBloc(context.read<AssignmentRepoImpl>()),
           ),

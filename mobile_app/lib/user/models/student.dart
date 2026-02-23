@@ -5,6 +5,7 @@ class Student extends AppUser {
   final String rollNumber;
   final String classId;
   final List<String> subjectIds;
+  final DateTime lastCheckedNotices;
 
   Student({
     required super.id,
@@ -16,6 +17,7 @@ class Student extends AppUser {
     required this.rollNumber,
     required this.classId,
     required this.subjectIds,
+    required this.lastCheckedNotices,
   });
 
   factory Student.fromMap(
@@ -32,6 +34,7 @@ class Student extends AppUser {
         rollNumber: studentData['roll_number'],
         classId: studentData['class_id'],
         subjectIds: List<String>.from(studentData['subject_ids']),
+        lastCheckedNotices: DateTime.parse(studentData['last_checked_notices'])
     );
   }
 }

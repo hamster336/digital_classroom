@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/home/view/home_screen.dart';
+import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/settings/view/settings.dart';
 import 'package:mobile_app/user/models/app_user.dart';
@@ -18,7 +20,6 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: pages[currentPageIndex],
       body: IndexedStack(
         index: currentPageIndex,
         children: [
@@ -45,7 +46,19 @@ class _AppShellState extends State<AppShell> {
       // bottom navigation Bar
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (value) {
-          setState(() => currentPageIndex = value);
+          if (currentPageIndex != value) {
+            setState(() => currentPageIndex = value);
+
+            if (value == 1) {
+              context.read<NoticeBloc>().add(
+                UpdateLastNoticeChecked(
+                  id: widget.user.id, 
+                  role: widget.user.role,
+                  time: DateTime.now().toUtc(),
+                ),
+              );
+            }
+          }
         },
         selectedIndex: currentPageIndex,
         destinations: [

@@ -5,6 +5,7 @@ class Teacher extends AppUser {
   final String empId;
   final List<String> subjectIds;
   final List<String> classIds;
+  final DateTime lastCheckedNotices;
 
   Teacher({
     required super.id,
@@ -16,19 +17,24 @@ class Teacher extends AppUser {
     required this.empId,
     required this.subjectIds,
     required this.classIds,
+    required this.lastCheckedNotices,
   });
 
-  factory Teacher.fromMap(Map<String, dynamic> user, Map<String, dynamic> teacherData) {
-     return Teacher(
-        id: user['id'],
-        name: user['full_name'],
-        email: user['email'],
-        createdAt: DateTime.parse(user['created_at']),
-        role: UserRoles.teacher,
-        avatarPath: teacherData['avatar_url'],
-        empId: teacherData['employee_id'],
-        subjectIds: List<String>.from(teacherData['subject_ids']),
-        classIds: List<String>.from(teacherData['class_ids']),
-      );
+  factory Teacher.fromMap(
+    Map<String, dynamic> user,
+    Map<String, dynamic> teacherData,
+  ) {
+    return Teacher(
+      id: user['id'],
+      name: user['full_name'],
+      email: user['email'],
+      createdAt: DateTime.parse(user['created_at']),
+      role: UserRoles.teacher,
+      avatarPath: teacherData['avatar_url'],
+      empId: teacherData['employee_id'],
+      subjectIds: List<String>.from(teacherData['subject_ids']),
+      classIds: List<String>.from(teacherData['class_ids']),
+      lastCheckedNotices: DateTime.parse(teacherData['last_checked_notices']),
+    );
   }
 }

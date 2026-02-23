@@ -178,7 +178,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
 
                           return CustomWidgets.customScrollableText(
                             context,
-                            'Error occured :(\/Swipe down to refresh.',
+                            'Error occured :(\nSwipe down to refresh.',
                           );
                         },
                       ),

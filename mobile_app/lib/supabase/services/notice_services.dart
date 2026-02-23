@@ -18,4 +18,11 @@ class NoticeServices {
         .order('published_at', ascending: false)
         .range(from, to);
   }
+
+  // get number of new notices
+  Future<int> countNewNotices (DateTime lastChecked) async {
+    final response = await client.from('notices').count().gt('published_at', lastChecked);
+
+    return response;
+  }
 }

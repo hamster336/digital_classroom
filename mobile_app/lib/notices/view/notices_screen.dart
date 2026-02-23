@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/notices/bloc/notice_bloc.dart';
+import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
+import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
 import 'package:mobile_app/notices/view/notice_list.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
@@ -51,7 +52,7 @@ class _NoticesScreenState extends State<NoticesScreen> {
         padding: const EdgeInsetsGeometry.symmetric(horizontal: 10),
         child: BlocListener<NoticeBloc, NoticeState>(
           listener: (context, state) {
-            if (state is NoticeError) {
+            if (state is NoticeLoadingError) {
               CustomWidgets.customAltertBox(
                 context,
                 state.message,
@@ -59,6 +60,20 @@ class _NoticesScreenState extends State<NoticesScreen> {
                   LoadNotices(currentFilter: filter),
                 ),
               );
+            }
+
+            if(state is LastCheckedNoticeUpdateError) {
+              CustomWidgets.customAltertBox(
+                context,
+                state.message,
+                () => context.read<NoticeBloc>().add(
+                  LoadNotices(currentFilter: filter),
+                ),
+              );
+            }
+
+            if(state is LastCheckedNoticeUpdateSuccess) {
+              context.read<UnreadCountBloc>().add(ClearCount());
             }
           },
 
@@ -119,7 +134,8 @@ class _NoticesScreenState extends State<NoticesScreen> {
                     bloc.add(RefreshNotices(currentFilter: filter));
 
                     await bloc.stream.firstWhere(
-                      (state) => state is NoticeLoaded || state is NoticeError,
+                      (state) =>
+                          state is NoticeLoaded || state is NoticeLoadingError,
                     );
                   },
 
