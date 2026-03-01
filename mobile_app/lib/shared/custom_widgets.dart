@@ -1,16 +1,12 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
-import 'package:mobile_app/submission/model/submission.dart';
 import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
-import 'package:mobile_app/assignments/view/student_view/student.assignment_details_screen.dart';
 
 class CustomWidgets {
   // custom textFields
@@ -344,6 +340,7 @@ class CustomWidgets {
     required BuildContext context,
     required Assignment assignment,
     required String subjectName,
+    required VoidCallback onTap,
     bool detailed = false,
   }) {
     Color cardColor = Colors.blue;
@@ -360,23 +357,7 @@ class CustomWidgets {
     final percentage = getPercentage(assignment.issuedAt, assignment.dueDate);
 
     return InkWell(
-      onTap: (detailed)
-          ? () {
-              log(DateFormat('hh:mm:ss a, dd MMM y').format(DateTime.now()));
-              log(
-                DateFormat('hh:mm:ss a, dd MMM y').format(assignment.issuedAt),
-              );
-              log(
-                DateFormat('hh:mm:ss a, dd MMM y').format(assignment.dueDate),
-              );
-            }
-          : () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    StudentAssignmentDetailsScreen(assignment: assignment),
-              ),
-            ),
+      onTap: (detailed) ? () {} : onTap,
       child: Container(
         margin: const EdgeInsets.only(top: 5, bottom: 5),
         decoration: BoxDecoration(
@@ -531,7 +512,11 @@ class CustomWidgets {
   }
 
   // assignment subission details for student
-  static Widget submissionDetails(Assignment assignment, Submission? sub) {
+  static Widget submissionDetailsForStudent(
+    Assignment assignment,
+    AppFile? sub, {
+    int count = 0,
+  }) {
     Color cardColor = Colors.blue;
 
     if (assignment.priority == AssignmentPriority.urgent) {
@@ -558,13 +543,11 @@ class CustomWidgets {
                     style: TextStyle(fontSize: 18, color: Colors.black54),
                   ),
                 )
-              : Column(
-                  // crossAxisAlignment: .start,
+              : Row(
+                  mainAxisAlignment: .spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: .spaceBetween,
+                    Column(
                       children: [
-                        // last submission date
                         Column(
                           children: [
                             Text(
@@ -576,7 +559,9 @@ class CustomWidgets {
                             ),
 
                             Text(
-                              'No data found',
+                              DateFormat(
+                                'hh:mm a, dd MMM y',
+                              ).format(sub.createdAt),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black54,
@@ -584,8 +569,35 @@ class CustomWidgets {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10),
+                        Column(
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'File name:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
+                                ),
 
-                        // no of submissions until now
+                                Text(
+                                  sub.fileName,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    Column(
+                      children: [
                         Column(
                           children: [
                             Text(
@@ -595,8 +607,9 @@ class CustomWidgets {
                                 color: Colors.black54,
                               ),
                             ),
+
                             Text(
-                              'No data found',
+                              DateFormat('$count').format(sub.createdAt),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black54,
@@ -604,10 +617,97 @@ class CustomWidgets {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10),
+                        Column(
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'File size:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+
+                                Text(
+                                  DateFormat(
+                                    formatSize(sub.fileSize),
+                                  ).format(sub.createdAt),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ],
                 ),
+        ),
+      ),
+    );
+  }
+
+  //assignment submission details for teacher
+  static Widget submissionDetailsForTeacher(
+    Assignment assignment, {
+    int count = 0,
+    int total = 0,
+  }) {
+    Color cardColor = Colors.blue;
+
+    if (assignment.priority == AssignmentPriority.urgent) {
+      cardColor = Colors.red;
+    } else if (assignment.priority == AssignmentPriority.medium) {
+      cardColor = Colors.yellow.shade700;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: cardColor,
+      ),
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              Column(
+                children: [
+                  const Text(
+                    'No of submissions:',
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+
+                  Text(
+                    '$count / $total',
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  const Text(
+                    'Submission rate:',
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+
+                  Text(
+                    '${(count / total).toInt() * 100}%',
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -658,6 +758,7 @@ class CustomWidgets {
     required BuildContext context,
     required Assignment assignment,
     required String subjectName,
+    required Classroom cls,
     VoidCallback? onEdit,
     VoidCallback? onDelete,
     bool detailed = false,
@@ -681,8 +782,10 @@ class CustomWidgets {
           : () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    TeacherAssignmentDetailScreen(assignment: assignment),
+                builder: (_) => TeacherAssignmentDetailScreen(
+                  assignment: assignment,
+                  cls: cls,
+                ),
               ),
             ),
       child: Container(
@@ -1239,12 +1342,12 @@ class CustomWidgets {
       physics: const AlwaysScrollableScrollPhysics(),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height * 0.7,
+          minHeight: MediaQuery.of(context).size.height * 0.65,
         ),
         child: Center(
           child: Text(
             text,
-            style: TextStyle(fontSize: 20, color: Colors.black54),
+            style: TextStyle(fontSize: 18, color: Colors.black54),
             textAlign: TextAlign.center,
           ),
         ),

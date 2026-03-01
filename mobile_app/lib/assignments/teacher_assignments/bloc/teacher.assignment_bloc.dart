@@ -1,17 +1,21 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
+import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
 
 part 'teacher.assignment_event.dart';
 part 'teacher.assignment_state.dart';
 
 class TeacherAssignmentBloc
     extends Bloc<TeacherAssignmentEvent, TeacherAssignmentState> {
-  final AssignmentRepoImpl repository;
+  final AssignmentRepoImpl assignmentRepo;
+  final SubmissionRepoImpl submissionRepo;
 
-  TeacherAssignmentBloc(this.repository) : super(TeacherAssignmentLoading()) {
+  TeacherAssignmentBloc(this.assignmentRepo, this.submissionRepo)
+    : super(TeacherAssignmentLoading()) {
     on<LoadTeacherAssignments>(_loadTeacherAssignment);
     on<RefreshAssignments>(_refreshAssignments);
     on<CreateAssignment>(_createAssignment);
@@ -20,7 +24,8 @@ class TeacherAssignmentBloc
   }
 
   // cache asignments to prevent refetching each time the teacher navigates
-  Map<String, List<Assignment>> cached = {};
+  Map<String, List<Assignment>> cachedAssignemnts = {};
+  Map<String, List<AppFile>> cachedSubmissions = {};
 
   // refresh assignments
   Future<void> _refreshAssignments(
@@ -30,12 +35,22 @@ class TeacherAssignmentBloc
     final key = '${event.teacherId}-${event.classId}';
 
     try {
-      final assignments = await repository.loadTeachersAssignments(
+      final assignments = await assignmentRepo.loadTeachersAssignments(
         event.classId,
         event.teacherId,
       );
-      cached[key] = assignments;
-      emit(TeacherAssignmentLoaded(assignments: assignments));
+      final submissions = await submissionRepo.getSubmissionsForTeacher(
+        event.classId,
+        assignments.map((a) => a.id!).toList(),
+      );
+      cachedAssignemnts[key] = assignments;
+      cachedSubmissions[key] = submissions;
+      emit(
+        TeacherAssignmentLoaded(
+          assignments: assignments,
+          submissions: submissions,
+        ),
+      );
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
     }
@@ -48,20 +63,36 @@ class TeacherAssignmentBloc
   ) async {
     final key = '${event.teacherId}-${event.classId}';
 
-    if (cached.containsKey(key)) {
-      emit(TeacherAssignmentLoaded(assignments: cached[key]!));
+    if (cachedAssignemnts.containsKey(key)) {
+      emit(
+        TeacherAssignmentLoaded(
+          assignments: cachedAssignemnts[key]!,
+          submissions: cachedSubmissions[key]!,
+        ),
+      );
       return;
     }
 
     emit(TeacherAssignmentLoading());
 
     try {
-      final assignments = await repository.loadTeachersAssignments(
+      final assignments = await assignmentRepo.loadTeachersAssignments(
         event.classId,
         event.teacherId,
       );
-      cached[key] = assignments;
-      emit(TeacherAssignmentLoaded(assignments: assignments));
+      final submissions = await submissionRepo.getSubmissionsForTeacher(
+        event.classId,
+        assignments.map((a) => a.id!).toList(),
+      );
+
+      cachedAssignemnts[key] = assignments;
+      cachedSubmissions[key] = submissions;
+      emit(
+        TeacherAssignmentLoaded(
+          assignments: assignments,
+          submissions: submissions,
+        ),
+      );
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
     }
@@ -79,7 +110,7 @@ class TeacherAssignmentBloc
     emit(TeacherAssignmentLoading());
 
     try {
-      await repository.addAssignment(event.assignment);
+      await assignmentRepo.addAssignment(event.assignment);
 
       emit(CreateAssignmentSuccess());
     } catch (e) {
@@ -100,7 +131,7 @@ class TeacherAssignmentBloc
     emit(TeacherAssignmentLoading());
 
     try {
-      await repository.updateAssignment(event.assignment);
+      await assignmentRepo.updateAssignment(event.assignment);
       emit(UpdateAssignmentSuccess());
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
@@ -120,9 +151,9 @@ class TeacherAssignmentBloc
     emit(TeacherAssignmentLoading());
 
     try {
-      await repository.deleteAssignment(event.assignmentId);
+      await assignmentRepo.deleteAssignment(event.assignmentId);
       emit(DeleteAssignmentSuccess());
-      emit(TeacherAssignmentLoaded(assignments: currentState.assignments));
+      emit(currentState);
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
       emit(currentState);

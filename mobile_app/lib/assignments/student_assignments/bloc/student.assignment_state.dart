@@ -2,11 +2,13 @@ part of 'student.assignment_bloc.dart';
 
 sealed class StudentsAssignmentState {}
 
+final class StudentAssignmentInitial extends StudentsAssignmentState {}
+
 final class StudentAssignmentLoading extends StudentsAssignmentState {}
 
 final class StudentAssignmentLoaded extends StudentsAssignmentState {
   final List<Assignment> assignments;
-  final List<Submission> submissions;
+  final List<AppFile> submissions;
   final AssignmentFilter filter;
 
   StudentAssignmentLoaded({
@@ -20,9 +22,7 @@ final class StudentAssignmentLoaded extends StudentsAssignmentState {
     final now = DateTime.now();
 
     // set  of submission ids for fast lookup
-    final submittedAssignmentIds = submissions
-        .map((s) => s.assignmentId)
-        .toSet();
+    final submittedAssignmentIds = submissions.map((s) => s.ownerId).toSet();
 
     switch (filter) {
       case AssignmentFilter.completed:
@@ -54,9 +54,7 @@ final class StudentAssignmentLoaded extends StudentsAssignmentState {
   // get no of remaining assignments
   int get pendingCount {
     // set  of submission ids for fast lookup
-    final submittedAssignmentIds = submissions
-        .map((s) => s.assignmentId)
-        .toSet();
+    final submittedAssignmentIds = submissions.map((s) => s.ownerId).toSet();
 
     return assignments
         .where((a) => !submittedAssignmentIds.contains(a.id))
@@ -65,7 +63,7 @@ final class StudentAssignmentLoaded extends StudentsAssignmentState {
 
   StudentAssignmentLoaded copyWith({
     List<Assignment>? assignments,
-    List<Submission>? submissions,
+    List<AppFile>? submissions,
     AssignmentFilter? filter,
   }) {
     return StudentAssignmentLoaded(
@@ -76,7 +74,14 @@ final class StudentAssignmentLoaded extends StudentsAssignmentState {
   }
 }
 
-final class StudentAssignmentError extends StudentsAssignmentState {
+final class StudentAssignmentLoadingError extends StudentsAssignmentState {
   final String message;
-  StudentAssignmentError({required this.message});
+  StudentAssignmentLoadingError({required this.message});
 }
+
+final class StudentAssignmentSubmitError extends StudentsAssignmentState {
+  final String message;
+  StudentAssignmentSubmitError({required this.message});
+}
+
+final class StudentAssignmentSubmitSuccess extends StudentsAssignmentState {}

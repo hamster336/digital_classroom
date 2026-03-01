@@ -1,4 +1,8 @@
-import 'package:mobile_app/submission/model/submission.dart';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:mime/mime.dart';
+import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
 import 'package:mobile_app/supabase/services/submission_services.dart';
 
@@ -8,63 +12,74 @@ class SubmissionRepoImpl extends SubmissionRepo {
   SubmissionRepoImpl({required this.services});
 
   @override
-  Future<List<Submission>> getSubmissionsForStudent(String studentId) async {
-    try {
-      final submissions = await services.fetchSubmissionsForStudent(studentId);
-
-      return submissions.map((s) => Submission.fromMap(s)).toList();
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
-
-  @override
-  Future<Submission?> getSingleSubmission(
+  Future<List<AppFile>> getSubmissionsForStudent(
     String studentId,
-    String assignmentId,
+    String classId,
   ) async {
     try {
-      final submission = await services.fetchSingleSubmission(
-        studentId,
-        assignmentId,
+      final submissions = await services.fetchSubmissionsForStudent(
+        classId: classId,
+        studentId: studentId,
       );
 
-      if (submission != null) {
-        return Submission.fromMap(submission);
-      } else {
-        return null;
-      }
+      return submissions.map((s) => AppFile.fromMap(s)).toList();
     } catch (e) {
       throw Exception(e.toString());
     }
   }
 
   @override
-  Future<void> submitAssignment(Submission sub) async {
+  Future<void> submitAssignment({
+    required PlatformFile submission,
+    required String classId,
+    required String studentId,
+    required String assignmentId,
+  }) async {
     try {
-      await services.addSubmission(Submission.toMap(sub));
+      final path = submission.path!;
+      final file = File(path);
+      final bytes = await file.readAsBytes();
+
+      final mimeType =
+          lookupMimeType(path, headerBytes: bytes) ??
+          'application/octet_stream';
+
+      final storagePath = '$classId/${submission.name}';
+
+      final sub = AppFile(
+        uploaderId: studentId,
+        classId: classId,
+        ownerId: assignmentId,
+        context: .assignments,
+        filePath: storagePath,
+        fileName: submission.name,
+        mimeType: mimeType,
+        fileSize: submission.size,
+        createdAt: DateTime.now(),
+      );
+
+      await services.addSubmission(
+        file: file,
+        map: sub.toMap(),
+        storagePath: storagePath,
+      );
     } catch (e) {
       throw Exception(e.toString());
     }
   }
 
   @override
-  Future<void> resubmitAssignment(Submission sub) async {
-    try {
-      await services.updateSubmission(Submission.toMap(sub));
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
-
-  @override
-  Future<List<Submission>> getSubmissionsForTeacher(String assignmentId) async {
+  Future<List<AppFile>> getSubmissionsForTeacher(
+    String classId,
+    List<String> assignmentIds,
+  ) async {
     try {
       final submissions = await services.fetchSubmissionForTeacher(
-        assignmentId,
+        classId,
+        assignmentIds,
       );
-
-      return submissions.map((s) => Submission.fromMap(s)).toList();
+      
+      return submissions.map((s) => AppFile.fromMap(s)).toList();
     } catch (e) {
       throw Exception(e.toString());
     }

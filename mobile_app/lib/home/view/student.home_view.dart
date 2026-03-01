@@ -34,14 +34,13 @@ class _StudentHomeViewState extends State<StudentHomeView> {
     );
     // load class details
     context.read<ClassroomBloc>().add(LoadClasses(user: widget.student));
-
     // load subjects details
     context.read<SubjectBloc>().add(
       LoadSubjects(subjectIds: widget.student.subjectIds),
     );
     // load number of new notices
     context.read<UnreadCountBloc>().add(
-     LoadUnreadCount(lastChecked: widget.student.lastCheckedNotices),
+      LoadUnreadCount(lastChecked: widget.student.lastCheckedNotices),
     );
   }
 
@@ -62,7 +61,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
           ),
           BlocListener<StudentsAssignmentBloc, StudentsAssignmentState>(
             listener: (context, state) {
-              if (state is StudentAssignmentError) {
+              if (state is StudentAssignmentLoadingError) {
                 CustomWidgets.customAltertBox(context, state.message, () {});
               }
             },
@@ -233,23 +232,27 @@ class _StudentHomeViewState extends State<StudentHomeView> {
 
                             // latest notices
                             Expanded(
-                              child: BlocBuilder<UnreadCountBloc, UnreadCountState>(
-                                builder: (context, state) {
-                                  if (state is! CountLoaded) {
-                                    return CustomWidgets.infoCard(
-                                      size,
-                                      0,
-                                      'New Notices',
-                                    );
-                                  }
+                              child:
+                                  BlocBuilder<
+                                    UnreadCountBloc,
+                                    UnreadCountState
+                                  >(
+                                    builder: (context, state) {
+                                      if (state is! CountLoaded) {
+                                        return CustomWidgets.infoCard(
+                                          size,
+                                          0,
+                                          'New Notices',
+                                        );
+                                      }
 
-                                  return CustomWidgets.infoCard(
-                                    size,
-                                    state.count,
-                                    'New Notices',
-                                  );
-                                },
-                              ),
+                                      return CustomWidgets.infoCard(
+                                        size,
+                                        state.count,
+                                        'New Notices',
+                                      );
+                                    },
+                                  ),
                             ),
                           ],
                         ),
@@ -282,7 +285,9 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                               () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const StudentAssignmentView(),
+                                  builder: (_) => StudentAssignmentView(
+                                    student: widget.student,
+                                  ),
                                 ),
                               ),
                             ),

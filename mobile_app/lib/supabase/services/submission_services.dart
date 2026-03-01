@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SubmissionServices {
@@ -8,54 +10,45 @@ class SubmissionServices {
   /// FOR STUDENT
 
   // fetch all submissions for student
-  Future<List<Map<String, dynamic>>> fetchSubmissionsForStudent(
-    String studentId,
-  ) async {
+  Future<List<Map<String, dynamic>>> fetchSubmissionsForStudent({
+    required String classId,
+    required String studentId,
+  }) async {
     return await client
-        .from('submissions')
+        .from('app_files')
         .select()
-        .eq('student_id', studentId)
-        .order('submitted_at');
-  }
-
-  // fetch submission for single assignment
-  Future<Map<String, dynamic>?> fetchSingleSubmission(
-    String studentId,
-    String assignmentId,
-  ) async {
-    return await client
-        .from('submissions')
-        .select()
-        .eq('student_id', studentId)
-        .eq('assignment_id', assignmentId)
-        .maybeSingle();
+        .eq('class_id', classId)
+        .eq('file_context', 'assignment')
+        .eq('uploader_id', studentId)
+        .order('created_at', ascending: false);
   }
 
   // submit assignment
-  Future<void> addSubmission(Map<String, dynamic> map) async {
-    await client.from('submissions').insert(map);
+  Future<void> addSubmission({
+    required File file,
+    required String storagePath,
+    required Map<String, dynamic> map,
+  }) async {
+    // first upload the file to bucket
+    await client.storage.from('submissions').upload(storagePath, file);
+
+    // add the meta data to the table
+    await client.from('app_files').insert(map);
   }
-
-  // resubmit assignment
-  Future<void> updateSubmission(Map<String, dynamic> map) async {
-    final id = map['id'];
-    final data = Map<String, dynamic>.from(map)..remove('id');
-
-    await client.from('submissions').update(data).eq('id', id);
-  }
-
-
 
   //? FOR TEACHER
 
   // fetch submissions of a class
   Future<List<Map<String, dynamic>>> fetchSubmissionForTeacher(
-    String assingmentId,
+    String classId,
+    List<String> assignmentIds,
   ) async {
     return await client
-        .from('submissions')
+        .from('app_files')
         .select()
-        .eq('assignment_id', assingmentId)
-        .order('submitted_at');
+        .eq('class_id', classId)
+        .eq('file_context', 'assignment')
+        .inFilter('owner_id', assignmentIds)
+        .order('created_at', ascending: false);
   }
 }

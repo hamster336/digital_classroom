@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
+import 'package:mobile_app/assignments/view/student_view/student.assignment_details_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
+import 'package:mobile_app/user/models/student.dart';
 
-class StudentAssignmentView extends StatelessWidget {
-  const StudentAssignmentView({super.key});
+class StudentAssignmentView extends StatefulWidget {
+  final Student student;
+  const StudentAssignmentView({super.key, required this.student});
 
+  @override
+  State<StudentAssignmentView> createState() => _StudentAssignmentViewState();
+}
+
+class _StudentAssignmentViewState extends State<StudentAssignmentView> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -18,121 +26,180 @@ class StudentAssignmentView extends StatelessWidget {
 
       appBar: AppBar(title: const Text('Assignments')),
 
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          crossAxisAlignment: .start,
-          children: [
-            // total and pending assignments count
-            BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
-              builder: (context, state) {
-                if (state is! StudentAssignmentLoaded) {
-                  return const SizedBox.shrink();
-                }
+      body: BlocListener<StudentsAssignmentBloc, StudentsAssignmentState>(
+        listener: (context, state) {
+          if (state is StudentAssignmentLoadingError) {
+            CustomWidgets.customAltertBox(context, state.message, () {});
+          }
+        },
+        child: RefreshIndicator(
+          onRefresh: () async {
+            final bloc = context.read<StudentsAssignmentBloc>();
+            bloc.add(RefreshAssignments(student: widget.student));
+            await bloc.stream.firstWhere(
+              (state) =>
+                  state is StudentAssignmentLoaded ||
+                  state is StudentAssignmentLoadingError,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                // total and pending assignments count
+                BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
+                  builder: (context, state) {
+                    int pending = 0;
+                    int total = 0;
 
-                return Text(
-                  'Pending ${state.pendingCount} . Total ${state.totalCount}',
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
-                );
-              },
-            ),
+                    if (state is StudentAssignmentLoaded) {
+                      pending = state.pendingCount;
+                      total = state.totalCount;
+                    }
 
-            SizedBox(height: size.height * 0.01),
+                    return Text(
+                      'Pending $pending . Total $total',
+                      style: TextStyle(fontSize: 18, color: Colors.black54),
+                    );
+                  },
+                ),
 
-            // filter buttons
-            BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
-              builder: (context, state) {
-                if (state is! StudentAssignmentLoaded) {
-                  return const SizedBox.shrink();
-                }
+                SizedBox(height: size.height * 0.01),
 
-                final currentFilter = state.filter;
+                // filter buttons
+                BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
+                  builder: (context, state) {
+                    final loaded = (state is StudentAssignmentLoaded)
+                        ? true
+                        : false;
 
-                return Row(
-                  children: [
-                    CustomWidgets.assignmentFilterButton(
-                      label: 'Pending',
-                      isSelected: currentFilter == AssignmentFilter.pending,
-                      onTap: () => context.read<StudentsAssignmentBloc>().add(
-                        FilterAssignments(filter: AssignmentFilter.pending),
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    CustomWidgets.assignmentFilterButton(
-                      label: 'Overdue',
-                      isSelected: currentFilter == AssignmentFilter.overdue,
-                      onTap: () => context.read<StudentsAssignmentBloc>().add(
-                        FilterAssignments(filter: AssignmentFilter.overdue),
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    CustomWidgets.assignmentFilterButton(
-                      label: 'Completed',
-                      isSelected: currentFilter == AssignmentFilter.completed,
-                      onTap: () => context.read<StudentsAssignmentBloc>().add(
-                        FilterAssignments(filter: AssignmentFilter.completed),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                    final currentFilter = (state is StudentAssignmentLoaded)
+                        ? state.filter
+                        : AssignmentFilter.pending;
 
-            SizedBox(height: size.height * 0.01),
+                    return Row(
+                      children: [
+                        CustomWidgets.assignmentFilterButton(
+                          label: 'Pending',
+                          isSelected: currentFilter == AssignmentFilter.pending,
+                          onTap: (!loaded)
+                              ? () {}
+                              : () {
+                                  context.read<StudentsAssignmentBloc>().add(
+                                    FilterAssignments(
+                                      filter: AssignmentFilter.pending,
+                                    ),
+                                  );
+                                },
+                        ),
+                        const SizedBox(width: 5),
+                        CustomWidgets.assignmentFilterButton(
+                          label: 'Overdue',
+                          isSelected: currentFilter == AssignmentFilter.overdue,
+                          onTap: (!loaded)
+                              ? () {}
+                              : () {
+                                  context.read<StudentsAssignmentBloc>().add(
+                                    FilterAssignments(
+                                      filter: AssignmentFilter.overdue,
+                                    ),
+                                  );
+                                },
+                        ),
+                        const SizedBox(width: 5),
+                        CustomWidgets.assignmentFilterButton(
+                          label: 'Completed',
+                          isSelected:
+                              currentFilter == AssignmentFilter.completed,
+                          onTap: (!loaded)
+                              ? () {}
+                              : () {
+                                  context.read<StudentsAssignmentBloc>().add(
+                                    FilterAssignments(
+                                      filter: AssignmentFilter.completed,
+                                    ),
+                                  );
+                                },
+                        ),
+                      ],
+                    );
+                  },
+                ),
 
-            // show the assignments
-            Expanded(
-              child:
-                  BlocBuilder<StudentsAssignmentBloc, StudentsAssignmentState>(
-                    builder: (context, assignmentState) {
-                      if (assignmentState is StudentAssignmentLoading) {
-                        return CustomWidgets.customLoader();
-                      }
+                SizedBox(height: size.height * 0.01),
 
-                      if (assignmentState is StudentAssignmentLoaded) {
-                        final assignments = assignmentState.showAssignments();
-                        if (assignments.isEmpty) {
-                          return Center(
-                            child: const Text(
-                              'No assingments available',
-                              style: TextStyle(fontSize: 17),
-                            ),
-                          );
-                        }
+                // show the assignments
+                Expanded(
+                  child:
+                      BlocBuilder<
+                        StudentsAssignmentBloc,
+                        StudentsAssignmentState
+                      >(
+                        builder: (context, assignmentState) {
+                          if (assignmentState is StudentAssignmentLoading) {
+                            return CustomWidgets.customLoader();
+                          }
 
-                        return ListView.builder(
-                          itemCount: assignments.length,
-                          itemBuilder: (_, index) {
-                            return BlocBuilder<SubjectBloc, SubjectState>(
-                              builder: (context, state) {
-                                final subjects = (state is SubjectLoaded)
-                                    ? state.subjects
-                                    : [];
+                          if (assignmentState is StudentAssignmentLoaded) {
+                            final assignments = assignmentState
+                                .showAssignments();
 
-                                final sub =
-                                    subjects.firstWhere(
-                                          (s) =>
-                                              s.id ==
-                                              assignments[index].subjectId,
-                                        )
-                                        as Subject;
+                            if (assignments.isEmpty) {
+                              return CustomWidgets.customScrollableText(
+                                context,
+                                'No assignments available',
+                              );
+                            }
 
-                                return CustomWidgets.studentAssignmentCards(
-                                  context: context,
-                                  assignment: assignments[index],
-                                  subjectName: sub.name,
+                            return ListView.builder(
+                              itemCount: assignments.length,
+                              itemBuilder: (_, index) {
+                                return BlocBuilder<SubjectBloc, SubjectState>(
+                                  builder: (context, state) {
+                                    final assignment = assignments[index];
+                                    final subjects = (state is SubjectLoaded)
+                                        ? state.subjects
+                                        : [];
+
+                                    final sub =
+                                        subjects.firstWhere(
+                                              (s) =>
+                                                  s.id == assignment.subjectId,
+                                            )
+                                            as Subject;
+
+                                    return CustomWidgets.studentAssignmentCards(
+                                      context: context,
+                                      assignment: assignments[index],
+                                      subjectName: sub.name,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              StudentAssignmentDetailsScreen(
+                                                student: widget.student,
+                                                assignment: assignment,
+
+                                              ),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             );
-                          },
-                        );
-                      }
-
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                          }
+                          return CustomWidgets.customScrollableText(
+                            context,
+                            'Error Occured :(\nSwipe down to refresh.',
+                          );
+                        },
+                      ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

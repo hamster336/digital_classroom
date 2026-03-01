@@ -199,7 +199,7 @@ class _TeacherNotesViewState extends State<TeacherNotesView> {
                             final note = notes[index];
 
                             final sub = subjects.firstWhere(
-                              (s) => s.id == notes[index].subjectId,
+                              (s) => s.id == notes[index].ownerId,
                             );
 
                             return CustomWidgets.teacherNotesCard(

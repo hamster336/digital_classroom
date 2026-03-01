@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_media_store/flutter_media_store.dart';
 import 'package:mime/mime.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/shared/required_enums.dart';
@@ -27,7 +27,7 @@ class NotesServices {
         .select()
         .eq('class_id', classId)
         .eq('file_context', 'notes')
-        .inFilter('subject_id', subjectIds)
+        .inFilter('owner_id', subjectIds)
         .order('created_at', ascending: false)
         .range(from, to);
   }
@@ -78,7 +78,7 @@ class NotesServices {
         final note = AppFile(
           uploaderId: teacherId,
           classId: classId,
-          subjectId: subjectId,
+          ownerId: subjectId,
           context: FileContext.notes,
           fileName: file.name,
           filePath: storagePath,
@@ -102,26 +102,35 @@ class NotesServices {
   }
 
   // download note
-  Future<void> downloadNote(AppFile note) async {
+  Future<void> downloadNote(AppFile note, String directory) async {
     try {
-      final bytes = await client.storage
+      final url = client.storage
           .from('classroom_materials')
-          .download(note.filePath);
+          .getPublicUrl(note.filePath);
 
-      final mediaStore = FlutterMediaStore();
+      Dio dio = Dio();
 
-      await mediaStore.saveFile(
-        fileData: bytes,
-        mimeType: note.mimeType,
-        rootFolderName: 'Download',
-        folderName: 'Academia',
-        fileName: note.fileName,
-        onSuccess: (uri, filePath) =>
-            log('File saved: ${filePath.toString()} $uri'),
-        onError: (errorMessage) {
-          log(errorMessage);
-        },
-      );
+      final savePath = '$directory/${note.fileName}';
+
+      await dio.download(url, savePath);
+      log('File downloaded to: $savePath');
+
+      // final bytes = await client.storage
+      //     .from('classroom_materials')
+      //     .download(note.filePath);
+      // final mediaStore = FlutterMediaStore();
+      // await mediaStore.saveFile(
+      //   fileData: bytes,
+      //   mimeType: note.mimeType,
+      //   rootFolderName: 'Download',
+      //   folderName: 'Academia',
+      //   fileName: note.fileName,
+      //   onSuccess: (uri, filePath) =>
+      //       log('File saved: ${filePath.toString()} $uri'),
+      //   onError: (errorMessage) {
+      //     log(errorMessage);
+      //   },
+      // );
     } catch (e) {
       throw Exception(e.toString());
     }

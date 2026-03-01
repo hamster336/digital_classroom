@@ -62,7 +62,7 @@ class _NoticesScreenState extends State<NoticesScreen> {
               );
             }
 
-            if(state is LastCheckedNoticeUpdateError) {
+            if (state is LastCheckedNoticeUpdateError) {
               CustomWidgets.customAltertBox(
                 context,
                 state.message,
@@ -72,7 +72,7 @@ class _NoticesScreenState extends State<NoticesScreen> {
               );
             }
 
-            if(state is LastCheckedNoticeUpdateSuccess) {
+            if (state is LastCheckedNoticeUpdateSuccess) {
               context.read<UnreadCountBloc>().add(ClearCount());
             }
           },
@@ -92,7 +92,9 @@ class _NoticesScreenState extends State<NoticesScreen> {
                         label: 'All',
                         isSelected: currentFilter == NoticeFilter.all,
                         onTap: () {
-                          filter = NoticeFilter.all;
+                          setState(() {
+                            filter = NoticeFilter.all;
+                          });
                           context.read<NoticeBloc>().add(
                             FilterNotices(filter: NoticeFilter.all),
                           );
@@ -103,7 +105,9 @@ class _NoticesScreenState extends State<NoticesScreen> {
                         label: 'Important',
                         isSelected: currentFilter == NoticeFilter.important,
                         onTap: () {
-                          filter = NoticeFilter.important;
+                          setState(() {
+                            filter = NoticeFilter.important;
+                          });
                           context.read<NoticeBloc>().add(
                             FilterNotices(filter: NoticeFilter.important),
                           );
@@ -114,7 +118,9 @@ class _NoticesScreenState extends State<NoticesScreen> {
                         label: 'Urgent',
                         isSelected: currentFilter == NoticeFilter.urgent,
                         onTap: () {
-                          filter = NoticeFilter.urgent;
+                          setState(() {
+                            filter = NoticeFilter.urgent;
+                          });
                           context.read<NoticeBloc>().add(
                             FilterNotices(filter: NoticeFilter.urgent),
                           );

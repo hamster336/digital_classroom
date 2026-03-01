@@ -156,6 +156,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                                       context: context,
                                       assignment: assignments[index],
                                       subjectName: sub.name,
+                                      cls: widget.cls,
                                       onEdit: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
