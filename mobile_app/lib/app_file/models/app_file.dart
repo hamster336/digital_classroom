@@ -5,7 +5,8 @@ class AppFile {
   final String uploaderId;
 
   final String classId;
-  final String subjectId;
+  final String
+  ownerId; // subjectId for notes, and assignmentId for assignment submissions
   final FileContext context;
 
   final String filePath;
@@ -18,7 +19,7 @@ class AppFile {
     this.id,
     required this.uploaderId,
     required this.classId,
-    required this.subjectId,
+    required this.ownerId,
     required this.context,
     required this.filePath,
     required this.fileName,
@@ -27,18 +28,22 @@ class AppFile {
     required this.createdAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
+  Map<String, dynamic> toMap({String? id}) {
+    final map = {
       'uploader_id': uploaderId,
       'class_id': classId,
-      'subject_id': subjectId,
+      'owner_id': ownerId,
       'file_context': setFileContext(context),
       'file_path': filePath,
       'file_name': fileName,
       'mime_type': mimeType,
       'file_size': fileSize,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
+
+    if (id != null) map['id'] = id;
+
+    return map;
   }
 
   factory AppFile.fromMap(Map<String, dynamic> map) {
@@ -46,26 +51,44 @@ class AppFile {
       id: map['id'],
       uploaderId: map['uploader_id'],
       classId: map['class_id'],
-      subjectId: map['subject_id'],
+      ownerId: map['owner_id'],
       context: getFileContext(map['file_context']),
       filePath: map['file_path'],
       fileName: map['file_name'],
       mimeType: map['mime_type'],
       fileSize: map['file_size'],
-      createdAt: DateTime.parse(map['created_at']),
+      createdAt: DateTime.parse(map['created_at']).toLocal(),
     );
   }
 
   static FileContext getFileContext(String con) {
-    if (con == 'notes') {
-      return FileContext.notes;
-    } else {
-      return FileContext.assignments;
-    }
+    if (con == 'notes') return FileContext.notes;
+    return FileContext.assignments;
   }
 
   static String setFileContext(FileContext con) {
     if (con == FileContext.notes) return 'notes';
     return 'assignment';
+  }
+
+  AppFile copyWith({
+    required String filePath,
+    required String fileName,
+    required String mimeType,
+    required int fileSize,
+    required DateTime createdAt,
+  }) {
+    return AppFile(
+      id: id,
+      uploaderId: uploaderId,
+      classId: classId,
+      ownerId: ownerId,
+      context: context,
+      filePath: filePath,
+      fileName: fileName,
+      mimeType: mimeType,
+      fileSize: fileSize,
+      createdAt: createdAt,
+    );
   }
 }

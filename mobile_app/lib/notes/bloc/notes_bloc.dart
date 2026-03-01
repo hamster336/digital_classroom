@@ -147,11 +147,14 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   Future<void> _deleteNote(DeleteNote event, Emitter<NotesState> emit) async {
     if (state is! NotesLoaded) return;
 
+    final currentState = state;
+
     emit(NotesLoading());
 
     try {
       await repository.deleteNote(event.noteId, event.filePath);
       emit(DeleteNoteSuccess());
+      emit(currentState);
     } catch (e) {
       emit(DeleteNoteError(message: e.toString()));
     }
@@ -167,11 +170,13 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     DownloadNote event,
     Emitter<NotesState> emit,
   ) async {
+    final currentState = state;
     try {
       await repository.downloadNote(event.note);
       emit(DownloadNoteSuccess());
     } catch (e) {
       emit(DownloadNoteError(message: e.toString()));
+      emit(currentState);
     }
   }
 

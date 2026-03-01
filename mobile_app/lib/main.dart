@@ -32,7 +32,6 @@ import 'package:mobile_app/supabase/services/subject_services.dart';
 import 'package:mobile_app/supabase/services/teachers_services.dart';
 import 'package:mobile_app/supabase/services/user_services.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
-import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 import 'package:mobile_app/upcoming/repository/upcoming_repo_impl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
@@ -145,8 +144,10 @@ class MyApp extends StatelessWidget {
           ),
           // teacher assignment bloc
           BlocProvider(
-            create: (context) =>
-                TeacherAssignmentBloc(context.read<AssignmentRepoImpl>()),
+            create: (context) => TeacherAssignmentBloc(
+              context.read<AssignmentRepoImpl>(),
+              context.read<SubmissionRepoImpl>(),
+            ),
           ),
           // upcoming bloc
           BlocProvider(
@@ -158,11 +159,6 @@ class MyApp extends StatelessWidget {
             create: (context) =>
                 AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
             // ..add(AuthCheckRequested()),
-          ),
-          // submission bloc
-          BlocProvider(
-            create: (context) =>
-                SubmissionBloc(context.read<SubmissionRepoImpl>()),
           ),
           // classroom bloc
           BlocProvider(

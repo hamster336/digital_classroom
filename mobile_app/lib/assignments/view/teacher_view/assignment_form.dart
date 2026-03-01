@@ -419,7 +419,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
   // get priority
   String _getPriority(AssignmentPriority p) {
     if (p == AssignmentPriority.urgent) return 'Urgent';
-    if (p == AssignmentPriority.medium) return 'Mediuma';
+    if (p == AssignmentPriority.medium) return 'Medium';
     return 'Normal';
   }
 }

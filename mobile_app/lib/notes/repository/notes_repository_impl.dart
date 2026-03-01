@@ -1,7 +1,11 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/notes/repository/notes_repository.dart';
 import 'package:mobile_app/supabase/services/notes_services.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NotesRepositoryImpl extends NotesRepository {
   final NotesServices services;
@@ -81,9 +85,34 @@ class NotesRepositoryImpl extends NotesRepository {
   @override
   Future<void> downloadNote(AppFile note) async {
     try {
-      await services.downloadNote(note);
+      final directory = await getPublicDirectoryPath();
+      await services.downloadNote(note, directory!);
     } catch (e) {
       throw Exception(e.toString());
+    }
+  }
+
+  Future<String?> getPublicDirectoryPath() async {
+    try {
+      if (Platform.isAndroid) {
+        final directory = await getExternalStorageDirectory();
+        if (directory != null) {
+          log(directory.path);
+          List<String> folders = directory.path.split('/');
+          String rootPath = '';
+          for (int i = 1; i < folders.length; i++) {
+            if (folders[i] == 'Android') break;
+            rootPath += '/${folders[i]}';
+          }
+          return '$rootPath/Download';
+        } else if (Platform.isIOS) {
+          final directory = await getApplicationDocumentsDirectory();
+          return directory.path;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 }

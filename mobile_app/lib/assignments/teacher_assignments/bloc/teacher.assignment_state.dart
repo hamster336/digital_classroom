@@ -6,7 +6,8 @@ final class TeacherAssignmentLoading extends TeacherAssignmentState {}
 
 final class TeacherAssignmentLoaded extends TeacherAssignmentState {
   final List<Assignment> assignments;
-  TeacherAssignmentLoaded({required this.assignments});
+  final List<AppFile> submissions;
+  TeacherAssignmentLoaded({required this.assignments, required this.submissions});
 }
 
 final class TeacherAssignmentLoadingError extends TeacherAssignmentState {
