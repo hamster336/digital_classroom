@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
@@ -99,6 +100,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
               }
 
               if (state is CreateAssignmentSuccess) {
+                context.read<DashboardBloc>().add(
+                  LoadActiveAssignmentCount(teacherId: widget.teacherId),
+                );
                 context.read<TeacherAssignmentBloc>().add(
                   RefreshAssignments(
                     teacherId: widget.teacherId,
@@ -113,6 +117,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
               }
 
               if (state is UpdateAssignmentSuccess) {
+                context.read<DashboardBloc>().add(
+                  LoadActiveAssignmentCount(teacherId: widget.teacherId),
+                );
                 context.read<TeacherAssignmentBloc>().add(
                   RefreshAssignments(
                     teacherId: widget.teacherId,

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_view.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/classroom_gate.dart';
+import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
 import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
@@ -37,6 +38,10 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
     // unread notices bloc
     context.read<UnreadCountBloc>().add(
       LoadUnreadCount(lastChecked: widget.teacher.lastCheckedNotices),
+    );
+    // actve assignment count
+    context.read<DashboardBloc>().add(
+      LoadActiveAssignmentCount(teacherId: widget.teacher.id),
     );
   }
 
@@ -164,24 +169,38 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             Expanded(
                               child: BlocBuilder<ClassroomBloc, ClassroomState>(
                                 builder: (context, state) {
-                                  if (state is! ClassesLoaded) {
-                                    return CustomWidgets.infoCard(
-                                      size,
-                                      0,
-                                      'Classes',
-                                    );
-                                  }
+                                  final classCount = (state is ClassesLoaded)
+                                      ? state.classes.length
+                                      : 0;
 
                                   return CustomWidgets.infoCard(
                                     size,
-                                    state.classes.length,
+                                    classCount,
                                     'Classes',
                                   );
                                 },
                               ),
                             ),
 
-                            // latest notices
+                            // number of active assignments (that have not passed due date)
+                            Expanded(
+                              child: BlocBuilder<DashboardBloc, DashboardState>(
+                                builder: (context, state) {
+                                  final subjectCount =
+                                      (state is DashboardLoaded)
+                                      ? state.activeAssignmentCount
+                                      : 0;
+
+                                  return CustomWidgets.infoCard(
+                                    size,
+                                    subjectCount,
+                                    'Assignments',
+                                  );
+                                },
+                              ),
+                            ),
+
+                            // unread notices
                             Expanded(
                               child:
                                   BlocBuilder<
@@ -189,17 +208,14 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                                     UnreadCountState
                                   >(
                                     builder: (context, state) {
-                                      if (state is! CountLoaded) {
-                                        return CustomWidgets.infoCard(
-                                          size,
-                                          0,
-                                          'New Notices',
-                                        );
-                                      }
+                                      final unreadNotice =
+                                          (state is CountLoaded)
+                                          ? state.count
+                                          : 0;
 
                                       return CustomWidgets.infoCard(
                                         size,
-                                        state.count, // dummy data
+                                        unreadNotice,
                                         'New Notices',
                                       );
                                     },

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
 import 'package:mobile_app/assignments/view/teacher_view/assignment_form.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
@@ -89,12 +90,19 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                     CustomWidgets.customAltertBox(
                       context,
                       'Assignment deleted successfully.',
-                      () => context.read<TeacherAssignmentBloc>().add(
-                        RefreshAssignments(
-                          teacherId: widget.teacherId,
-                          classId: widget.cls.id,
-                        ),
-                      ),
+                      () {
+                        context.read<DashboardBloc>().add(
+                          LoadActiveAssignmentCount(
+                            teacherId: widget.teacherId,
+                          ),
+                        );
+                        context.read<TeacherAssignmentBloc>().add(
+                          RefreshAssignments(
+                            teacherId: widget.teacherId,
+                            classId: widget.cls.id,
+                          ),
+                        );
+                      },
                     );
                   }
                 },

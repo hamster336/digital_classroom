@@ -123,7 +123,7 @@ class StudentProfileScreen extends StatelessWidget {
 
             SizedBox(height: size.height * 0.01),
             CustomWidgets.userInfoTiles(
-              'assets/images/mail.png',
+              'assets/images/email.png',
               'Email',
               student.email,
             ),

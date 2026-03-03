@@ -25,6 +25,17 @@ class AssignmentRepoImpl extends AssignmentRepo {
     }
   }
 
+  @override
+  Future<int> fetchActiveAssignmentCount(String teacherId) async {
+    try {
+      final count = await services.fetchActiveAssignmentCount(teacherId);
+
+      return count;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // load assignments for student
   @override
   Future<List<Assignment>> loadStudentsAssignments(

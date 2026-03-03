@@ -702,7 +702,9 @@ class CustomWidgets {
                   ),
 
                   Text(
-                    (total == 0) ? '0 %' : '${(count / total).toInt() * 100}%',
+                    (total == 0)
+                        ? '0 %'
+                        : '${((count / total) * 100).toInt()}%',
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                 ],
@@ -1407,6 +1409,7 @@ class CustomWidgets {
                 '${student.rollNumber}. ${student.name}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
+
               Row(
                 mainAxisAlignment: .start,
                 children: [
@@ -1430,7 +1433,6 @@ class CustomWidgets {
                   const SizedBox(width: 5),
                 ],
               ),
-
               (submission == null)
                   ? Text(
                       'No data found',
