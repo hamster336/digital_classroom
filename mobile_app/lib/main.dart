@@ -17,6 +17,7 @@ import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
 import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
+import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 import 'package:mobile_app/supabase/credentials/supabase.crendentials.dart';
 import 'package:mobile_app/supabase/services/assignment_services.dart';
 import 'package:mobile_app/supabase/services/notes_services.dart';
@@ -109,7 +110,10 @@ class MyApp extends StatelessWidget {
         // submission repo
         RepositoryProvider(
           create: (_) => SubmissionRepoImpl(
-            services: SubmissionServices(client: SupabaseCredentials.client),
+            subServices: SubmissionServices(client: SupabaseCredentials.client),
+            studentServices: StudentsServices(
+              client: SupabaseCredentials.client,
+            ),
           ),
         ),
         // notes repo
@@ -172,6 +176,11 @@ class MyApp extends StatelessWidget {
           // notes bloc
           BlocProvider(
             create: (context) => NotesBloc(context.read<NotesRepositoryImpl>()),
+          ),
+          // submission bloc
+          BlocProvider(
+            create: (context) =>
+                SubmissionBloc(context.read<SubmissionRepoImpl>()),
           ),
         ],
 

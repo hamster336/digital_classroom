@@ -43,6 +43,7 @@ class TeacherAssignmentBloc
         event.classId,
         assignments.map((a) => a.id!).toList(),
       );
+
       cachedAssignemnts[key] = assignments;
       cachedSubmissions[key] = submissions;
       emit(

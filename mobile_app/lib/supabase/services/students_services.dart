@@ -27,4 +27,17 @@ class StudentsServices {
         .update({'last_checked_notices': time.toIso8601String()})
         .eq('id', id);
   }
+
+  // fetch details of student from a view
+  Future<List<Map<String, dynamic>>> fetchStudentsOfClass(
+    String classId,
+    String subjectId,
+  ) async {
+    return await client
+        .from('class_students')
+        .select()
+        .eq('class_id', classId)
+        .contains('subject_ids', [subjectId])
+        .order('roll_number');
+  }
 }

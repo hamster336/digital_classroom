@@ -40,6 +40,8 @@ class Assignment {
     );
   }
 
+  // Assignment a
+
   static Map<String, dynamic> toMap(Assignment a) {
     final map = {
       'title': a.title,
