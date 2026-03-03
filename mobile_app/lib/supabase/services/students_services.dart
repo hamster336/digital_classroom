@@ -38,6 +38,6 @@ class StudentsServices {
         .select()
         .eq('class_id', classId)
         .contains('subject_ids', [subjectId])
-        .order('roll_number');
+        .order('roll_number', ascending: true);
   }
 }

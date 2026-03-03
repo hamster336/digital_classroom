@@ -9,6 +9,7 @@ import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
+import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
 import 'package:mobile_app/notes/bloc/notes_bloc.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
 import 'package:mobile_app/notices/repository/notice_repo_impl.dart';
@@ -181,6 +182,11 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) =>
                 SubmissionBloc(context.read<SubmissionRepoImpl>()),
+          ),
+          // teachers dashboard bloc
+          BlocProvider(
+            create: (context) =>
+                DashboardBloc(context.read<AssignmentRepoImpl>()),
           ),
         ],
 

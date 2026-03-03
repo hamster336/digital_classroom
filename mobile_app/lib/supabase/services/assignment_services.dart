@@ -10,12 +10,21 @@ class AssignmentServices {
     String teacherId,
     String classId,
   ) async {
-    return client
+    return await client
         .from('assignments')
         .select()
         .eq('class_id', classId)
         .eq('teacher_id', teacherId)
         .order('issued_at');
+  }
+
+  // fetch number of active assignments across all classes for a teacher
+  Future<int> fetchActiveAssignmentCount(String teacherId) async {
+    return await client
+        .from('assignments')
+        .count()
+        .eq('teacher_id', teacherId)
+        .gt('due_date', DateTime.now().toUtc().toIso8601String());
   }
 
   // load assignments for teacher

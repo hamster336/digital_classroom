@@ -39,60 +39,57 @@ class SubmissionsView extends StatelessWidget {
                 CustomWidgets.customAltertBox(context, state.message, () {});
               }
             },
-            child: Expanded(
-              child: BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
-                builder: (context, state) {
-                  final List<AppFile> submissions =
-                      (state is TeacherAssignmentLoaded)
-                      ? state.submissions
-                      : [];
+            child: BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
+              builder: (context, state) {
+                final List<AppFile> submissions =
+                    (state is TeacherAssignmentLoaded) ? state.submissions : [];
 
-                  return BlocBuilder<SubmissionBloc, SubmissionState>(
-                    builder: (context, state) {
-                      if (state is LoadingStudents) {
-                        return CustomWidgets.customLoader();
-                      }
+                return BlocBuilder<SubmissionBloc, SubmissionState>(
+                  builder: (context, state) {
+                    if (state is LoadingStudents) {
+                      return CustomWidgets.customLoader();
+                    }
 
-                      if (state is StudentsLoaded) {
-                        final students = state.students;
+                    if (state is StudentsLoaded) {
+                      final students = state.students;
 
-                        if (students.isEmpty) {
-                          return CustomWidgets.customScrollableText(
-                            context,
-                            'No students :(',
-                          );
-                        }
-
-                        return ListView.builder(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          itemCount: students.length,
-                          itemBuilder: (context, index) {
-                            final student = students[index];
-
-                            final sub = submissions.firstWhereOrNull(
-                              (s) =>
-                                  (s.uploaderId == student.id) &&
-                                  (s.ownerId == assignmentId),
-                            );
-
-                            return CustomWidgets.studentSubmissionCard(
-                              student: student,
-                              submission: sub,
-                              icon: Icons.download,
-                              onDownload: () {},
-                            );
-                          },
+                      if (students.isEmpty) {
+                        return CustomWidgets.customScrollableText(
+                          context,
+                          'No students :(',
                         );
                       }
 
-                      return CustomWidgets.customScrollableText(
-                        context,
-                        'Error occured :(\nSwipe down to  refresh.',
+                      return ListView.builder(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        itemCount: students.length,
+                        itemBuilder: (context, index) {
+                          final student = students[index];
+
+                          final sub = submissions.firstWhereOrNull(
+                            (s) =>
+                                (s.uploaderId == student.id) &&
+                                (s.ownerId == assignmentId),
+                          );
+
+                          return CustomWidgets.studentSubmissionCard(
+                            // size: size,
+                            student: student,
+                            submission: sub,
+                            icon: Icons.download,
+                            onDownload: () {},
+                          );
+                        },
                       );
-                    },
-                  );
-                },
-              ),
+                    }
+
+                    return CustomWidgets.customScrollableText(
+                      context,
+                      'Error occured :(\nSwipe down to  refresh.',
+                    );
+                  },
+                );
+              },
             ),
           ),
         ),

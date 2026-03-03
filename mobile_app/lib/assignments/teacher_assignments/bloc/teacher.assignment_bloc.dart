@@ -46,6 +46,7 @@ class TeacherAssignmentBloc
 
       cachedAssignemnts[key] = assignments;
       cachedSubmissions[key] = submissions;
+
       emit(
         TeacherAssignmentLoaded(
           assignments: assignments,
