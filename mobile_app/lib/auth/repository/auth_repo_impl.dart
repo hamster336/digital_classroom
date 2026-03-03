@@ -51,10 +51,7 @@ class AuthRepoImpl extends AuthRepo {
     if (user == null) { 
       throw Exception('User profile not found');
     }
-
-    // user table bata aadha data aayo
     
-
     final role = user['role'];
 
     if (role == 'student') {

@@ -10,8 +10,10 @@ enum AssignmentFilter { pending, completed, overdue }
 
 enum TypeOfFile { image, document, pdf, spreadsheet, presentation }
 
-enum FileContext { notes, schedules, assignments }
+enum FileContext { notes, assignments }
 
 enum UpcomingEventType { notice, assignment }
 
 enum UpcomingEventPriority { urgent, medium, normal }
+
+enum StudentSubmissionFilter { hasSubmited, hasNotSubmitted }

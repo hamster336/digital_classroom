@@ -4,6 +4,7 @@ class AuthenticationServices {
   final SupabaseClient client;
 
   AuthenticationServices({required this.client});
+  
   // login
   Future<AuthResponse> signIn({
     required String email,

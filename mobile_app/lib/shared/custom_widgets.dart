@@ -4,6 +4,7 @@ import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/submission/model/class_students.dart';
 import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
 import 'package:mobile_app/shared/required_enums.dart';
@@ -701,7 +702,7 @@ class CustomWidgets {
                   ),
 
                   Text(
-                    '${(count / total).toInt() * 100}%',
+                    (total == 0) ? '0 %' : '${(count / total).toInt() * 100}%',
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                 ],
@@ -1377,6 +1378,88 @@ class CustomWidgets {
           child: const Text('Yes', style: TextStyle(color: Colors.red)),
         ),
       ],
+    );
+  }
+
+  // student assignment submission Card
+  static Widget studentSubmissionCard({
+    required ClassStudents student,
+    AppFile? submission,
+    required IconData icon,
+    required VoidCallback onDownload,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: (submission != null) ? Color(0xFF2AB3AA) : Colors.red,
+      ),
+
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
+          child: Column(
+            crossAxisAlignment: .start,
+            children: [
+              Text(
+                '${student.rollNumber}. ${student.name}',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              Row(
+                mainAxisAlignment: .start,
+                children: [
+                  Text(
+                    (submission == null)
+                        ? 'No data found'
+                        : submission.fileName,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  Spacer(),
+
+                  if (submission != null)
+                    InkWell(
+                      onTap: onDownload,
+                      child: Icon(icon, size: 30, color: Colors.black54),
+                    ),
+                  const SizedBox(width: 5),
+                ],
+              ),
+
+              (submission == null)
+                  ? Text(
+                      'No data found',
+                      style: TextStyle(color: Colors.black54),
+                    )
+                  : Row(
+                      children: [
+                        Text(
+                          formatSize(submission.fileSize),
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '(${getFileLabel(submission.mimeType)})',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          DateFormat(
+                            'hh:mm a, dd MMM',
+                          ).format(submission.createdAt.toLocal()),
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      ],
+                    ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -3,13 +3,19 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
+import 'package:mobile_app/submission/model/class_students.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
+import 'package:mobile_app/supabase/services/students_services.dart';
 import 'package:mobile_app/supabase/services/submission_services.dart';
 
 class SubmissionRepoImpl extends SubmissionRepo {
-  final SubmissionServices services;
+  final SubmissionServices subServices;
+  final StudentsServices studentServices;
 
-  SubmissionRepoImpl({required this.services});
+  SubmissionRepoImpl({
+    required this.subServices,
+    required this.studentServices,
+  });
 
   @override
   Future<List<AppFile>> getSubmissionsForStudent(
@@ -17,7 +23,7 @@ class SubmissionRepoImpl extends SubmissionRepo {
     String classId,
   ) async {
     try {
-      final submissions = await services.fetchSubmissionsForStudent(
+      final submissions = await subServices.fetchSubmissionsForStudent(
         classId: classId,
         studentId: studentId,
       );
@@ -58,7 +64,7 @@ class SubmissionRepoImpl extends SubmissionRepo {
         createdAt: DateTime.now(),
       );
 
-      await services.addSubmission(
+      await subServices.addSubmission(
         file: file,
         map: sub.toMap(),
         storagePath: storagePath,
@@ -74,12 +80,29 @@ class SubmissionRepoImpl extends SubmissionRepo {
     List<String> assignmentIds,
   ) async {
     try {
-      final submissions = await services.fetchSubmissionForTeacher(
+      final submissions = await subServices.fetchSubmissionForTeacher(
         classId,
         assignmentIds,
       );
-      
+
       return submissions.map((s) => AppFile.fromMap(s)).toList();
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<List<ClassStudents>> getClassStudents(
+    String classId,
+    String subjectId,
+  ) async {
+    try {
+      final students = await studentServices.fetchStudentsOfClass(
+        classId,
+        subjectId,
+      );
+
+      return students.map((s) => ClassStudents.fromMap(s)).toList();
     } catch (e) {
       throw Exception(e.toString());
     }

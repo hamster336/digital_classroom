@@ -7,8 +7,10 @@ import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
+import 'package:mobile_app/submission/bloc/submission_bloc.dart';
+import 'package:mobile_app/submission/view/submissions_view.dart';
 
-class TeacherAssignmentDetailScreen extends StatelessWidget {
+class TeacherAssignmentDetailScreen extends StatefulWidget {
   final Assignment assignment;
   final Classroom cls;
   const TeacherAssignmentDetailScreen({
@@ -18,6 +20,24 @@ class TeacherAssignmentDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<TeacherAssignmentDetailScreen> createState() =>
+      _TeacherAssignmentDetailScreenState();
+}
+
+class _TeacherAssignmentDetailScreenState
+    extends State<TeacherAssignmentDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SubmissionBloc>().add(
+      LoadStudents(
+        classId: widget.cls.id,
+        subjectId: widget.assignment.subjectId,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -25,88 +45,115 @@ class TeacherAssignmentDetailScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsetsGeometry.symmetric(horizontal: 10),
-          child: Column(
-            crossAxisAlignment: .start,
-            mainAxisSize: .min,
-            children: [
-              // assignment details
-              const Text(
-                'ASSIGNMENT DETAILS:',
-                style: TextStyle(color: Colors.black45),
-              ),
-              const SizedBox(height: 5),
+          child: BlocListener<SubmissionBloc, SubmissionState>(
+            listener: (context, state) {
+              if (state is StudentsLoadingError) {
+                CustomWidgets.customAltertBox(context, state.message, () {});
+              }
+            },
+            child: Column(
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
+              children: [
+                // assignment details
+                const Text(
+                  'ASSIGNMENT DETAILS:',
+                  style: TextStyle(color: Colors.black45),
+                ),
+                const SizedBox(height: 5),
 
-              BlocBuilder<SubjectBloc, SubjectState>(
-                builder: (context, state) {
-                  final subjects = (state is SubjectLoaded)
-                      ? state.subjects
-                      : [];
+                BlocBuilder<SubjectBloc, SubjectState>(
+                  builder: (context, state) {
+                    final subjects = (state is SubjectLoaded)
+                        ? state.subjects
+                        : [];
 
-                  final sub =
-                      subjects.firstWhere((s) => s.id == assignment.subjectId)
-                          as Subject;
-                  return CustomWidgets.teachersAssignmentCards(
-                    context: context,
-                    assignment: assignment,
-                    subjectName: sub.name,
-                    detailed: true,
-                    cls: cls,
-                  );
-                },
-              ),
+                    final sub =
+                        subjects.firstWhere(
+                              (s) => s.id == widget.assignment.subjectId,
+                            )
+                            as Subject;
+                    return CustomWidgets.teachersAssignmentCards(
+                      context: context,
+                      assignment: widget.assignment,
+                      subjectName: sub.name,
+                      detailed: true,
+                      cls: widget.cls,
+                    );
+                  },
+                ),
 
-              const SizedBox(height: 15),
+                const SizedBox(height: 15),
 
-              // submission details
-              const Text(
-                'SUBMISSION DETAILS:',
-                style: TextStyle(color: Colors.black45),
-              ),
-              const SizedBox(height: 5),
-              BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
-                builder: (context, state) {
-                  final List<AppFile> submissions =
-                      (state is TeacherAssignmentLoaded)
-                      ? state.submissions
-                      : [];
+                // submission details
+                const Text(
+                  'SUBMISSION DETAILS:',
+                  style: TextStyle(color: Colors.black45),
+                ),
+                const SizedBox(height: 5),
+                BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
+                  builder: (context, state) {
+                    final List<AppFile> submissions =
+                        (state is TeacherAssignmentLoaded)
+                        ? state.submissions
+                        : [];
 
-                  final subCount = submissions
-                      .where((s) => s.ownerId == assignment.id)
-                      .map((s) => s.uploaderId)
-                      .toSet();
+                    final subCount = submissions
+                        .where((s) => s.ownerId == widget.assignment.id)
+                        .map((s) => s.uploaderId)
+                        .toSet();
 
-                  return CustomWidgets.submissionDetailsForTeacher(
-                    assignment,
-                    count: subCount.length,
-                    total: cls.studentCount,
-                  );
-                },
-              ),
+                    return BlocBuilder<SubmissionBloc, SubmissionState>(
+                      builder: (context, state) {
+                        final int totalCount = (state is StudentsLoaded)
+                            ? state.students.length
+                            : 0;
 
-              const SizedBox(height: 5),
-              
-              // view submissions
-              Row(
-                children: [
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF2AB3AA),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text(
-                      'View Submissions',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
+                        return CustomWidgets.submissionDetailsForTeacher(
+                          widget.assignment,
+                          count: subCount.length,
+                          total: totalCount,
+                        );
+                      },
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 5),
+
+                // view submissions
+                Row(
+                  children: [
+                    Spacer(),
+                    ElevatedButton(
+                      onPressed: () =>
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SubmissionsView(
+                              classId: widget.cls.id,
+                              subjectId: widget.assignment.subjectId,
+                              assignmentId: widget.assignment.id ?? '',
+                            ),
+                          ),
+                        ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2AB3AA),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(
+                        'View Submissions',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 15),
+              ],
+            ),
           ),
         ),
       ),
