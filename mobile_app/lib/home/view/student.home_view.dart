@@ -185,20 +185,15 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             // no of subjects
                             BlocBuilder<SubjectBloc, SubjectState>(
                               builder: (context, state) {
-                                if (state is! SubjectLoaded) {
-                                  return Expanded(
-                                    child: CustomWidgets.infoCard(
-                                      size,
-                                      0,
-                                      'Subjects',
-                                    ),
-                                  );
-                                }
+                                final String subjectCount =
+                                    (state is SubjectLoaded)
+                                    ? state.subjects.length.toString()
+                                    : '-';
 
                                 return Expanded(
                                   child: CustomWidgets.infoCard(
                                     size,
-                                    state.subjects.length,
+                                    subjectCount,
                                     'Subjects',
                                   ),
                                 );
@@ -213,17 +208,14 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                                     StudentsAssignmentState
                                   >(
                                     builder: (context, state) {
-                                      if (state is! StudentAssignmentLoaded) {
-                                        return CustomWidgets.infoCard(
-                                          size,
-                                          0,
-                                          'Assignments',
-                                        );
-                                      }
+                                      final String pendingCount =
+                                          (state is StudentAssignmentLoaded)
+                                          ? state.pendingCount.toString()
+                                          : '-';
 
                                       return CustomWidgets.infoCard(
                                         size,
-                                        state.pendingCount,
+                                        pendingCount,
                                         'Assignments',
                                       );
                                     },
@@ -238,17 +230,14 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                                     UnreadCountState
                                   >(
                                     builder: (context, state) {
-                                      if (state is! CountLoaded) {
-                                        return CustomWidgets.infoCard(
-                                          size,
-                                          0,
-                                          'New Notices',
-                                        );
-                                      }
+                                      final String unreadNotice =
+                                          (state is CountLoaded)
+                                          ? state.count.toString()
+                                          : '-';
 
                                       return CustomWidgets.infoCard(
                                         size,
-                                        state.count,
+                                        unreadNotice,
                                         'New Notices',
                                       );
                                     },

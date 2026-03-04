@@ -8,9 +8,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final AssignmentRepoImpl repository;
 
   DashboardBloc(this.repository) : super(DashboardLoading()) {
-    on<LoadActiveAssignmentCount>((event, emit) async{
+    on<LoadActiveAssignmentCount>((event, emit) async {
       try {
-        final activeCount = await repository.fetchActiveAssignmentCount(event.teacherId);
+        final activeCount = await repository.fetchActiveAssignmentCount(
+          event.teacherId,
+        );
+
         emit(DashboardLoaded(activeAssignmentCount: activeCount));
       } catch (e) {
         emit(DashboardLoadingError(message: e.toString()));
