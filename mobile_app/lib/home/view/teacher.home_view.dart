@@ -169,9 +169,9 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             Expanded(
                               child: BlocBuilder<ClassroomBloc, ClassroomState>(
                                 builder: (context, state) {
-                                  final classCount = (state is ClassesLoaded)
-                                      ? state.classes.length
-                                      : 0;
+                                  final String classCount = (state is ClassesLoaded)
+                                      ? state.classes.length.toString()
+                                      : '-';
 
                                   return CustomWidgets.infoCard(
                                     size,
@@ -186,10 +186,10 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             Expanded(
                               child: BlocBuilder<DashboardBloc, DashboardState>(
                                 builder: (context, state) {
-                                  final subjectCount =
+                                  final String subjectCount =
                                       (state is DashboardLoaded)
-                                      ? state.activeAssignmentCount
-                                      : 0;
+                                      ? state.activeAssignmentCount.toString()
+                                      : '-';
 
                                   return CustomWidgets.infoCard(
                                     size,
@@ -208,10 +208,10 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                                     UnreadCountState
                                   >(
                                     builder: (context, state) {
-                                      final unreadNotice =
+                                      final String unreadNotice =
                                           (state is CountLoaded)
-                                          ? state.count
-                                          : 0;
+                                          ? state.count.toString()
+                                          : '-';
 
                                       return CustomWidgets.infoCard(
                                         size,

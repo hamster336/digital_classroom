@@ -37,7 +37,7 @@ class CustomWidgets {
   }
 
   // general info card for homescreen
-  static Widget infoCard(Size size, int count, String info) {
+  static Widget infoCard(Size size, String count, String info) {
     return Card(
       elevation: 2,
       color: Colors.white,
@@ -45,7 +45,7 @@ class CustomWidgets {
         contentPadding: .zero,
         title: Center(
           child: Text(
-            '$count',
+            count,
             style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.w600,

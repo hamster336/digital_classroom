@@ -39,6 +39,5 @@ final class UpdateAssignmentError extends TeacherAssignmentState {
 
 final class DeleteAssignmentError extends TeacherAssignmentState {
   final String message;
-
   DeleteAssignmentError({required this.message});
 }
