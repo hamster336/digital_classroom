@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SubmissionServices {
@@ -36,7 +37,7 @@ class SubmissionServices {
     await client.from('app_files').insert(map);
   }
 
-  //? FOR TEACHER
+  /// FOR TEACHER
 
   // fetch submissions of a class
   Future<List<Map<String, dynamic>>> fetchSubmissionForTeacher(
@@ -50,5 +51,26 @@ class SubmissionServices {
         .eq('file_context', 'assignment')
         .inFilter('owner_id', assignmentIds)
         .order('created_at', ascending: false);
+  }
+
+  // downlaod students submitted file
+  Future<void> downloadSubmission({
+    required String fileName,
+    required String filePath,
+    required String directory,
+  }) async {
+    try {
+      final url = client.storage
+          .from('submissions')
+          .getPublicUrl(filePath);
+
+      Dio dio = Dio();
+
+      final savePath = '$directory/$fileName';
+
+      await dio.download(url, savePath);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }

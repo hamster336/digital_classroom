@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/notes/bloc/notes_bloc.dart';
@@ -98,6 +99,10 @@ class _StudentNotesViewState extends State<StudentNotesView> {
             },
             child: BlocBuilder<SubjectBloc, SubjectState>(
               builder: (context, state) {
+                if (state is SubjectsLoading) {
+                  return CustomWidgets.customLoader();
+                }
+
                 List<Subject> subjects = (state is SubjectLoaded)
                     ? state.subjects
                     : [];
@@ -131,18 +136,26 @@ class _StudentNotesViewState extends State<StudentNotesView> {
 
                           final note = notes[index];
 
-                          final sub = subjects.firstWhere(
+                          final sub = subjects.firstWhereOrNull(
                             (s) => s.id == notes[index].ownerId,
                           );
 
+                          final downloading = state.downloadProgress
+                              .containsKey(note.id!);
+
+                          final progress = state.downloadProgress[note.id!];
+
+                          // log('$downloading $progress');
                           return CustomWidgets.studentrNotesCard(
                             note: note,
-                            subjectName: sub.name,
-                            onTap: () {},
+                            subjectName: (sub == null) ? '' : sub.name,
+
                             icon: Icons.file_download_outlined,
                             onDownload: () => context.read<NotesBloc>().add(
                               DownloadNote(note: note),
                             ),
+                            downlaoding: downloading,
+                            progress: (downloading) ? progress : null,
                           );
                         },
                       );

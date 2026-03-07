@@ -25,5 +25,9 @@ abstract class NotesRepository {
 
   Future<void> deleteNote(String noteId, String filePath);
 
-  Future<void> downloadNote(AppFile note);
+  Future<void> downloadNote({
+    required String filePath,
+    required String fileName,
+    required Function(int recieved, int total) onProgress,
+  });
 }

@@ -1151,58 +1151,105 @@ class CustomWidgets {
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
-            child: Column(
-              crossAxisAlignment: .start,
-              children: [
-                Text(
-                  subjectName,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2AB3AA),
+            child: ListTile(
+              title: Column(
+                crossAxisAlignment: .start,
+                children: [
+                  // subject Name
+                  Text(
+                    subjectName,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2AB3AA),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    mainAxisAlignment: .start,
-                    children: [
-                      Text(
-                        note.fileName,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Spacer(),
-                      InkWell(
-                        onTap: onDelete,
-                        child: Icon(Icons.delete_rounded, color: Colors.red),
-                      ),
-                      const SizedBox(width: 5),
-                    ],
+
+                  // file name
+                  Text(
+                    note.fileName,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      formatSize(note.fileSize),
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '(${getFileLabel(note.mimeType)})',
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      DateFormat('dd MMM').format(note.createdAt.toLocal()),
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
+              subtitle: Row(
+                children: [
+                  Text(
+                    formatSize(note.fileSize),
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '(${getFileLabel(note.mimeType)})',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    DateFormat(
+                      'hh:mm a, dd MMM',
+                    ).format(note.createdAt.toLocal()),
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+
+              trailing: InkWell(
+                onTap: onDelete,
+                child: Icon(Icons.delete_rounded, color: Colors.red),
+              ),
             ),
+            // Column(
+            //   crossAxisAlignment: .start,
+            //   children: [
+            //     Text(
+            //       subjectName,
+            //       style: TextStyle(
+            //         fontSize: 18,
+            //         fontWeight: FontWeight.w600,
+            //         color: Color(0xFF2AB3AA),
+            //       ),
+            //     ),
+            //     Padding(
+            //       padding: const EdgeInsets.symmetric(vertical: 5),
+            //       child: Row(
+            //         mainAxisAlignment: .start,
+            //         children: [
+            //           Text(
+            //             note.fileName,
+            //             style: TextStyle(
+            //               fontSize: 18,
+            //               fontWeight: FontWeight.w600,
+            //             ),
+            //           ),
+            //           Spacer(),
+            //           InkWell(
+            //             onTap: onDelete,
+            //             child: Icon(Icons.delete_rounded, color: Colors.red),
+            //           ),
+            //           const SizedBox(width: 5),
+            //         ],
+            //       ),
+            //     ),
+            //     Row(
+            //       children: [
+            //         Text(
+            //           formatSize(note.fileSize),
+            //           style: TextStyle(color: Colors.black54),
+            //         ),
+            //         const SizedBox(width: 10),
+            //         Text(
+            //           '(${getFileLabel(note.mimeType)})',
+            //           style: TextStyle(color: Colors.black54),
+            //         ),
+            //         const SizedBox(width: 10),
+            //         Text(
+            //           DateFormat('dd MMM').format(note.createdAt.toLocal()),
+            //           style: TextStyle(color: Colors.black54),
+            //         ),
+            //       ],
+            //     ),
+            //   ],
+            // ),
           ),
         ),
       ),
@@ -1213,9 +1260,10 @@ class CustomWidgets {
   static Widget studentrNotesCard({
     required AppFile note,
     required String subjectName,
-    required VoidCallback onTap,
     required IconData icon,
     required VoidCallback onDownload,
+    required bool downlaoding,
+    double? progress,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5, bottom: 5),
@@ -1224,16 +1272,17 @@ class CustomWidgets {
         color: Color(0xFF2AB3AA),
       ),
 
-      child: InkWell(
-        onTap: onTap,
-        child: Card(
-          margin: const EdgeInsets.only(left: 5),
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
-            child: Column(
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
+          child: ListTile(
+            contentPadding: .zero,
+            title: Column(
               crossAxisAlignment: .start,
               children: [
+                // subject Name
                 Text(
                   subjectName,
                   style: TextStyle(
@@ -1242,49 +1291,47 @@ class CustomWidgets {
                     color: Color(0xFF2AB3AA),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    mainAxisAlignment: .start,
-                    children: [
-                      Text(
-                        note.fileName,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Spacer(),
-                      InkWell(
-                        onTap: onDownload,
-                        child: Icon(icon, size: 30, color: Colors.black54),
-                      ),
-                      const SizedBox(width: 5),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      formatSize(note.fileSize),
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '(${getFileLabel(note.mimeType)})',
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      DateFormat(
-                        'hh:mm a, dd MMM',
-                      ).format(note.createdAt.toLocal()),
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                  ],
+
+                // file name
+                Text(
+                  note.fileName,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
+
+            // file information
+            subtitle: Row(
+              children: [
+                Text(
+                  formatSize(note.fileSize),
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '(${getFileLabel(note.mimeType)})',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  DateFormat(
+                    'hh:mm a, dd MMM',
+                  ).format(note.createdAt.toLocal()),
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
+
+            // download button and download progress
+            trailing: (downlaoding)
+                ? CircularProgressIndicator(
+                    color: Color(0xFF2AB3AA),
+                    value: progress,
+                  )
+                : InkWell(
+                    onTap: onDownload,
+                    child: Icon(icon, size: 30, color: Colors.black54),
+                  ),
           ),
         ),
       ),

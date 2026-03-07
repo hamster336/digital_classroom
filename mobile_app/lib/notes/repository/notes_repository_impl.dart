@@ -83,10 +83,19 @@ class NotesRepositoryImpl extends NotesRepository {
   }
 
   @override
-  Future<void> downloadNote(AppFile note) async {
+  Future<void> downloadNote({
+    required String filePath,
+    required String fileName,
+    required Function(int recieved, int total) onProgress,
+  }) async {
     try {
       final directory = await getPublicDirectoryPath();
-      await services.downloadNote(note, directory!);
+      await services.downloadNote(
+        filePath: filePath,
+        fileName: fileName,
+        directory: directory!,
+        onProgress: (recieved, total) => onProgress(recieved, total),
+      );
     } catch (e) {
       throw Exception(e.toString());
     }
