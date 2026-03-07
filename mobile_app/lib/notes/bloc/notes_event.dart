@@ -20,14 +20,20 @@ final class LoadNotesForStudent extends NotesEvent {
   final String classId;
   final List<String> subjectId;
 
-  LoadNotesForStudent({required this.classId, required this.subjectId});
+  LoadNotesForStudent({
+    required this.classId,
+    required this.subjectId,
+  });
 }
 
 final class RefreshNotesForStudent extends NotesEvent {
   final String classId;
   final List<String> subjectIds;
 
-  RefreshNotesForStudent({required this.classId, required this.subjectIds});
+  RefreshNotesForStudent({
+    required this.classId,
+    required this.subjectIds,
+  });
 }
 
 final class UploadNotes extends NotesEvent {

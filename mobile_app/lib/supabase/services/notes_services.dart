@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -102,35 +101,31 @@ class NotesServices {
   }
 
   // download note
-  Future<void> downloadNote(AppFile note, String directory) async {
+  Future<void> downloadNote({
+    required String filePath,
+    required String fileName,
+    required String directory,
+    required Function(int received, int total) onProgress,
+  }) async {
     try {
       final url = client.storage
           .from('classroom_materials')
-          .getPublicUrl(note.filePath);
+          .getPublicUrl(filePath);
 
       Dio dio = Dio();
 
-      final savePath = '$directory/${note.fileName}';
+      final savePath = '$directory/$fileName';
 
-      await dio.download(url, savePath);
-      log('File downloaded to: $savePath');
-
-      // final bytes = await client.storage
-      //     .from('classroom_materials')
-      //     .download(note.filePath);
-      // final mediaStore = FlutterMediaStore();
-      // await mediaStore.saveFile(
-      //   fileData: bytes,
-      //   mimeType: note.mimeType,
-      //   rootFolderName: 'Download',
-      //   folderName: 'Academia',
-      //   fileName: note.fileName,
-      //   onSuccess: (uri, filePath) =>
-      //       log('File saved: ${filePath.toString()} $uri'),
-      //   onError: (errorMessage) {
-      //     log(errorMessage);
-      //   },
-      // );
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            // log('${received/total}');
+            onProgress(received, total);
+          }
+        },
+      );
     } catch (e) {
       throw Exception(e.toString());
     }

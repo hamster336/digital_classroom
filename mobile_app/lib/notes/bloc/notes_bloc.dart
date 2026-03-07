@@ -52,6 +52,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           notes: notes,
           hasReachedMax: notes.length < pageSize,
           isLoadingMore: false,
+          downloadProgress: {},
         ),
       );
     } catch (e) {
@@ -75,6 +76,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           notes: cachedNotesForTeacher[key]!,
           hasReachedMax: cachedReachedMaxForTeacher[key]!,
           isLoadingMore: false,
+          downloadProgress: {},
         ),
       );
     }
@@ -98,6 +100,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
             notes: oldNotes,
             hasReachedMax: false,
             isLoadingMore: true,
+            downloadProgress: {},
           ),
         );
       }
@@ -117,6 +120,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           notes: oldNotes + newNotes,
           hasReachedMax: newNotes.length < pageSize,
           isLoadingMore: false,
+          downloadProgress: {},
         ),
       );
     } catch (e) {
@@ -170,11 +174,37 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     DownloadNote event,
     Emitter<NotesState> emit,
   ) async {
-    final currentState = state;
+    if (state is! NotesLoaded) return;
+
+    final currentState = state as NotesLoaded;
+
+    final Map<String, double> progressMap = currentState.downloadProgress;
     try {
-      await repository.downloadNote(event.note);
+      // start the download
+      progressMap[event.note.id!] = 0;
+      emit(currentState.copyWith(downloadProgress: progressMap));
+
+      await repository.downloadNote(
+        filePath: event.note.filePath,
+        fileName: event.note.fileName,
+        onProgress: (recieved, total) {
+          final progress = recieved / total;
+
+          progressMap[event.note.id!] = progress;
+          emit(currentState.copyWith(downloadProgress: progressMap));
+
+          // add(
+          //   UpdateDownloadProgress(noteId: event.note.id!, progress: progress),
+          // );
+        },
+      );
+
+      progressMap.remove(event.note.id);
+
       emit(DownloadNoteSuccess());
+      emit(currentState.copyWith(downloadProgress: progressMap));
     } catch (e) {
+      progressMap.remove(event.note.id!);
       emit(DownloadNoteError(message: e.toString()));
       emit(currentState);
     }
@@ -202,6 +232,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           notes: notes,
           hasReachedMax: notes.length < pageSize,
           isLoadingMore: false,
+          downloadProgress: {},
         ),
       );
     } catch (e) {
@@ -222,6 +253,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           notes: cachedNotesForStudent,
           hasReachedMax: cachedReachedMaxForStudent,
           isLoadingMore: false,
+          downloadProgress: {},
         ),
       );
     }
@@ -231,10 +263,12 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
 
       List<AppFile> oldNotes = [];
       int from = 0;
+      Map<String, double> progress = {};
 
       if (currentState is NotesLoaded) {
         oldNotes = currentState.notes;
         from = oldNotes.length;
+        progress = currentState.downloadProgress;
       }
 
       if (oldNotes.isEmpty) {
@@ -245,6 +279,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
             notes: oldNotes,
             hasReachedMax: false,
             isLoadingMore: true,
+            downloadProgress: progress,
           ),
         );
       }
@@ -264,6 +299,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           notes: oldNotes + newNotes,
           hasReachedMax: newNotes.length < pageSize,
           isLoadingMore: false,
+          downloadProgress: {},
         ),
       );
     } catch (e) {
