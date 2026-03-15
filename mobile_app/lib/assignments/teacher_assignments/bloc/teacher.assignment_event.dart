@@ -28,3 +28,9 @@ final class DeleteAssignment extends TeacherAssignmentEvent {
   final String assignmentId;
   DeleteAssignment({required this.assignmentId});
 }
+
+final class DownloadAssignmentSubmission extends TeacherAssignmentEvent {
+  final AppFile submission;
+  String className;
+  DownloadAssignmentSubmission({required this.submission, required this.className});
+}

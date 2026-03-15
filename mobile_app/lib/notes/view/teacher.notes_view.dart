@@ -205,7 +205,7 @@ class _TeacherNotesViewState extends State<TeacherNotesView> {
                             return CustomWidgets.teacherNotesCard(
                               note: notes[index],
                               subjectName: sub.name,
-                              onTap: () {},
+
                               onDelete: () async =>
                                   _onDelete(note.id!, note.filePath),
                             );

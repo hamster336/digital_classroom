@@ -163,7 +163,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                                     return CustomWidgets.teachersAssignmentCards(
                                       context: context,
                                       assignment: assignments[index],
-                                      subjectName: sub.name,
+                                      subject: sub,
                                       cls: widget.cls,
                                       onEdit: () => Navigator.push(
                                         context,

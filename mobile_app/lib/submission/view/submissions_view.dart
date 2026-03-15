@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
+import 'package:mobile_app/classroom/model/classroom.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
+import 'package:mobile_app/subject/model/subject.dart';
 import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 
 class SubmissionsView extends StatelessWidget {
-  final String classId;
-  final String subjectId;
+  final Classroom cls;
+  final Subject subject;
   final String assignmentId;
 
   const SubmissionsView({
     super.key,
-    required this.classId,
-    required this.subjectId,
+    required this.cls,
+    required this.subject,
     required this.assignmentId,
   });
 
@@ -25,24 +27,68 @@ class SubmissionsView extends StatelessWidget {
       appBar: AppBar(title: const Text('Submissions')),
       body: RefreshIndicator(
         onRefresh: () async {
-          final bloc = context.read<SubmissionBloc>();
-          bloc.add(RefreshStudents(classId: classId, subjectId: subjectId));
-          await bloc.stream.firstWhere(
+          final subBloc = context.read<SubmissionBloc>();
+          final asgnBloc = context.read<TeacherAssignmentBloc>();
+          asgnBloc.add(
+            RefreshAssignments(teacherId: subject.teacherId, classId: cls.id),
+          );
+          subBloc.add(RefreshStudents(classId: cls.id, subjectId: subject.id));
+
+          await subBloc.stream.firstWhere(
             (state) => state is StudentsLoaded || state is StudentsLoadingError,
+          );
+
+          await asgnBloc.stream.firstWhere(
+            (state) =>
+                state is TeacherAssignmentLoaded ||
+                state is TeacherAssignmentLoadingError,
           );
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: BlocListener<SubmissionBloc, SubmissionState>(
-            listener: (context, state) {
-              if (state is StudentsLoadingError) {
-                CustomWidgets.customAltertBox(context, state.message, () {});
-              }
-            },
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<TeacherAssignmentBloc, TeacherAssignmentState>(
+                listener: (context, state) {
+                  if (state is DownloadAssignmentSubmissionError) {
+                    CustomWidgets.customAltertBox(
+                      context,
+                      state.message,
+                      () {},
+                    );
+                  }
+
+                  if (state is DownloadAssignmentSubmissionSuccess) {
+                    context.read<TeacherAssignmentBloc>().add(
+                      RefreshAssignments(
+                        teacherId: subject.teacherId,
+                        classId: cls.id,
+                      ),
+                    );
+                  }
+                },
+              ),
+              BlocListener<SubmissionBloc, SubmissionState>(
+                listener: (context, state) {
+                  if (state is StudentsLoadingError) {
+                    CustomWidgets.customAltertBox(
+                      context,
+                      state.message,
+                      () {},
+                    );
+                  }
+                },
+              ),
+            ],
             child: BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
               builder: (context, state) {
                 final List<AppFile> submissions =
                     (state is TeacherAssignmentLoaded) ? state.submissions : [];
+
+                final Map<String, double> downloadProgress =
+                    (state is TeacherAssignmentLoaded)
+                    ? state.downloadProgress
+                    : {};
 
                 return BlocBuilder<SubmissionBloc, SubmissionState>(
                   builder: (context, state) {
@@ -72,12 +118,32 @@ class SubmissionsView extends StatelessWidget {
                                 (s.ownerId == assignmentId),
                           );
 
+                          final isDownloaded = (sub != null)
+                              ? sub.isDownloaded
+                              : false;
+
+                          final downloading = (sub != null)
+                              ? downloadProgress.containsKey(sub.id!)
+                              : false;
+
+                          final progress = (sub != null)
+                              ? downloadProgress[sub.id!]
+                              : null;
+
                           return CustomWidgets.studentSubmissionCard(
-                            // size: size,
                             student: student,
                             submission: sub,
-                            icon: Icons.download,
-                            onDownload: () {},
+                            // icon: Icons.file_download_outlined,
+                            onDownload: () =>
+                                context.read<TeacherAssignmentBloc>().add(
+                                  DownloadAssignmentSubmission(
+                                    submission: sub!,
+                                    className: cls.name,
+                                  ),
+                                ),
+                            isDownloaded: isDownloaded,
+                            downloading: downloading,
+                            progress: progress,
                           );
                         },
                       );

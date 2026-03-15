@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
+import 'package:mobile_app/shared/public_directory.dart';
 
 part 'notes_event.dart';
 part 'notes_state.dart';
@@ -192,10 +194,6 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
 
           progressMap[event.note.id!] = progress;
           emit(currentState.copyWith(downloadProgress: progressMap));
-
-          // add(
-          //   UpdateDownloadProgress(noteId: event.note.id!, progress: progress),
-          // );
         },
       );
 
@@ -216,6 +214,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     Emitter<NotesState> emit,
   ) async {
     try {
+      final dir = await PublicDirectory.getPublicDirectoryPath();
+
       int from = 0;
       final notes = await repository.loadNotesForStudent(
         classId: event.classId,
@@ -223,6 +223,13 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
         from: from,
         limit: pageSize,
       );
+
+      for (var note in notes) {
+        final path = '$dir/${note.fileName}';
+        final exists = await File(path).exists();
+
+        note.isDownloaded = exists;
+      }
 
       cachedNotesForStudent = notes;
       cachedReachedMaxForStudent = notes.length < pageSize;
@@ -260,6 +267,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
 
     try {
       final currentState = state;
+      final dir = await PublicDirectory.getPublicDirectoryPath();
 
       List<AppFile> oldNotes = [];
       int from = 0;
@@ -290,6 +298,13 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
         from: from,
         limit: pageSize,
       );
+
+      for (var note in newNotes) {
+        final path = '$dir/${note.fileName}';
+        final exists = await File(path).exists();
+
+        note.isDownloaded = exists;
+      }
 
       cachedNotesForStudent = oldNotes + newNotes;
       cachedReachedMaxForStudent = newNotes.length < pageSize;

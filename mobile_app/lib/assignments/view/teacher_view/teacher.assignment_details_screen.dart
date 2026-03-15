@@ -13,10 +13,12 @@ import 'package:mobile_app/submission/view/submissions_view.dart';
 class TeacherAssignmentDetailScreen extends StatefulWidget {
   final Assignment assignment;
   final Classroom cls;
+  final Subject sub;
   const TeacherAssignmentDetailScreen({
     super.key,
     required this.assignment,
     required this.cls,
+    required this.sub,
   });
 
   @override
@@ -76,7 +78,7 @@ class _TeacherAssignmentDetailScreenState
                     return CustomWidgets.teachersAssignmentCards(
                       context: context,
                       assignment: widget.assignment,
-                      subjectName: sub.name,
+                      subject: sub,
                       detailed: true,
                       cls: widget.cls,
                     );
@@ -126,17 +128,16 @@ class _TeacherAssignmentDetailScreenState
                   children: [
                     Spacer(),
                     ElevatedButton(
-                      onPressed: () =>
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => SubmissionsView(
-                              classId: widget.cls.id,
-                              subjectId: widget.assignment.subjectId,
-                              assignmentId: widget.assignment.id ?? '',
-                            ),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SubmissionsView(
+                            cls: widget.cls,
+                            subject: widget.sub,
+                            assignmentId: widget.assignment.id ?? '',
                           ),
                         ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF2AB3AA),
                         foregroundColor: Colors.white,

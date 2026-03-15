@@ -57,18 +57,26 @@ class SubmissionServices {
   Future<void> downloadSubmission({
     required String fileName,
     required String filePath,
+    required String className,
     required String directory,
+    required Function(int received, int total) onProgress,
   }) async {
     try {
-      final url = client.storage
-          .from('submissions')
-          .getPublicUrl(filePath);
+      final url = client.storage.from('submissions').getPublicUrl(filePath);
 
       Dio dio = Dio();
 
       final savePath = '$directory/$fileName';
 
-      await dio.download(url, savePath);
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            onProgress(received, total);
+          }
+        },
+      );
     } catch (e) {
       throw Exception(e.toString());
     }

@@ -7,11 +7,25 @@ final class TeacherAssignmentLoading extends TeacherAssignmentState {}
 final class TeacherAssignmentLoaded extends TeacherAssignmentState {
   final List<Assignment> assignments;
   final List<AppFile> submissions;
+  final Map<String, double> downloadProgress;
 
   TeacherAssignmentLoaded({
     required this.assignments,
     required this.submissions,
+    required this.downloadProgress,
   });
+
+  TeacherAssignmentLoaded copyWith({
+    List<Assignment>? assignments,
+    List<AppFile>? submissions,
+    Map<String, double>? downloadProgress,
+  }) {
+    return TeacherAssignmentLoaded(
+      assignments: assignments ?? this.assignments,
+      submissions: submissions ?? this.submissions,
+      downloadProgress: downloadProgress ?? this.downloadProgress,
+    );
+  }
 }
 
 final class TeacherAssignmentLoadingError extends TeacherAssignmentState {
@@ -41,3 +55,10 @@ final class DeleteAssignmentError extends TeacherAssignmentState {
   final String message;
   DeleteAssignmentError({required this.message});
 }
+
+final class DownloadAssignmentSubmissionError extends TeacherAssignmentState {
+  final String message;
+  DownloadAssignmentSubmissionError({required this.message});
+}
+
+final class DownloadAssignmentSubmissionSuccess extends TeacherAssignmentState {}
