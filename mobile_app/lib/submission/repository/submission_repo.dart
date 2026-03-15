@@ -20,5 +20,15 @@ abstract class SubmissionRepo {
     List<String> assignmentIds,
   );
 
-  Future<List<ClassStudents>> getClassStudents(String classId, String subjectId);
+  Future<List<ClassStudents>> getClassStudents(
+    String classId,
+    String subjectId,
+  );
+
+  Future<void> downloadSubmission({
+    required String fileName,
+    required String filePath,
+    required String className,
+    required Function(int received, int total) onProgress,
+  });
 }

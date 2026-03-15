@@ -1,10 +1,10 @@
-import 'dart:developer';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/notes/bloc/notes_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
+import 'package:mobile_app/shared/public_directory.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
 import 'package:mobile_app/user/models/student.dart';
@@ -19,6 +19,7 @@ class StudentNotesView extends StatefulWidget {
 
 class _StudentNotesViewState extends State<StudentNotesView> {
   final scrollController = ScrollController();
+  String? dir;
 
   @override
   void initState() {
@@ -30,7 +31,12 @@ class _StudentNotesViewState extends State<StudentNotesView> {
         subjectId: widget.student.subjectIds,
       ),
     );
+    getDirectoryPath();
     super.initState();
+  }
+
+  void getDirectoryPath() async {
+    dir = await PublicDirectory.getPublicDirectoryPath();
   }
 
   @override
@@ -70,7 +76,6 @@ class _StudentNotesViewState extends State<StudentNotesView> {
             }
 
             if (state is DownloadNoteError) {
-              log(state.message);
               CustomWidgets.customAltertBox(context, state.message, () {});
             }
 
@@ -136,26 +141,29 @@ class _StudentNotesViewState extends State<StudentNotesView> {
 
                           final note = notes[index];
 
+                          final isDownloaded = note.isDownloaded;
+
                           final sub = subjects.firstWhereOrNull(
                             (s) => s.id == notes[index].ownerId,
                           );
 
-                          final downloading = state.downloadProgress
-                              .containsKey(note.id!);
+                          final isDownloading =
+                              state.downloadProgress.containsKey(note.id!) &&
+                              !isDownloaded;
 
                           final progress = state.downloadProgress[note.id!];
 
-                          // log('$downloading $progress');
                           return CustomWidgets.studentrNotesCard(
                             note: note,
                             subjectName: (sub == null) ? '' : sub.name,
 
-                            icon: Icons.file_download_outlined,
                             onDownload: () => context.read<NotesBloc>().add(
-                              DownloadNote(note: note),
-                            ),
-                            downlaoding: downloading,
-                            progress: (downloading) ? progress : null,
+                                    DownloadNote(note: note),
+                                  ),
+
+                            isDownloaded: isDownloaded,
+                            downlaoding: isDownloading,
+                            progress: (isDownloading) ? progress : null,
                           );
                         },
                       );

@@ -149,11 +149,10 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => Center(
-        child: CustomWidgets.customLoader(),
-      ),
+      builder: (context) => Center(child: CustomWidgets.customLoader()),
     );
 
     context.read<AuthBloc>().add(LoginRequested(email: email, password: psw));
+    FocusScope.of(context).unfocus();
   }
 }

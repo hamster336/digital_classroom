@@ -3,7 +3,6 @@ import 'package:mobile_app/shared/required_enums.dart';
 class AppFile {
   final String? id;
   final String uploaderId;
-
   final String classId;
   final String
   ownerId; // subjectId for notes, and assignmentId for assignment submissions
@@ -14,6 +13,8 @@ class AppFile {
   final String mimeType;
   final int fileSize;
   final DateTime createdAt;
+
+  bool isDownloaded;
 
   AppFile({
     this.id,
@@ -26,6 +27,7 @@ class AppFile {
     required this.mimeType,
     required this.fileSize,
     required this.createdAt,
+    this.isDownloaded = false,
   });
 
   Map<String, dynamic> toMap({String? id}) {
@@ -77,6 +79,7 @@ class AppFile {
     required String mimeType,
     required int fileSize,
     required DateTime createdAt,
+    bool? isDownloaded,
   }) {
     return AppFile(
       id: id,
@@ -89,6 +92,7 @@ class AppFile {
       mimeType: mimeType,
       fileSize: fileSize,
       createdAt: createdAt,
+      isDownloaded: isDownloaded ?? this.isDownloaded
     );
   }
 }

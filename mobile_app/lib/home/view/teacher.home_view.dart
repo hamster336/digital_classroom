@@ -169,7 +169,8 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                             Expanded(
                               child: BlocBuilder<ClassroomBloc, ClassroomState>(
                                 builder: (context, state) {
-                                  final String classCount = (state is ClassesLoaded)
+                                  final String classCount =
+                                      (state is ClassesLoaded)
                                       ? state.classes.length.toString()
                                       : '-';
 

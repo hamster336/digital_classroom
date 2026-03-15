@@ -28,8 +28,8 @@ class Assignment {
       id: map['id'],
       title: map['title'],
       description: map['description'],
-      issuedAt: DateTime.parse(map['issued_at']),
-      dueDate: DateTime.parse(map['due_date']),
+      issuedAt: DateTime.parse(map['issued_at']).toLocal(),
+      dueDate: DateTime.parse(map['due_date']).toLocal(),
       subjectId: map['subject_id'],
       classId: map['class_id'],
       teacherId: map['teacher_id'],
@@ -38,7 +38,6 @@ class Assignment {
   }
 
   // Assignment a
-
   static Map<String, dynamic> toMap(Assignment a) {
     final map = {
       'title': a.title,

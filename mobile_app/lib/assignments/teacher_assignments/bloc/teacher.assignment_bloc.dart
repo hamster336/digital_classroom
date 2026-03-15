@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
+import 'package:mobile_app/shared/public_directory.dart';
 import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
 
 part 'teacher.assignment_event.dart';
@@ -21,6 +23,7 @@ class TeacherAssignmentBloc
     on<CreateAssignment>(_createAssignment);
     on<UpdateAssignment>(_updateAssignment);
     on<DeleteAssignment>(_deleteAssignment);
+    on<DownloadAssignmentSubmission>(_downloadSubmission);
   }
 
   // cache asignments to prevent refetching each time the teacher navigates
@@ -35,6 +38,8 @@ class TeacherAssignmentBloc
     final key = '${event.teacherId}-${event.classId}';
 
     try {
+      final dir = await PublicDirectory.getPublicDirectoryPath();
+
       final assignments = await assignmentRepo.loadTeachersAssignments(
         event.classId,
         event.teacherId,
@@ -44,6 +49,13 @@ class TeacherAssignmentBloc
         assignments.map((a) => a.id!).toList(),
       );
 
+      for (var sub in submissions) {
+        final path = '$dir/${sub.fileName}';
+        final exists = await File(path).exists();
+
+        sub.isDownloaded = exists;
+      }
+
       cachedAssignemnts[key] = assignments;
       cachedSubmissions[key] = submissions;
 
@@ -51,6 +63,7 @@ class TeacherAssignmentBloc
         TeacherAssignmentLoaded(
           assignments: assignments,
           submissions: submissions,
+          downloadProgress: {},
         ),
       );
     } catch (e) {
@@ -70,6 +83,7 @@ class TeacherAssignmentBloc
         TeacherAssignmentLoaded(
           assignments: cachedAssignemnts[key]!,
           submissions: cachedSubmissions[key]!,
+          downloadProgress: {},
         ),
       );
       return;
@@ -78,6 +92,8 @@ class TeacherAssignmentBloc
     emit(TeacherAssignmentLoading());
 
     try {
+      final dir = await PublicDirectory.getPublicDirectoryPath();
+
       final assignments = await assignmentRepo.loadTeachersAssignments(
         event.classId,
         event.teacherId,
@@ -87,12 +103,21 @@ class TeacherAssignmentBloc
         assignments.map((a) => a.id!).toList(),
       );
 
+      for (var sub in submissions) {
+        final path = '$dir/${sub.fileName}';
+        final exists = await File(path).exists();
+
+        sub.isDownloaded = exists;
+      }
+
       cachedAssignemnts[key] = assignments;
       cachedSubmissions[key] = submissions;
+
       emit(
         TeacherAssignmentLoaded(
           assignments: assignments,
           submissions: submissions,
+          downloadProgress: {},
         ),
       );
     } catch (e) {
@@ -158,6 +183,43 @@ class TeacherAssignmentBloc
       emit(currentState);
     } catch (e) {
       emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _downloadSubmission(
+    DownloadAssignmentSubmission event,
+    Emitter<TeacherAssignmentState> emit,
+  ) async {
+    if (state is! TeacherAssignmentLoaded) return;
+
+    final currentState = state as TeacherAssignmentLoaded;
+
+    final Map<String, double> progressMap = currentState.downloadProgress;
+
+    try {
+      progressMap[event.submission.id!] = 0;
+      emit(currentState.copyWith(downloadProgress: progressMap));
+
+      await submissionRepo.downloadSubmission(
+        fileName: event.submission.fileName,
+        filePath: event.submission.filePath,
+        className: event.className,
+        onProgress: (received, total) {
+          final progress = received / total;
+
+          progressMap[event.submission.id!] = progress;
+          emit(currentState.copyWith(downloadProgress: progressMap));
+        },
+      );
+
+      progressMap.remove(event.submission.id);
+
+      emit(DownloadAssignmentSubmissionSuccess());
+      emit(currentState.copyWith(downloadProgress: progressMap));
+    } catch (e) {
+      progressMap.remove(event.submission.id!);
+      emit(DownloadAssignmentSubmissionError(message: e.toString()));
       emit(currentState);
     }
   }

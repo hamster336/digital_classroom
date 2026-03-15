@@ -121,7 +121,6 @@ class NotesServices {
         savePath,
         onReceiveProgress: (received, total) {
           if (total != -1) {
-            // log('${received/total}');
             onProgress(received, total);
           }
         },

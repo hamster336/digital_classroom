@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:mobile_app/app_file/models/app_file.dart';
+import 'package:mobile_app/shared/public_directory.dart';
 import 'package:mobile_app/submission/model/class_students.dart';
 import 'package:mobile_app/submission/repository/submission_repo.dart';
 import 'package:mobile_app/supabase/services/students_services.dart';
@@ -103,6 +104,27 @@ class SubmissionRepoImpl extends SubmissionRepo {
       );
 
       return students.map((s) => ClassStudents.fromMap(s)).toList();
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<void> downloadSubmission({
+    required String fileName,
+    required String filePath,
+    required String className,
+    required Function(int received, int total) onProgress,
+  }) async {
+    try {
+      final directory = await PublicDirectory.getPublicDirectoryPath();
+      await subServices.downloadSubmission(
+        filePath: filePath,
+        fileName: fileName,
+        className: className,
+        directory: directory!,
+        onProgress: (recieved, total) => onProgress(recieved, total),
+      );
     } catch (e) {
       throw Exception(e.toString());
     }

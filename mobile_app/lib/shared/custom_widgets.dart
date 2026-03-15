@@ -4,6 +4,7 @@ import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/subject/model/subject.dart';
 import 'package:mobile_app/submission/model/class_students.dart';
 import 'package:mobile_app/upcoming/model/upcoming.dart';
 import 'package:mobile_app/notices/models/notice.dart';
@@ -760,7 +761,7 @@ class CustomWidgets {
   static Widget teachersAssignmentCards({
     required BuildContext context,
     required Assignment assignment,
-    required String subjectName,
+    required Subject subject,
     required Classroom cls,
     VoidCallback? onEdit,
     VoidCallback? onDelete,
@@ -788,6 +789,7 @@ class CustomWidgets {
                 builder: (_) => TeacherAssignmentDetailScreen(
                   assignment: assignment,
                   cls: cls,
+                  sub: subject,
                 ),
               ),
             ),
@@ -807,7 +809,7 @@ class CustomWidgets {
               children: [
                 // subject name
                 Text(
-                  subjectName,
+                  subject.name,
                   style: TextStyle(
                     fontSize: 18,
                     color: Color(0xFF2AB3AA),
@@ -1134,7 +1136,6 @@ class CustomWidgets {
   static Widget teacherNotesCard({
     required AppFile note,
     required String subjectName,
-    required VoidCallback onTap,
     required VoidCallback onDelete,
   }) {
     return Container(
@@ -1144,113 +1145,111 @@ class CustomWidgets {
         color: Color(0xFF2AB3AA),
       ),
 
-      child: InkWell(
-        onTap: onTap,
-        child: Card(
-          margin: const EdgeInsets.only(left: 5),
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
-            child: ListTile(
-              title: Column(
-                crossAxisAlignment: .start,
-                children: [
-                  // subject Name
-                  Text(
-                    subjectName,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2AB3AA),
-                    ),
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
+          child: ListTile(
+            contentPadding: .zero,
+            title: Column(
+              crossAxisAlignment: .start,
+              children: [
+                // subject Name
+                Text(
+                  subjectName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2AB3AA),
                   ),
+                ),
 
-                  // file name
-                  Text(
-                    note.fileName,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              subtitle: Row(
-                children: [
-                  Text(
-                    formatSize(note.fileSize),
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    '(${getFileLabel(note.mimeType)})',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    DateFormat(
-                      'hh:mm a, dd MMM',
-                    ).format(note.createdAt.toLocal()),
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                ],
-              ),
-
-              trailing: InkWell(
-                onTap: onDelete,
-                child: Icon(Icons.delete_rounded, color: Colors.red),
-              ),
+                // file name
+                Text(
+                  note.fileName,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
-            // Column(
-            //   crossAxisAlignment: .start,
-            //   children: [
-            //     Text(
-            //       subjectName,
-            //       style: TextStyle(
-            //         fontSize: 18,
-            //         fontWeight: FontWeight.w600,
-            //         color: Color(0xFF2AB3AA),
-            //       ),
-            //     ),
-            //     Padding(
-            //       padding: const EdgeInsets.symmetric(vertical: 5),
-            //       child: Row(
-            //         mainAxisAlignment: .start,
-            //         children: [
-            //           Text(
-            //             note.fileName,
-            //             style: TextStyle(
-            //               fontSize: 18,
-            //               fontWeight: FontWeight.w600,
-            //             ),
-            //           ),
-            //           Spacer(),
-            //           InkWell(
-            //             onTap: onDelete,
-            //             child: Icon(Icons.delete_rounded, color: Colors.red),
-            //           ),
-            //           const SizedBox(width: 5),
-            //         ],
-            //       ),
-            //     ),
-            //     Row(
-            //       children: [
-            //         Text(
-            //           formatSize(note.fileSize),
-            //           style: TextStyle(color: Colors.black54),
-            //         ),
-            //         const SizedBox(width: 10),
-            //         Text(
-            //           '(${getFileLabel(note.mimeType)})',
-            //           style: TextStyle(color: Colors.black54),
-            //         ),
-            //         const SizedBox(width: 10),
-            //         Text(
-            //           DateFormat('dd MMM').format(note.createdAt.toLocal()),
-            //           style: TextStyle(color: Colors.black54),
-            //         ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
+            subtitle: Row(
+              children: [
+                Text(
+                  formatSize(note.fileSize),
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '(${getFileLabel(note.mimeType)})',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  DateFormat(
+                    'hh:mm a, dd MMM',
+                  ).format(note.createdAt.toLocal()),
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
+
+            trailing: InkWell(
+              onTap: onDelete,
+              child: Icon(Icons.delete_rounded, color: Colors.red),
+            ),
           ),
+          // Column(
+          //   crossAxisAlignment: .start,
+          //   children: [
+          //     Text(
+          //       subjectName,
+          //       style: TextStyle(
+          //         fontSize: 18,
+          //         fontWeight: FontWeight.w600,
+          //         color: Color(0xFF2AB3AA),
+          //       ),
+          //     ),
+          //     Padding(
+          //       padding: const EdgeInsets.symmetric(vertical: 5),
+          //       child: Row(
+          //         mainAxisAlignment: .start,
+          //         children: [
+          //           Text(
+          //             note.fileName,
+          //             style: TextStyle(
+          //               fontSize: 18,
+          //               fontWeight: FontWeight.w600,
+          //             ),
+          //           ),
+          //           Spacer(),
+          //           InkWell(
+          //             onTap: onDelete,
+          //             child: Icon(Icons.delete_rounded, color: Colors.red),
+          //           ),
+          //           const SizedBox(width: 5),
+          //         ],
+          //       ),
+          //     ),
+          //     Row(
+          //       children: [
+          //         Text(
+          //           formatSize(note.fileSize),
+          //           style: TextStyle(color: Colors.black54),
+          //         ),
+          //         const SizedBox(width: 10),
+          //         Text(
+          //           '(${getFileLabel(note.mimeType)})',
+          //           style: TextStyle(color: Colors.black54),
+          //         ),
+          //         const SizedBox(width: 10),
+          //         Text(
+          //           DateFormat('dd MMM').format(note.createdAt.toLocal()),
+          //           style: TextStyle(color: Colors.black54),
+          //         ),
+          //       ],
+          //     ),
+          //   ],
+          // ),
         ),
       ),
     );
@@ -1260,8 +1259,8 @@ class CustomWidgets {
   static Widget studentrNotesCard({
     required AppFile note,
     required String subjectName,
-    required IconData icon,
     required VoidCallback onDownload,
+    required bool isDownloaded,
     required bool downlaoding,
     double? progress,
   }) {
@@ -1328,9 +1327,15 @@ class CustomWidgets {
                     color: Color(0xFF2AB3AA),
                     value: progress,
                   )
+                : (isDownloaded)
+                ? Icon(Icons.done, color: Colors.green, size: 30)
                 : InkWell(
                     onTap: onDownload,
-                    child: Icon(icon, size: 30, color: Colors.black54),
+                    child: Icon(
+                      Icons.file_download_outlined,
+                      size: 30,
+                      color: Colors.black54,
+                    ),
                   ),
           ),
         ),
@@ -1434,8 +1439,10 @@ class CustomWidgets {
   static Widget studentSubmissionCard({
     required ClassStudents student,
     AppFile? submission,
-    required IconData icon,
     required VoidCallback onDownload,
+    required bool isDownloaded,
+    required bool downloading,
+    double? progress,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5, bottom: 5),
@@ -1448,65 +1455,127 @@ class CustomWidgets {
         margin: const EdgeInsets.only(left: 5),
         color: Colors.white,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 0, 10, 5),
-          child: Column(
-            crossAxisAlignment: .start,
-            children: [
-              Text(
-                '${student.rollNumber}. ${student.name}',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
+          padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
+          child: ListTile(
+            contentPadding: .zero,
+            title: Text(
+              '${student.rollNumber}. ${student.name}',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
 
-              Row(
-                mainAxisAlignment: .start,
-                children: [
-                  Text(
-                    (submission == null)
-                        ? 'No data found'
-                        : submission.fileName,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+            subtitle: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  (submission == null) ? 'No data found' : submission.fileName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black54,
+                  ),
+                ),
+
+                (submission == null)
+                    ? Text(
+                        'No data found',
+                        style: TextStyle(color: Colors.black54),
+                      )
+                    : Row(
+                        children: [
+                          Text(
+                            formatSize(submission.fileSize),
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '(${getFileLabel(submission.mimeType)})',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            DateFormat(
+                              'hh:mm a, dd MMM',
+                            ).format(submission.createdAt.toLocal()),
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                        ],
+                      ),
+              ],
+            ),
+            trailing: (submission == null)
+                ? null
+                : (downloading)
+                ? CircularProgressIndicator(
+                    color: Color(0xFF2AB3AA),
+                    value: progress,
+                  )
+                : (isDownloaded)
+                ? Icon(Icons.done, color: Colors.green, size: 30)
+                : InkWell(
+                    onTap: onDownload,
+                    child: Icon(
+                      Icons.file_download_outlined,
+                      size: 30,
                       color: Colors.black54,
                     ),
                   ),
-                  Spacer(),
-
-                  if (submission != null)
-                    InkWell(
-                      onTap: onDownload,
-                      child: Icon(icon, size: 30, color: Colors.black54),
-                    ),
-                  const SizedBox(width: 5),
-                ],
-              ),
-              (submission == null)
-                  ? Text(
-                      'No data found',
-                      style: TextStyle(color: Colors.black54),
-                    )
-                  : Row(
-                      children: [
-                        Text(
-                          formatSize(submission.fileSize),
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '(${getFileLabel(submission.mimeType)})',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          DateFormat(
-                            'hh:mm a, dd MMM',
-                          ).format(submission.createdAt.toLocal()),
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ],
-                    ),
-            ],
           ),
+          // Column(
+          //   crossAxisAlignment: .start,
+          //   children: [
+          //     Text(
+          //       '${student.rollNumber}. ${student.name}',
+          //       style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          //     ),
+          //     Row(
+          //       mainAxisAlignment: .start,
+          //       children: [
+          //         Text(
+          //           (submission == null)
+          //               ? 'No data found'
+          //               : submission.fileName,
+          //           style: TextStyle(
+          //             fontSize: 18,
+          //             fontWeight: FontWeight.w600,
+          //             color: Colors.black54,
+          //           ),
+          //         ),
+          //         Spacer(),
+          //         if (submission != null)
+          //           InkWell(
+          //             onTap: onDownload,
+          //             child: Icon(icon, size: 30, color: Colors.black54),
+          //           ),
+          //         const SizedBox(width: 5),
+          //       ],
+          //     ),
+          //     (submission == null)
+          //         ? Text(
+          //             'No data found',
+          //             style: TextStyle(color: Colors.black54),
+          //           )
+          //         : Row(
+          //             children: [
+          //               Text(
+          //                 formatSize(submission.fileSize),
+          //                 style: TextStyle(color: Colors.black54),
+          //               ),
+          //               const SizedBox(width: 10),
+          //               Text(
+          //                 '(${getFileLabel(submission.mimeType)})',
+          //                 style: TextStyle(color: Colors.black54),
+          //               ),
+          //               const SizedBox(width: 10),
+          //               Text(
+          //                 DateFormat(
+          //                   'hh:mm a, dd MMM',
+          //                 ).format(submission.createdAt.toLocal()),
+          //                 style: TextStyle(color: Colors.black54),
+          //               ),
+          //             ],
+          //           ),
+          //   ],
+          // ),
         ),
       ),
     );
