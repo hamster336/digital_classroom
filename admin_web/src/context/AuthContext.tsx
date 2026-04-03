@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { loginAdmin, logoutAdmin, getCurrentAdmin } from '@/supabase/auth'; // ✅ real auth
+import { signUp } from '@/supabase/signup'; // ✅ real signup
 
 interface User {
     id: string;
@@ -9,9 +11,9 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    login: (email: string, name: string) => void;
-    signup: (email: string, name: string) => void;
-    logout: () => void;
+    login: (email: string, password: string) => Promise<void>; 
+    signup: (email: string, password: string, name: string) => Promise<void>; 
+    logout: () => Promise<void>;  
     isAuthenticated: boolean;
     isLoading: boolean;
 }
@@ -22,54 +24,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    //  Supabase session on refresh
     useEffect(() => {
-        // Check for stored user on refresh
-        const storedUser = localStorage.getItem('academia_user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else {
-            // Default "Public Admin" for instant access
-            const guestUser: User = {
-                id: 'guest',
-                name: 'Guest Administrator',
-                email: 'guest@academia.edu',
-                role: 'admin'
-            };
-            setUser(guestUser);
-            localStorage.setItem('academia_user', JSON.stringify(guestUser));
-        }
-        setIsLoading(false);
+        const loadUser = async () => {
+            try {
+                const supabaseUser = await getCurrentAdmin();
+                if (supabaseUser) {
+                    setUser({
+                        id: supabaseUser.id,
+                        name: supabaseUser.user_metadata?.name || supabaseUser.email || 'Admin',
+                        email: supabaseUser.email ?? '',
+                        role: supabaseUser.user_metadata?.role || 'admin'
+                    });
+                }
+            } catch {
+                setUser(null); 
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadUser();
     }, []);
 
-    const login = (email: string, name: string) => {
-        const dummyUser: User = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: name || 'Admin User',
-            email,
-            role: 'admin'
-        };
-        setUser(dummyUser);
-        localStorage.setItem('academia_user', JSON.stringify(dummyUser));
+    // Supabase login
+    const login = async (email: string, password: string) => {
+        try {
+            const { user: supabaseUser } = await loginAdmin(email, password);
+            if (supabaseUser) {
+                setUser({
+                    id: supabaseUser.id,
+                    name: supabaseUser.user_metadata?.name || email,
+                    email: supabaseUser.email ?? '',
+                    role: supabaseUser.user_metadata?.role || 'admin'
+                });
+            }
+        } catch (error) {
+            console.error("Login failed:", error);
+            throw error;
+        }
     };
 
-    const signup = (email: string, name: string) => {
-        const dummyUser: User = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: name,
-            email,
-            role: 'admin'
-        };
-        setUser(dummyUser);
-        localStorage.setItem('academia_user', JSON.stringify(dummyUser));
+    // signin
+    const signup = async (email: string, password: string, name: string) => {
+        try {
+            const { user: supabaseUser } = await signUp(email, password);
+            if (supabaseUser) {
+                setUser({
+                    id: supabaseUser.id,
+                    name: name || email,
+                    email: supabaseUser.email ?? '',
+                    role: 'admin'
+                });
+            }
+        } catch (error) {
+            console.error("Signup failed:", error);
+            throw error; 
+        }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('academia_user');
+    //  Supabase logout
+    const logout = async () => {
+        try {
+            await logoutAdmin();
+            setUser(null);
+        } catch (error) {
+            console.error("Logout failed:", error);
+            throw error;
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated: !!user, isLoading }}>
+        <AuthContext.Provider value={{
+            user,
+            login,
+            signup,
+            logout,
+            isAuthenticated: !!user,
+            isLoading
+        }}>
             {children}
         </AuthContext.Provider>
     );

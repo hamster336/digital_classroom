@@ -1,18 +1,15 @@
-import { supabase } from "./client";
+import { supabase } from "./supabase-client";
 
-/**
- * CREATE: Add a new notice
- */
-export const createNotice = async (noticeData) => {
+/** CREATE */
+export const createNotice = async (noticeData: Record<string, any>) => {
   const { data, error } = await supabase
     .from("notices")
     .insert([{
-      // Matches your screenshot columns exactly
       title:        noticeData.title,
       description:  noticeData.description,
-      published_at: noticeData.publishedAt || new Date().toISOString(),
-      scheduled_at: noticeData.scheduledAt, // Can be NULL as seen in your image
-      priority:     noticeData.priority      // e.g., 'urgent', 'info', 'important'
+      published_at: noticeData.published_at ?? new Date().toISOString(), 
+      scheduled_at: noticeData.scheduled_at ?? null,                     
+      priority:     noticeData.priority
     }])
     .select()
     .single();
@@ -21,24 +18,19 @@ export const createNotice = async (noticeData) => {
   return data;
 };
 
-/**
- * READ ALL: Get all notices
- */
+/** READ ALL */
 export const getAllNotices = async () => {
   const { data, error } = await supabase
     .from("notices")
     .select("*")
-    // Correct: Sorting by published_at as it exists in your screenshot
-    .order("published_at", { ascending: false });
+    .order("published_at", { ascending: false }); 
 
   if (error) throw error;
   return data;
 };
 
-/**
- * READ BY ID
- */
-export const getNoticeById = async (id) => {
+/** READ BY ID */
+export const getNoticeById = async (id: string) => { 
   const { data, error } = await supabase
     .from("notices")
     .select("*")
@@ -49,17 +41,15 @@ export const getNoticeById = async (id) => {
   return data;
 };
 
-/**
- * UPDATE: Explicitly map the update fields
- */
-export const updateNotice = async (id, updates) => {
+/** UPDATE */
+export const updateNotice = async (id: string, updates: Record<string, any>) => {  
   const { data, error } = await supabase
     .from("notices")
     .update({
       title:        updates.title,
       description:  updates.description,
-      published_at: updates.publishedAt,
-      scheduled_at: updates.scheduledAt,
+      published_at: updates.published_at,   
+      scheduled_at: updates.scheduled_at ?? null,  
       priority:     updates.priority
     })
     .eq("id", id)
@@ -70,10 +60,8 @@ export const updateNotice = async (id, updates) => {
   return data;
 };
 
-/**
- * DELETE
- */
-export const deleteNotice = async (id) => {
+/** DELETE */
+export const deleteNotice = async (id: string) => {  
   const { error } = await supabase
     .from("notices")
     .delete()
