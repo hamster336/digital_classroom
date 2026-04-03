@@ -4,7 +4,7 @@ import { AlertTriangle, Bell, Globe, Lock } from 'lucide-react';
 import React from 'react';
 
 export const SettingsPage: React.FC = () => {
-    const { resetToDefaults } = useData();
+    const { refreshAll } = useData();
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col gap-2">
@@ -126,7 +126,7 @@ export const SettingsPage: React.FC = () => {
                                 className="shadow-lg shadow-red-200"
                                 onClick={() => {
                                     if (confirm("Are you sure? This will delete all your manual changes and reload the default massive test data.")) {
-                                        resetToDefaults();
+                                        refreshAll();
                                     }
                                 }}
                             >

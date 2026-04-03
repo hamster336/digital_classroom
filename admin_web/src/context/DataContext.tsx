@@ -1,155 +1,365 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
+//  Import  models
+import { Classroom } from '../models/classroom';
+import { Notice } from '../models/notice';
+import { Student } from '../models/student';
+import { Subject } from '../models/subject';
+import { Teacher } from '../models/teacher';
+
+//  Import controllers
 import {
-    Classroom,
-    Notice,
-    Student,
-    Subject, Teacher,
-    classrooms as initialClassrooms,
-    notices as initialNotices,
-    students as initialStudents,
-    subjects as initialSubjects,
-    teachers as initialTeachers
-} from '../lib/dummy-data';
+  addClassroom as addClassroomDB,
+  editClassroom,
+  fetchClassrooms,
+  removeClassroom,
+} from '../controllers/classroomController';
+import {
+  addNotice as addNoticeDB,
+  editNotice,
+  fetchNotices,
+  removeNotice,
+} from '../controllers/noticeController';
+import {
+  addStudent as addStudentDB,
+  editStudent,
+  fetchStudents,
+  removeStudent,
+} from '../controllers/studentController';
+import {
+  addSubject as addSubjectDB,
+  editSubject,
+  fetchSubject,
+  removeSubject,
+} from '../controllers/subjectController';
+import {
+  addTeacher as addTeacherDB,
+  editTeacher,
+  fetchTeachers,
+  removeTeacher,
+} from '../controllers/teacherController';
 
 interface DataContextType {
-    classrooms: Classroom[];
-    subjects: Subject[];
-    teachers: Teacher[];
-    students: Student[];
-    notices: Notice[];
+  // State
+  classrooms: Classroom[];
+  subjects: Subject[];
+  teachers: Teacher[];
+  students: Student[];
+  notices: Notice[];
+  isLoading: boolean;
+  error: string | null;
 
-    addClassroom: (classroom: Classroom) => void;
-    updateClassroom: (classroom: Classroom) => void;
-    deleteClassroom: (id: string) => void;
+  // Classroom
+  addClassroom: (name: string, faculty: string, startYear: number, endYear: number, isActive: boolean) => Promise<void>;
+  updateClassroom: (id: string, name: string, faculty: string, startYear: number, endYear: number, isActive: boolean, createdAt: Date) => Promise<void>;
+  deleteClassroom: (id: string) => Promise<void>;
 
-    addSubject: (subject: Subject) => void;
-    updateSubject: (subject: Subject) => void;
-    deleteSubject: (id: string) => void;
+  // Subject
+  addSubject: (name: string, classId: string, teacherId: string) => Promise<void>;
+  updateSubject: (id: string, name: string, classId: string, teacherId: string) => Promise<void>;
+  deleteSubject: (id: string) => Promise<void>;
 
-    addTeacher: (teacher: Teacher) => void;
-    updateTeacher: (teacher: Teacher) => void;
-    deleteTeacher: (id: string) => void;
+  // Teacher
+  addTeacher: (employeeId: string, subjectIds: string[], classIds: string[], avatarUrl: string | null) => Promise<void>;
+  updateTeacher: (id: string, employeeId: string, subjectIds: string[], classIds: string[], avatarUrl: string | null, lastCheckedNotices: Date | null) => Promise<void>;
+  deleteTeacher: (id: string) => Promise<void>;
 
-    addStudent: (student: Student) => void;
-    updateStudent: (student: Student) => void;
-    deleteStudent: (id: string) => void;
+  // Student
+  addStudent: (rollNo: number, subjectIds: string[], avatarUrl: string | null, classId: string) => Promise<void>;
+  updateStudent: (id: string, rollNo: number, subjectIds: string[], avatarUrl: string | null, classId: string, lastCheckedNotices: Date | null) => Promise<void>;
+  deleteStudent: (id: string) => Promise<void>;
 
-    addNotice: (notice: Notice) => void;
-    updateNotice: (notice: Notice) => void;
-    deleteNotice: (id: string) => void;
-    resetToDefaults: () => void;
+  // Notice
+  addNotice: (title: string, description: string, scheduledAt: Date | null, priority: string) => Promise<void>;
+  updateNotice: (id: string, title: string, description: string, scheduledAt: Date | null, priority: string, publishedAt: Date) => Promise<void>;
+  deleteNotice: (id: string) => Promise<void>;
+
+  // Refresh
+  refreshAll: () => Promise<void>;
 }
-
-const DATA_VERSION = 'v1.1'; // Increment this to force all clients to refresh their data
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-    const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [teachers, setTeachers] = useState<Teacher[]>([]);
-    const [students, setStudents] = useState<Student[]>([]);
-    const [notices, setNotices] = useState<Notice[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const [isLoading, setIsLoading] = useState(true);
+  //  Load all data from Supabase on mount
+  const loadAll = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const [c, s, t, st, n] = await Promise.all([
+        fetchClassrooms(),
+        fetchSubject(),
+        fetchTeachers(),
+        fetchStudents(),
+        fetchNotices(),
+      ]);
+      setClassrooms(c);
+      setSubjects(s);
+      setTeachers(t);
+      setStudents(st);
+      setNotices(n);
+    } catch (err) {
+      setError("Failed to load data. Please refresh.");
+      console.error("DataContext load error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const STORAGE_KEYS = {
-        VERSION: 'academia_data_version',
-        CLASSROOMS: 'academia_classrooms',
-        SUBJECTS: 'academia_subjects',
-        TEACHERS: 'academia_teachers',
-        STUDENTS: 'academia_students',
-        NOTICES: 'academia_notices'
-    };
+  useEffect(() => {
+    loadAll();
+  }, []);
 
-    // Initial load and sync
-    useEffect(() => {
-        const storedVersion = localStorage.getItem(STORAGE_KEYS.VERSION);
+  // Refresh all data
+  const refreshAll = async () => {
+    await loadAll();
+  };
 
-        // If version mismatch or missing, clear everything to force fresh dummy data
-        if (storedVersion !== DATA_VERSION) {
-            Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-            localStorage.setItem(STORAGE_KEYS.VERSION, DATA_VERSION);
-        }
+  // CLASSROOM handlers
+  const addClassroom = async (
+    name: string,
+    faculty: string,
+    startYear: number,
+    endYear: number,
+    isActive: boolean
+  ) => {
+    try {
+      const newItem = await addClassroomDB(name, faculty, startYear, endYear, isActive);
+      setClassrooms(prev => [...prev, newItem]); // update state instantly
+    } catch (err) {
+      console.error("Failed to add classroom:", err);
+      throw err;
+    }
+  };
 
-        const load = (key: string, initial: any[]) => {
-            const stored = localStorage.getItem(key);
-            return stored ? JSON.parse(stored) : initial;
-        };
+  const updateClassroom = async (
+    id: string,
+    name: string,
+    faculty: string,
+    startYear: number,
+    endYear: number,
+    isActive: boolean,
+    createdAt: Date
+  ) => {
+    try {
+      const updated = await editClassroom(id, name, faculty, startYear, endYear, isActive, createdAt);
+      setClassrooms(prev => prev.map(i => i.id === id ? updated : i)); 
+    } catch (err) {
+      console.error("Failed to update classroom:", err);
+      throw err;
+    }
+  };
 
-        setClassrooms(load(STORAGE_KEYS.CLASSROOMS, initialClassrooms));
-        setSubjects(load(STORAGE_KEYS.SUBJECTS, initialSubjects));
-        setTeachers(load(STORAGE_KEYS.TEACHERS, initialTeachers));
-        setStudents(load(STORAGE_KEYS.STUDENTS, initialStudents));
-        setNotices(load(STORAGE_KEYS.NOTICES, initialNotices));
+  const deleteClassroom = async (id: string) => {
+    try {
+      await removeClassroom(id);
+      setClassrooms(prev => prev.filter(i => i.id !== id)); 
+    } catch (err) {
+      console.error("Failed to delete classroom:", err);
+      throw err;
+    }
+  };
 
-        setIsLoading(false);
-    }, []);
+  //  SUBJECT handlers
+  const addSubject = async (name: string, classId: string, teacherId: string) => {
+    try {
+      const newItem = await addSubjectDB(name, classId, teacherId);
+      setSubjects(prev => [...prev, newItem]);
+    } catch (err) {
+      console.error("Failed to add subject:", err);
+      throw err;
+    }
+  };
 
-    // Effect for persistence
-    useEffect(() => {
-        if (!isLoading) {
-            localStorage.setItem(STORAGE_KEYS.CLASSROOMS, JSON.stringify(classrooms));
-            localStorage.setItem(STORAGE_KEYS.SUBJECTS, JSON.stringify(subjects));
-            localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(teachers));
-            localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
-            localStorage.setItem(STORAGE_KEYS.NOTICES, JSON.stringify(notices));
-        }
-    }, [classrooms, subjects, teachers, students, notices, isLoading]);
+  const updateSubject = async (id: string, name: string, classId: string, teacherId: string) => {
+    try {
+      const updated = await editSubject(id, name, classId, teacherId);
+      setSubjects(prev => prev.map(i => i.id === id ? updated : i));
+    } catch (err) {
+      console.error("Failed to update subject:", err);
+      throw err;
+    }
+  };
 
-    const resetToDefaults = () => {
-        Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-        localStorage.setItem(STORAGE_KEYS.VERSION, DATA_VERSION);
-        setClassrooms(initialClassrooms);
-        setSubjects(initialSubjects);
-        setTeachers(initialTeachers);
-        setStudents(initialStudents);
-        setNotices(initialNotices);
-        window.location.reload(); // Force reload to ensure everything is fresh
-    };
+  const deleteSubject = async (id: string) => {
+    try {
+      await removeSubject(id);
+      setSubjects(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      console.error("Failed to delete subject:", err);
+      throw err;
+    }
+  };
 
-    // Handlers
-    const addClassroom = (item: Classroom) => setClassrooms(prev => [...prev, item]);
-    const updateClassroom = (item: Classroom) => setClassrooms(prev => prev.map(i => i.id === item.id ? item : i));
-    const deleteClassroom = (id: string) => setClassrooms(prev => prev.filter(i => i.id !== id));
+  //  TEACHER handlers
+  const addTeacher = async (
+    employeeId: string,
+    subjectIds: string[],
+    classIds: string[],
+    avatarUrl: string | null
+  ) => {
+    try {
+      const newItem = await addTeacherDB(employeeId, subjectIds, classIds, avatarUrl);
+      setTeachers(prev => [...prev, newItem]);
+    } catch (err) {
+      console.error("Failed to add teacher:", err);
+      throw err;
+    }
+  };
 
-    const addSubject = (item: Subject) => setSubjects(prev => [...prev, item]);
-    const updateSubject = (item: Subject) => setSubjects(prev => prev.map(i => i.id === item.id ? item : i));
-    const deleteSubject = (id: string) => setSubjects(prev => prev.filter(i => i.id !== id));
+  const updateTeacher = async (
+    id: string,
+    employeeId: string,
+    subjectIds: string[],
+    classIds: string[],
+    avatarUrl: string | null,
+    lastCheckedNotices: Date | null
+  ) => {
+    try {
+      const updated = await editTeacher(id, employeeId, subjectIds, classIds, avatarUrl, lastCheckedNotices);
+      setTeachers(prev => prev.map(i => i.id === id ? updated : i));
+    } catch (err) {
+      console.error("Failed to update teacher:", err);
+      throw err;
+    }
+  };
 
-    const addTeacher = (item: Teacher) => setTeachers(prev => [...prev, item]);
-    const updateTeacher = (item: Teacher) => setTeachers(prev => prev.map(i => i.id === item.id ? item : i));
-    const deleteTeacher = (id: string) => setTeachers(prev => prev.filter(i => i.id !== id));
+  const deleteTeacher = async (id: string) => {
+    try {
+      await removeTeacher(id);
+      setTeachers(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      console.error("Failed to delete teacher:", err);
+      throw err;
+    }
+  };
 
-    const addStudent = (item: Student) => setStudents(prev => [...prev, item]);
-    const updateStudent = (item: Student) => setStudents(prev => prev.map(i => i.id === item.id ? item : i));
-    const deleteStudent = (id: string) => setStudents(prev => prev.filter(i => i.id !== id));
+  //  STUDENT handlers
+  const addStudent = async (
+    rollNo: number,
+    subjectIds: string[],
+    avatarUrl: string | null,
+    classId: string
+  ) => {
+    try {
+      const newItem = await addStudentDB(rollNo, subjectIds, avatarUrl, classId);
+      setStudents(prev => [...prev, newItem]);
+    } catch (err) {
+      console.error("Failed to add student:", err);
+      throw err;
+    }
+  };
 
-    const addNotice = (item: Notice) => setNotices(prev => [...prev, item]);
-    const updateNotice = (item: Notice) => setNotices(prev => prev.map(i => i.id === item.id ? item : i));
-    const deleteNotice = (id: string) => setNotices(prev => prev.filter(i => i.id !== id));
+  const updateStudent = async (
+    id: string,
+    rollNo: number,
+    subjectIds: string[],
+    avatarUrl: string | null,
+    classId: string,
+    lastCheckedNotices: Date | null
+  ) => {
+    try {
+      const updated = await editStudent(id, rollNo, subjectIds, avatarUrl, classId, lastCheckedNotices);
+      setStudents(prev => prev.map(i => i.id === id ? updated : i));
+    } catch (err) {
+      console.error("Failed to update student:", err);
+      throw err;
+    }
+  };
 
-    if (isLoading) return null;
+  const deleteStudent = async (id: string) => {
+    try {
+      await removeStudent(id);
+      setStudents(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      console.error("Failed to delete student:", err);
+      throw err;
+    }
+  };
 
-    return (
-        <DataContext.Provider value={{
-            classrooms, subjects, teachers, students, notices,
-            addClassroom, updateClassroom, deleteClassroom,
-            addSubject, updateSubject, deleteSubject,
-            addTeacher, updateTeacher, deleteTeacher,
-            addStudent, updateStudent, deleteStudent,
-            addNotice, updateNotice, deleteNotice,
-            resetToDefaults
-        }}>
-            {children}
-        </DataContext.Provider>
-    );
+  //  NOTICE handlers
+  const addNotice = async (
+    title: string,
+    description: string,
+    scheduledAt: Date | null,
+    priority: string
+  ) => {
+    try {
+      const newItem = await addNoticeDB(title, description, scheduledAt, priority);
+      setNotices(prev => [...prev, newItem]);
+    } catch (err) {
+      console.error("Failed to add notice:", err);
+      throw err;
+    }
+  };
+
+  const updateNotice = async (
+    id: string,
+    title: string,
+    description: string,
+    scheduledAt: Date | null,
+    priority: string,
+    publishedAt: Date
+  ) => {
+    try {
+      const updated = await editNotice(id, title, description, scheduledAt, priority, publishedAt);
+      setNotices(prev => prev.map(i => i.id === id ? updated : i));
+    } catch (err) {
+      console.error("Failed to update notice:", err);
+      throw err;
+    }
+  };
+
+  const deleteNotice = async (id: string) => {
+    try {
+      await removeNotice(id);
+      setNotices(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      console.error("Failed to delete notice:", err);
+      throw err;
+    }
+  };
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-slate-500 font-medium">Loading data...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-red-500 font-medium">{error}</p>
+    </div>
+  );
+
+  return (
+    <DataContext.Provider value={{
+      classrooms, subjects, teachers, students, notices,
+      isLoading, error,
+      addClassroom, updateClassroom, deleteClassroom,
+      addSubject, updateSubject, deleteSubject,
+      addTeacher, updateTeacher, deleteTeacher,
+      addStudent, updateStudent, deleteStudent,
+      addNotice, updateNotice, deleteNotice,
+      refreshAll,
+    }}>
+      {children}
+    </DataContext.Provider>
+  );
 }
 
 export function useData() {
-    const context = useContext(DataContext);
-    if (context === undefined) {
-        throw new Error('useData must be used within a DataProvider');
-    }
-    return context;
-}
+  const context = useContext(DataContext);
+  if (context === undefined) {
+    throw new Error('useData must be used within a DataProvider');
+  }
+  return context;
+}   
