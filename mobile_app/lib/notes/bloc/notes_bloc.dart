@@ -178,33 +178,61 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   ) async {
     if (state is! NotesLoaded) return;
 
-    final currentState = state as NotesLoaded;
-
-    final Map<String, double> progressMap = currentState.downloadProgress;
     try {
+      final currentState = state as NotesLoaded;
+      final Map<String, double> progressMap = Map<String, double>.from(
+        currentState.downloadProgress,
+      );
+
       // start the download
       progressMap[event.note.id!] = 0;
+      double lastProgress = 0;
+
       emit(currentState.copyWith(downloadProgress: progressMap));
 
       await repository.downloadNote(
         filePath: event.note.filePath,
         fileName: event.note.fileName,
-        onProgress: (recieved, total) {
-          final progress = recieved / total;
+        onProgress: (received, total) {
+          if (state is! NotesLoaded) return;
 
-          progressMap[event.note.id!] = progress;
-          emit(currentState.copyWith(downloadProgress: progressMap));
+          final progress = received / total;
+
+          if ((progress - lastProgress) > 0.05) {
+            lastProgress = progress;
+
+            final latestState = state as NotesLoaded;
+            final updatedMap = Map<String, double>.from(
+              latestState.downloadProgress,
+            );
+
+            updatedMap[event.note.id!] = received / total;
+
+            emit(latestState.copyWith(downloadProgress: updatedMap));
+          }
         },
       );
 
-      progressMap.remove(event.note.id);
+      if (state is! NotesLoaded) return;
 
-      emit(DownloadNoteSuccess());
-      emit(currentState.copyWith(downloadProgress: progressMap));
+      final latestState = state as NotesLoaded;
+      final updatedMap = Map<String, double>.from(latestState.downloadProgress);
+
+      updatedMap.remove(event.note.id);
+
+      event.note.isDownloaded = true;
+
+      emit(latestState.copyWith(downloadProgress: updatedMap));
     } catch (e) {
-      progressMap.remove(event.note.id!);
+      if (state is! NotesLoaded) return;
+
+      final latestState = state as NotesLoaded;
+      final updatedMap = Map<String, double>.from(latestState.downloadProgress);
+
+      updatedMap.remove(event.note.id);
+
       emit(DownloadNoteError(message: e.toString()));
-      emit(currentState);
+      emit(latestState.copyWith(downloadProgress: updatedMap));
     }
   }
 
@@ -213,6 +241,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     RefreshNotesForStudent event,
     Emitter<NotesState> emit,
   ) async {
+    if (state is! NotesLoaded) return;
+
     try {
       final dir = await PublicDirectory.getPublicDirectoryPath();
 

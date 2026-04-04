@@ -6,6 +6,7 @@ import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/user/models/student.dart';
 
 class StudentAssignmentView extends StatefulWidget {
@@ -34,9 +35,15 @@ class _StudentAssignmentViewState extends State<StudentAssignmentView> {
         },
         child: RefreshIndicator(
           onRefresh: () async {
-            final bloc = context.read<StudentsAssignmentBloc>();
-            bloc.add(RefreshAssignments(student: widget.student));
-            await bloc.stream.firstWhere(
+            final assignmentBloc = context.read<StudentsAssignmentBloc>();
+            final upcomingBloc = context.read<UpcomingBloc>();
+
+            assignmentBloc.add(RefreshAssignments(student: widget.student));
+            upcomingBloc.add(
+              RefreshEvents(subjectIds: widget.student.subjectIds),
+            );
+
+            await assignmentBloc.stream.firstWhere(
               (state) =>
                   state is StudentAssignmentLoaded ||
                   state is StudentAssignmentLoadingError,
@@ -180,7 +187,6 @@ class _StudentAssignmentViewState extends State<StudentAssignmentView> {
                                               StudentAssignmentDetailsScreen(
                                                 student: widget.student,
                                                 assignment: assignment,
-
                                               ),
                                         ),
                                       ),

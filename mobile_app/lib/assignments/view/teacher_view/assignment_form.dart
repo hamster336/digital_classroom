@@ -9,17 +9,19 @@ import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
+import 'package:mobile_app/user/models/teacher.dart';
 
 class AssignmentForm extends StatefulWidget {
   final Assignment? initialAssignment;
   final Classroom cls;
-  final String teacherId;
+  final Teacher teacher;
 
   const AssignmentForm({
     super.key,
     this.initialAssignment,
     required this.cls,
-    required this.teacherId,
+    required this.teacher,
   });
 
   @override
@@ -95,20 +97,27 @@ class _AssignmentFormState extends State<AssignmentForm> {
                 CustomWidgets.customAltertBox(context, state.message, () {});
               }
 
-              if (state is DeleteAssignmentError) {
+              if (state is UpdateAssignmentError) {
                 CustomWidgets.customAltertBox(context, state.message, () {});
               }
 
               if (state is CreateAssignmentSuccess) {
+                // refresh active assignment count
                 context.read<DashboardBloc>().add(
-                  LoadActiveAssignmentCount(teacherId: widget.teacherId),
+                  LoadActiveAssignmentCount(teacherId: widget.teacher.id),
                 );
+                // refresh assignments
                 context.read<TeacherAssignmentBloc>().add(
                   RefreshAssignments(
-                    teacherId: widget.teacherId,
+                    teacherId: widget.teacher.id,
                     classId: widget.cls.id,
                   ),
                 );
+                // refresh events
+                context.read<UpcomingBloc>().add(
+                  RefreshEvents(subjectIds: widget.teacher.subjectIds),
+                );
+
                 CustomWidgets.customAltertBox(
                   context,
                   'Assignment issued successfully.',
@@ -117,15 +126,22 @@ class _AssignmentFormState extends State<AssignmentForm> {
               }
 
               if (state is UpdateAssignmentSuccess) {
+                // refresh active assignment count
                 context.read<DashboardBloc>().add(
-                  LoadActiveAssignmentCount(teacherId: widget.teacherId),
+                  LoadActiveAssignmentCount(teacherId: widget.teacher.id),
                 );
+                // refresh assignments
                 context.read<TeacherAssignmentBloc>().add(
                   RefreshAssignments(
-                    teacherId: widget.teacherId,
+                    teacherId: widget.teacher.id,
                     classId: widget.cls.id,
                   ),
                 );
+                // refresh upcoming events
+                context.read<UpcomingBloc>().add(
+                  RefreshEvents(subjectIds: widget.teacher.subjectIds),
+                );
+
                 CustomWidgets.customAltertBox(
                   context,
                   'Assignment updated successfully.',
@@ -380,7 +396,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
       dueDate: dueDate!,
       classId: widget.cls.id,
       subjectId: selectedSubjectId!,
-      teacherId: widget.teacherId,
+      teacherId: widget.teacher.id,
       priority: priority!,
     );
 
