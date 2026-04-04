@@ -7,7 +7,7 @@ final class LoadEvents extends UpcomingEvent {
   LoadEvents({required this.subjectIds});
 }
 
-final class LoadStudentsEvents extends UpcomingEvent {
-  final Student student;
-  LoadStudentsEvents({required this.student});
+final class RefreshEvents extends UpcomingEvent {
+  final List<String> subjectIds;
+  RefreshEvents({required this.subjectIds});
 }

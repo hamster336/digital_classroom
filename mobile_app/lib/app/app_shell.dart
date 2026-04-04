@@ -52,7 +52,7 @@ class _AppShellState extends State<AppShell> {
             if (value == 1) {
               context.read<NoticeBloc>().add(
                 UpdateLastNoticeChecked(
-                  id: widget.user.id, 
+                  id: widget.user.id,
                   role: widget.user.role,
                   time: DateTime.now().toUtc(),
                 ),

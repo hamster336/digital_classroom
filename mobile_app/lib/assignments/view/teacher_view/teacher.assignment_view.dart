@@ -7,15 +7,17 @@ import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/subject/model/subject.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
+import 'package:mobile_app/user/models/teacher.dart';
 
 class TeacherAssignmentView extends StatefulWidget {
-  final String teacherId;
+  final Teacher teacher;
   final Classroom cls;
 
   const TeacherAssignmentView({
     super.key,
     required this.cls,
-    required this.teacherId,
+    required this.teacher,
   });
 
   @override
@@ -30,7 +32,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
     super.initState();
     context.read<TeacherAssignmentBloc>().add(
       LoadTeacherAssignments(
-        teacherId: widget.teacherId,
+        teacherId: widget.teacher.id,
         classId: widget.cls.id,
       ),
     );
@@ -51,10 +53,8 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AssignmentForm(
-                    cls: widget.cls,
-                    teacherId: widget.teacherId,
-                  ),
+                  builder: (_) =>
+                      AssignmentForm(cls: widget.cls, teacher: widget.teacher),
                 ),
               ),
               style: ElevatedButton.styleFrom(
@@ -93,14 +93,19 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                       () {
                         context.read<DashboardBloc>().add(
                           LoadActiveAssignmentCount(
-                            teacherId: widget.teacherId,
+                            teacherId: widget.teacher.id,
                           ),
                         );
+
                         context.read<TeacherAssignmentBloc>().add(
                           RefreshAssignments(
-                            teacherId: widget.teacherId,
+                            teacherId: widget.teacher.id,
                             classId: widget.cls.id,
                           ),
+                        );
+
+                        context.read<UpcomingBloc>().add(
+                          RefreshEvents(subjectIds: widget.teacher.subjectIds),
                         );
                       },
                     );
@@ -108,15 +113,22 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                 },
                 child: RefreshIndicator(
                   onRefresh: () async {
-                    final bloc = context.read<TeacherAssignmentBloc>();
-                    bloc.add(
+                    final assignmentBloc = context
+                        .read<TeacherAssignmentBloc>();
+                    final upcomingBloc = context.read<UpcomingBloc>();
+
+                    assignmentBloc.add(
                       RefreshAssignments(
-                        teacherId: widget.teacherId,
+                        teacherId: widget.teacher.id,
                         classId: widget.cls.id,
                       ),
                     );
 
-                    await bloc.stream.firstWhere(
+                    upcomingBloc.add(
+                      RefreshEvents(subjectIds: widget.teacher.subjectIds),
+                    );
+
+                    await assignmentBloc.stream.firstWhere(
                       (state) =>
                           state is TeacherAssignmentLoaded ||
                           state is TeacherAssignmentLoadingError,
@@ -172,7 +184,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
                                             initialAssignment:
                                                 assignments[index],
                                             cls: widget.cls,
-                                            teacherId: widget.teacherId,
+                                            teacher: widget.teacher,
                                           ),
                                         ),
                                       ),

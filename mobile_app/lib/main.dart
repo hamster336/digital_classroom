@@ -14,7 +14,6 @@ import 'package:mobile_app/notes/bloc/notes_bloc.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
 import 'package:mobile_app/notices/repository/notice_repo_impl.dart';
 import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
-import 'package:mobile_app/notices/view/notices_screen.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
 import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
@@ -133,7 +132,6 @@ class MyApp extends StatelessWidget {
             create: (context) =>
                 NoticeBloc(context.read<NoticeRepoImpl>())
                   ..add(LoadNotices(currentFilter: NoticeFilter.all)),
-            child: NoticesScreen(),
           ),
           // unread notices bloc
           BlocProvider(

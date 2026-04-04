@@ -88,6 +88,7 @@ class _StudentNotesViewState extends State<StudentNotesView> {
               );
             }
           },
+          
           child: RefreshIndicator(
             onRefresh: () async {
               final bloc = context.read<NotesBloc>();

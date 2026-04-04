@@ -5,6 +5,8 @@ import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
 import 'package:mobile_app/notices/view/notice_list.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/shared/required_enums.dart';
+import 'package:mobile_app/subject/bloc/subject_bloc.dart';
+import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 
 class NoticesScreen extends StatefulWidget {
   const NoticesScreen({super.key});
@@ -134,49 +136,71 @@ class _NoticesScreenState extends State<NoticesScreen> {
 
               // view notices
               Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    final bloc = context.read<NoticeBloc>();
-                    bloc.add(RefreshNotices(currentFilter: filter));
+                child: BlocBuilder<SubjectBloc, SubjectState>(
+                  builder: (context, state) {
+                    if (state is SubjectsLoading) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: 300),
+                          CustomWidgets.customLoader(),
+                        ],
+                      );
+                    }
 
-                    await bloc.stream.firstWhere(
-                      (state) =>
-                          state is NoticeLoaded || state is NoticeLoadingError,
+                    List<String> subjectIds = (state is SubjectLoaded)
+                        ? state.subjects.map((s) => s.id).toList()
+                        : [];
+
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        final noticeBloc = context.read<NoticeBloc>();
+                        final upcomingBloc = context.read<UpcomingBloc>();
+                        noticeBloc.add(RefreshNotices(currentFilter: filter));
+
+                        upcomingBloc.add(RefreshEvents(subjectIds: subjectIds));
+
+                        await noticeBloc.stream.firstWhere(
+                          (state) =>
+                              state is NoticeLoaded ||
+                              state is NoticeLoadingError,
+                        );
+                      },
+
+                      child: BlocBuilder<NoticeBloc, NoticeState>(
+                        builder: (context, state) {
+                          if (state is NoticeLoading) {
+                            return ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(height: 300),
+                                CustomWidgets.customLoader(),
+                              ],
+                            );
+                          }
+
+                          if (state is NoticeLoaded) {
+                            final notices = state.displayNotices;
+                            if (notices.isEmpty) {
+                              return Center(
+                                child: const Text(
+                                  'No notices available',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                              );
+                            }
+
+                            return NoticeList(
+                              notices: notices,
+                              scrollController: _scrollController,
+                              showBottomLoader: state.isLoadingMore,
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
                     );
                   },
-
-                  child: BlocBuilder<NoticeBloc, NoticeState>(
-                    builder: (context, state) {
-                      if (state is NoticeLoading) {
-                        return ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(height: 300),
-                            CustomWidgets.customLoader(),
-                          ],
-                        );
-                      }
-
-                      if (state is NoticeLoaded) {
-                        final notices = state.displayNotices;
-                        if (notices.isEmpty) {
-                          return Center(
-                            child: const Text(
-                              'No notices available',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          );
-                        }
-
-                        return NoticeList(
-                          notices: notices,
-                          scrollController: _scrollController,
-                          showBottomLoader: state.isLoadingMore,
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
                 ),
               ),
             ],
