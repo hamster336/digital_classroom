@@ -3,28 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
-import 'package:mobile_app/assignments/student_assignments/bloc/student.assignment_bloc.dart';
-import 'package:mobile_app/assignments/teacher_assignments/bloc/teacher.assignment_bloc.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
-import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
-import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
-import 'package:mobile_app/notes/bloc/notes_bloc.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
 import 'package:mobile_app/notices/repository/notice_repo_impl.dart';
-import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
-import 'package:mobile_app/shared/required_enums.dart';
+import 'package:mobile_app/schedules/repository/schedules_repo_impl.dart';
 import 'package:mobile_app/subject/repository/subject_repo_impl.dart';
 import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
-import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 import 'package:mobile_app/supabase/credentials/supabase.crendentials.dart';
 import 'package:mobile_app/supabase/services/assignment_services.dart';
 import 'package:mobile_app/supabase/services/notes_services.dart';
+import 'package:mobile_app/supabase/services/schedule_services.dart';
 import 'package:mobile_app/supabase/services/submission_services.dart';
 import 'package:mobile_app/supabase/services/upcoming_services.dart';
-import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
-import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
 import 'package:mobile_app/supabase/services/authetication_services.dart';
 import 'package:mobile_app/supabase/services/classroom_services.dart';
 import 'package:mobile_app/supabase/services/notice_services.dart';
@@ -32,7 +24,6 @@ import 'package:mobile_app/supabase/services/students_services.dart';
 import 'package:mobile_app/supabase/services/subject_services.dart';
 import 'package:mobile_app/supabase/services/teachers_services.dart';
 import 'package:mobile_app/supabase/services/user_services.dart';
-import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/upcoming/repository/upcoming_repo_impl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
@@ -122,72 +113,18 @@ class MyApp extends StatelessWidget {
             services: NotesServices(client: SupabaseCredentials.client),
           ),
         ),
+        // schedules repo
+        RepositoryProvider(
+          create: (context) => SchedulesRepoImpl(
+            services: ScheduleServices(client: SupabaseCredentials.client),
+          ),
+        ),
       ],
 
-      child: MultiBlocProvider(
-        // injecting blocs
-        providers: [
-          // notice bloc
-          BlocProvider(
-            create: (context) =>
-                NoticeBloc(context.read<NoticeRepoImpl>())
-                  ..add(LoadNotices(currentFilter: NoticeFilter.all)),
-          ),
-          // unread notices bloc
-          BlocProvider(
-            create: (context) =>
-                UnreadCountBloc(context.read<NoticeRepoImpl>()),
-          ),
-          // student assignment bloc
-          BlocProvider(
-            create: (context) => StudentsAssignmentBloc(
-              assignmentRepo: context.read<AssignmentRepoImpl>(),
-              submissionRepo: context.read<SubmissionRepoImpl>(),
-            ),
-          ),
-          // teacher assignment bloc
-          BlocProvider(
-            create: (context) => TeacherAssignmentBloc(
-              context.read<AssignmentRepoImpl>(),
-              context.read<SubmissionRepoImpl>(),
-            ),
-          ),
-          // upcoming bloc
-          BlocProvider(
-            create: (context) =>
-                UpcomingBloc(repo: context.read<UpcomingRepoImpl>()),
-          ),
-          // auth bloc
-          BlocProvider(
-            create: (context) =>
-                AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
-            // ..add(AuthCheckRequested()),
-          ),
-          // classroom bloc
-          BlocProvider(
-            create: (context) =>
-                ClassroomBloc(context.read<ClassroomRepoImpl>()),
-          ),
-          // subject bloc
-          BlocProvider(
-            create: (context) => SubjectBloc(context.read<SubjectRepoImpl>()),
-          ),
-          // notes bloc
-          BlocProvider(
-            create: (context) => NotesBloc(context.read<NotesRepositoryImpl>()),
-          ),
-          // submission bloc
-          BlocProvider(
-            create: (context) =>
-                SubmissionBloc(context.read<SubmissionRepoImpl>()),
-          ),
-          // teachers dashboard bloc
-          BlocProvider(
-            create: (context) =>
-                DashboardBloc(context.read<AssignmentRepoImpl>()),
-          ),
-        ],
-
+      child: BlocProvider(
+        // except auth bloc, all others blocs are injected in the authgate so they are rebuild after every login
+        create: (context) =>
+            AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Academia',
