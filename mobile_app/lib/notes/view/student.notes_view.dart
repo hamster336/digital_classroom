@@ -1,4 +1,3 @@
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -88,7 +87,7 @@ class _StudentNotesViewState extends State<StudentNotesView> {
               );
             }
           },
-          
+
           child: RefreshIndicator(
             onRefresh: () async {
               final bloc = context.read<NotesBloc>();
@@ -154,13 +153,13 @@ class _StudentNotesViewState extends State<StudentNotesView> {
 
                           final progress = state.downloadProgress[note.id!];
 
-                          return CustomWidgets.studentrNotesCard(
+                          return CustomWidgets.studentNotesCard(
                             note: note,
                             subjectName: (sub == null) ? '' : sub.name,
 
                             onDownload: () => context.read<NotesBloc>().add(
-                                    DownloadNote(note: note),
-                                  ),
+                              DownloadNote(note: note),
+                            ),
 
                             isDownloaded: isDownloaded,
                             downlaoding: isDownloading,

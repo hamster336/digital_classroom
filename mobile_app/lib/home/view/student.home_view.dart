@@ -9,7 +9,7 @@ import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/assignments/view/student_view/student.assignment_view.dart';
 import 'package:mobile_app/notes/view/student.notes_view.dart';
-import 'package:mobile_app/schedules/view/schedules.dart';
+import 'package:mobile_app/schedules/view/schedules_view.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/user/models/student.dart';
 import 'package:mobile_app/user/view/student_profile_screen.dart';

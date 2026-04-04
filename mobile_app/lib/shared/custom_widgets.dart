@@ -4,6 +4,7 @@ import 'package:mobile_app/app_file/models/app_file.dart';
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/view/teacher_view/teacher.assignment_details_screen.dart';
 import 'package:mobile_app/classroom/model/classroom.dart';
+import 'package:mobile_app/schedules/model/schedule.dart';
 import 'package:mobile_app/subject/model/subject.dart';
 import 'package:mobile_app/submission/model/class_students.dart';
 import 'package:mobile_app/upcoming/model/upcoming.dart';
@@ -1256,7 +1257,7 @@ class CustomWidgets {
   }
 
   // notes cards for student
-  static Widget studentrNotesCard({
+  static Widget studentNotesCard({
     required AppFile note,
     required String subjectName,
     required VoidCallback onDownload,
@@ -1576,6 +1577,69 @@ class CustomWidgets {
           //           ),
           //   ],
           // ),
+        ),
+      ),
+    );
+  }
+
+  // schedule cards
+  static Widget scheduleCard({
+    required Schedule schedule,
+    required VoidCallback onDownload,
+    required bool isDownloaded,
+    required bool downlaoding,
+    double? progress,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: Color(0xFF2AB3AA),
+      ),
+
+      child: Card(
+        margin: const EdgeInsets.only(left: 5),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
+          child: ListTile(
+            contentPadding: .zero,
+            title: Column(
+              crossAxisAlignment: .start,
+              children: [
+                // file name
+                Text(
+                  schedule.name,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+
+            // file information
+            subtitle: Text(
+              DateFormat(
+                'hh:mm a, dd MMM',
+              ).format(schedule.createdAt.toLocal()),
+              style: TextStyle(color: Colors.black54),
+            ),
+
+            // download button and download progress
+            trailing: (downlaoding)
+                ? CircularProgressIndicator(
+                    color: Color(0xFF2AB3AA),
+                    value: progress,
+                  )
+                : (isDownloaded)
+                ? Icon(Icons.done, color: Colors.green, size: 30)
+                : InkWell(
+                    onTap: onDownload,
+                    child: Icon(
+                      Icons.file_download_outlined,
+                      size: 30,
+                      color: Colors.black54,
+                    ),
+                  ),
+          ),
         ),
       ),
     );

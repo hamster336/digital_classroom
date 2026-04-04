@@ -10,7 +10,7 @@ import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/notes/view/teacher.notes_view.dart';
-import 'package:mobile_app/schedules/view/schedules.dart';
+import 'package:mobile_app/schedules/view/schedules_view.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/user/models/teacher.dart';
 import 'package:mobile_app/user/view/teacher_profile_screen.dart';
