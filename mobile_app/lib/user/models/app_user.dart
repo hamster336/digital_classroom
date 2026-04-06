@@ -7,7 +7,6 @@ abstract class AppUser {
   final String email;
   final DateTime createdAt;
   final UserRoles role;
-  final String? avatarPath;
 
   AppUser({
     required this.id,
@@ -15,6 +14,5 @@ abstract class AppUser {
     required this.email,
     required this.createdAt,
     required this.role,
-    required this.avatarPath,
   });
 }

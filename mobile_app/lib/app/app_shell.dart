@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/home/view/home_screen.dart';
 import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/view/notices_screen.dart';
-import 'package:mobile_app/settings/view/settings.dart';
+import 'package:mobile_app/settings/view/settings_view.dart';
 import 'package:mobile_app/user/models/app_user.dart';
 
 class AppShell extends StatefulWidget {
@@ -37,7 +37,7 @@ class _AppShellState extends State<AppShell> {
           ),
           Navigator(
             onGenerateRoute: (settings) {
-              return MaterialPageRoute(builder: (_) => const Settings());
+              return MaterialPageRoute(builder: (_) => const SettingView());
             },
           ),
         ],

@@ -47,11 +47,11 @@ class AuthRepoImpl extends AuthRepo {
 
     final uid = session.user.id;
 
-    final user = await userService.fetchUserData(uid);   
-    if (user == null) { 
+    final user = await userService.fetchUserData(uid);
+    if (user == null) {
       throw Exception('User profile not found');
     }
-    
+
     final role = user['role'];
 
     if (role == 'student') {
@@ -59,6 +59,8 @@ class AuthRepoImpl extends AuthRepo {
       if (studentData == null) {
         throw Exception('Student profile not found');
       }
+      final String avatarPath = studentData['avatar_path'] ?? '';
+      studentData['avatar_url'] = userService.fetchURL(avatarPath);
       return Student.fromMap(user, studentData);
     }
 
@@ -67,6 +69,8 @@ class AuthRepoImpl extends AuthRepo {
       if (teacherData == null) {
         throw Exception('Teacher profile not found');
       }
+      final String avatarPath = teacherData['avatar_path'] ?? '';
+      teacherData['avatar_url'] = userService.fetchURL(avatarPath);
       return Teacher.fromMap(user, teacherData);
     }
 

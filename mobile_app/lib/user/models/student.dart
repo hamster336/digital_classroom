@@ -2,6 +2,9 @@ import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/user/models/app_user.dart';
 
 class Student extends AppUser {
+  final String? avatarPath;
+  final String? avatarURL;
+
   final String rollNumber;
   final String classId;
   final List<String> subjectIds;
@@ -13,7 +16,8 @@ class Student extends AppUser {
     required super.email,
     required super.createdAt,
     required super.role,
-    super.avatarPath,
+    this.avatarPath,
+    this.avatarURL,
     required this.rollNumber,
     required this.classId,
     required this.subjectIds,
@@ -30,7 +34,8 @@ class Student extends AppUser {
         email: user['email'],
         createdAt: DateTime.parse(user['created_at']),
         role: UserRoles.student,
-        avatarPath: user['avatar_url'],
+        avatarPath: studentData['avatar_path'],
+        avatarURL: studentData['avatar_url'],
         rollNumber: studentData['roll_number'],
         classId: studentData['class_id'],
         subjectIds: List<String>.from(studentData['subject_ids']),

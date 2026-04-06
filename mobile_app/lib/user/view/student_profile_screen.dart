@@ -67,11 +67,13 @@ class StudentProfileScreen extends StatelessWidget {
                       ],
                     ),
                     child: CircleAvatar(
-                      radius: size.width * 0.18,
-                      child: Icon(
-                        Icons.person_rounded,
-                        size: size.width * 0.25,
-                      ),
+                      radius: size.width * 0.19,
+                      backgroundImage: (student.avatarURL != null)
+                          ? NetworkImage(student.avatarURL!)
+                          : null,
+                      child: (student.avatarURL == null)
+                          ? Icon(Icons.person_rounded, size: size.width * 0.25)
+                          : null,
                     ),
                   ),
 

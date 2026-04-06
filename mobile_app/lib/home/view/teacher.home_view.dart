@@ -96,7 +96,7 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
 
           await Future.wait(futures);
         },
-        
+
         child: MultiBlocListener(
           listeners: [
             BlocListener<ClassroomBloc, ClassroomState>(
@@ -183,18 +183,26 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                     ),
 
                     // Profile button
-                    trailing: IconButton(
-                      onPressed: () => Navigator.push(
+                    trailing: GestureDetector(
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) =>
                               TeacherProfileScreen(teacher: widget.teacher),
                         ),
                       ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
+                      child: CircleAvatar(
+                        radius: size.width * 0.08,
+                        backgroundImage: (widget.teacher.avatarURL != null)
+                            ? NetworkImage(widget.teacher.avatarURL!)
+                            : null,
+                        child: (widget.teacher.avatarURL == null)
+                            ? Icon(
+                                Icons.person_rounded,
+                                size: size.width * 0.25,
+                              )
+                            : null,
                       ),
-                      icon: Icon(Icons.person, color: Colors.green, size: 30),
                     ),
                   ),
                 ),
@@ -310,7 +318,7 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                                   ),
                                 ),
                               ),
-                              
+
                               // assignments
                               CustomWidgets.resrcCard(
                                 size,
@@ -367,7 +375,7 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                                   ),
                                 ),
                               ),
-                              
+
                               // class details
                               CustomWidgets.resrcCard(
                                 size,
