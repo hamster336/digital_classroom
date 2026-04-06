@@ -194,8 +194,8 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                             ? state.classes.first
                             : null;
 
-                        return IconButton(
-                          onPressed: (cls == null)
+                        return GestureDetector(
+                          onTap: (cls == null)
                               ? () {}
                               : () => Navigator.push(
                                   context,
@@ -206,13 +206,17 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                                     ),
                                   ),
                                 ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white,
-                          ),
-                          icon: Icon(
-                            Icons.person,
-                            color: Colors.green,
-                            size: 30,
+                          child: CircleAvatar(
+                            radius: size.width * 0.08,
+                            backgroundImage: (widget.student.avatarURL != null)
+                                ? NetworkImage(widget.student.avatarURL!)
+                                : null,
+                            child: (widget.student.avatarURL == null)
+                                ? Icon(
+                                    Icons.person_rounded,
+                                    size: size.width * 0.25,
+                                  )
+                                : null,
                           ),
                         );
                       },

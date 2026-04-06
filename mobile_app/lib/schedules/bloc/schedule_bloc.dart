@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:mobile_app/schedules/model/schedule.dart';
 import 'package:mobile_app/schedules/repository/schedules_repo_impl.dart';
+import 'package:mobile_app/shared/public_directory.dart';
 
 part 'schedule_event.dart';
 part 'schedule_state.dart';
@@ -27,7 +29,15 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     final key = event.classId;
 
     try {
+      final dir = await PublicDirectory.getPublicDirectoryPath();
       final schedules = await repository.getSchedules(event.classId);
+
+      for (var s in schedules) {
+        final path = '$dir/${s.name}';
+        final exists = await File(path).exists();
+
+        s.isDownloaded = exists;
+      }
 
       cached[key] = schedules;
 
@@ -50,8 +60,16 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     }
     try {
       emit(ScheduleLoading());
+      final dir = await PublicDirectory.getPublicDirectoryPath();
 
       final schedules = await repository.getSchedules(event.classId);
+
+      for (var s in schedules) {
+        final path = '$dir/${s.name}';
+        final exists = await File(path).exists();
+
+        s.isDownloaded = exists;
+      }
 
       cached[key] = schedules;
 

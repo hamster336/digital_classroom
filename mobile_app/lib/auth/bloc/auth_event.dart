@@ -23,3 +23,4 @@ final class ChangePassword extends AuthEvent {
 }
 
 final class LogoutRequested extends AuthEvent {}
+

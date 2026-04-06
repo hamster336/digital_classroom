@@ -9,4 +9,9 @@ class UserServices {
   Future<Map<String, dynamic>?> fetchUserData(String uid) async {
     return await client.from('users').select().eq('id', uid).maybeSingle();
   }
+
+  // get user avatar url
+  String fetchURL(String avatarPath) {
+    return client.storage.from('avatars').getPublicUrl(avatarPath);
+  }
 }

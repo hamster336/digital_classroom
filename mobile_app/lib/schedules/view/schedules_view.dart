@@ -73,7 +73,11 @@ class _SchedulesViewState extends State<SchedulesView> {
 
                     return CustomWidgets.scheduleCard(
                       schedule: schedule,
-                      onDownload: () {},
+                      onDownload: () {
+                        context.read<ScheduleBloc>().add(
+                          DownloadSchedule(schedule: schedule),
+                        );
+                      },
                       isDownloaded: isDownloaded,
                       downlaoding: isDownloading,
                     );
