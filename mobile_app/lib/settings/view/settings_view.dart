@@ -4,17 +4,14 @@ import 'package:mobile_app/auth/bloc/auth_bloc.dart';
 import 'package:mobile_app/auth/view/change_password_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
-class Settings extends StatefulWidget {
-  const Settings({super.key});
+class SettingView extends StatefulWidget {
+  const SettingView({super.key});
 
   @override
-  State<Settings> createState() => _SettingsState();
+  State<SettingView> createState() => _SettingViewState();
 }
 
-class _SettingsState extends State<Settings> {
-  bool _pushNoti = true;
-  bool _asgnmntReminder = true;
-
+class _SettingViewState extends State<SettingView> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -31,47 +28,6 @@ class _SettingsState extends State<Settings> {
             crossAxisAlignment: .start,
             children: [
               SizedBox(height: size.height * 0.01),
-
-              // notification settings section
-              const Text(
-                'NOTIFICATION',
-                style: TextStyle(color: Colors.black54),
-              ),
-
-              SizedBox(
-                width: size.width,
-                child: Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: Column(
-                      children: [
-                        // push notification
-                        CustomWidgets.toggleSetting(
-                          'Push Notification',
-                          _pushNoti,
-                          (value) => setState(() => _pushNoti = value),
-                        ),
-
-                        Divider(),
-
-                        // assignment reminders
-                        CustomWidgets.toggleSetting(
-                          'Assignment Reminders',
-                          _asgnmntReminder,
-                          (value) => setState(() => _asgnmntReminder = value),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: size.height * 0.025),
-
               // account and privacy section
               const Text(
                 'ACCOUNT & PRIVACY',

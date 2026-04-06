@@ -286,26 +286,6 @@ class CustomWidgets {
     return 'on ${DateFormat('dd MMM').format(localTime)}';
   }
 
-  // settings with toggles
-  static Widget toggleSetting(
-    String label,
-    bool toggle,
-    ValueChanged<bool> onChanged,
-  ) {
-    return Row(
-      mainAxisAlignment: .spaceBetween,
-      children: [
-        Text(label, style: TextStyle(fontSize: 20)),
-
-        Switch(
-          value: toggle,
-          onChanged: onChanged,
-          activeTrackColor: Color(0xFF2AB3AA),
-        ),
-      ],
-    );
-  }
-
   // settings with navigation
   static Widget navigateSettings(String label, VoidCallback onTap) {
     return Row(
