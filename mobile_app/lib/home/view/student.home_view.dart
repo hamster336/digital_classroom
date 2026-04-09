@@ -207,14 +207,14 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                                   ),
                                 ),
                           child: CircleAvatar(
-                            radius: size.width * 0.08,
+                            radius: size.width * 0.06,
                             backgroundImage: (widget.student.avatarURL != null)
                                 ? NetworkImage(widget.student.avatarURL!)
                                 : null,
                             child: (widget.student.avatarURL == null)
                                 ? Icon(
                                     Icons.person_rounded,
-                                    size: size.width * 0.25,
+                                    size: size.width * 0.1,
                                   )
                                 : null,
                           ),

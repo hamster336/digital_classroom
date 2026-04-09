@@ -72,7 +72,7 @@ class StudentProfileScreen extends StatelessWidget {
                           ? NetworkImage(student.avatarURL!)
                           : null,
                       child: (student.avatarURL == null)
-                          ? Icon(Icons.person_rounded, size: size.width * 0.25)
+                          ? Icon(Icons.person_rounded, size: size.width * 0.2)
                           : null,
                     ),
                   ),
