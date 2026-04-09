@@ -192,14 +192,16 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                         ),
                       ),
                       child: CircleAvatar(
-                        radius: size.width * 0.08,
+                        radius: size.width * 0.06,
+                        backgroundColor: Colors.white,
                         backgroundImage: (widget.teacher.avatarURL != null)
                             ? NetworkImage(widget.teacher.avatarURL!)
                             : null,
                         child: (widget.teacher.avatarURL == null)
                             ? Icon(
                                 Icons.person_rounded,
-                                size: size.width * 0.25,
+                                size: size.width * 0.1,
+                                color: Color(0xFF2AB3AA),
                               )
                             : null,
                       ),

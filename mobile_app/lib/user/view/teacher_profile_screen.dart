@@ -67,7 +67,7 @@ class TeacherProfileScreen extends StatelessWidget {
                           ? NetworkImage(teacher.avatarURL!)
                           : null,
                       child: (teacher.avatarURL == null)
-                          ? Icon(Icons.person_rounded, size: size.width * 0.25)
+                          ? Icon(Icons.person_rounded, size: size.width * 0.2)
                           : null,
                     ),
                   ),
