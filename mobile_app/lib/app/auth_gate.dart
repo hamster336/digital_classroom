@@ -74,7 +74,7 @@ class AuthGate extends StatelessWidget {
               // auth bloc
               BlocProvider(
                 create: (context) =>
-                    AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
+                    AuthBloc(context.read<AuthRepoImpl>())..add(CheckAuth()),
               ),
               // classroom bloc
               BlocProvider(

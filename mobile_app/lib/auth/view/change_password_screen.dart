@@ -96,6 +96,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   // change password method
   Future<void> _change() async {
+    FocusScope.of(context).unfocus();
     final oldPsw = oldPswController.text.trim();
     final newPsw = newPswController.text.trim();
     final confirmPsw = confirmPswController.text.trim();

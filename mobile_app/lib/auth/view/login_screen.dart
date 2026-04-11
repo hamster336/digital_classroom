@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
       CustomWidgets.customAltertBox(
         context,
         'Fields cannot be left empty.',
-        null,
+        () {},
       );
       return;
     }

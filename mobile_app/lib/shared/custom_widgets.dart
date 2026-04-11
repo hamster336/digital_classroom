@@ -1031,7 +1031,7 @@ class CustomWidgets {
   static void customAltertBox(
     BuildContext context,
     String text,
-    VoidCallback? onTap,
+    VoidCallback onTap,
   ) {
     showDialog(
       barrierDismissible: false,
@@ -1042,10 +1042,7 @@ class CustomWidgets {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-
-              if (onTap != null) {
-                onTap();
-              }
+              onTap();
             },
             child: const Text('Ok'),
           ),

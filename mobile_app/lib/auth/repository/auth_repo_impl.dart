@@ -86,12 +86,43 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   // change password
+  @override
   Future<void> changePassword(String oldPassword, String newPassword) async {
     try {
       await authService.changePassword(
         oldPassword: oldPassword,
         newPassword: newPassword,
       );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // request OTP
+  @override
+  Future<void> requestOTP(String email) async {
+    try {
+      await authService.requestOTP(email);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // verify the OTP
+  @override
+  Future<void> verifyOTP(String email, String otp) async {
+    try {
+      await authService.verifyOTP(email, otp);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // reset password
+  @override
+  Future<void> resetPassword(String password) async {
+    try {
+      await authService.resetPassword(password);
     } catch (e) {
       throw Exception(e.toString());
     }

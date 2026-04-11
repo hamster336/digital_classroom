@@ -4,7 +4,7 @@ class AuthenticationServices {
   final SupabaseClient client;
 
   AuthenticationServices({required this.client});
-  
+
   // login
   Future<AuthResponse> signIn({
     required String email,
@@ -45,5 +45,25 @@ class AuthenticationServices {
     } catch (e) {
       throw Exception('Failed to change password: ${e.toString()}');
     }
+  }
+
+  // request otp
+  Future<void> requestOTP(String email) async {
+    await client.auth.signInWithOtp(
+      email: email,
+      shouldCreateUser: false,
+      emailRedirectTo: null,
+      data: {},
+    );
+  }
+
+  // verify otp
+  Future<void> verifyOTP(String email, String otp) async {
+    await client.auth.verifyOTP(email: email, token: otp, type: OtpType.email);
+  }
+
+  // reset password
+  Future<void> resetPassword(String password) async {
+    await client.auth.updateUser(UserAttributes(password: password));
   }
 }
