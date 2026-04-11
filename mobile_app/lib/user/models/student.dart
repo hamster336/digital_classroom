@@ -32,14 +32,14 @@ class Student extends AppUser {
       id: user['id'],
         name: user['full_name'],
         email: user['email'],
-        createdAt: DateTime.parse(user['created_at']),
+        createdAt: DateTime.parse(user['created_at']).toLocal(),
         role: UserRoles.student,
         avatarPath: studentData['avatar_path'],
         avatarURL: studentData['avatar_url'],
         rollNumber: studentData['roll_number'],
         classId: studentData['class_id'],
         subjectIds: List<String>.from(studentData['subject_ids']),
-        lastCheckedNotices: DateTime.parse(studentData['last_checked_notices'])
+        lastCheckedNotices: DateTime.parse(studentData['last_checked_notices']).toLocal()
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
-import 'package:mobile_app/auth/bloc/reset_password_bloc.dart';
+import 'package:mobile_app/auth/bloc/password_bloc.dart';
 import 'package:mobile_app/auth/view/reset_password_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
@@ -22,7 +22,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Verify OTP')),
       backgroundColor: Colors.white,
-      body: BlocListener<ResetPasswordBloc, ResetPasswordState>(
+      body: BlocListener<PasswordBloc, PasswordState>(
         listener: (context, state) {
           if (state is VerifyOTPFailure) {
             CustomWidgets.customAltertBox(context, state.message, () {});
@@ -96,8 +96,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       return;
     }
 
-    context.read<ResetPasswordBloc>().add(
-      VerifyOTP(email: widget.email, otp: otp),
-    );
+    context.read<PasswordBloc>().add(VerifyOTP(email: widget.email, otp: otp));
   }
 }

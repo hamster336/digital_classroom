@@ -88,7 +88,7 @@ class _StudentNotesViewState extends State<StudentNotesView> {
             }
           },
 
-           child: RefreshIndicator(
+          child: RefreshIndicator(
             onRefresh: () async {
               final bloc = context.read<NotesBloc>();
               bloc.add(

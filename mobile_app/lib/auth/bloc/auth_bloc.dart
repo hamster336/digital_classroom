@@ -14,7 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuth>(_appStarted);
     on<LoginRequested>(_loginRequested);
     on<LogoutRequested>(_logoutRequested);
-    on<ChangePassword>(_changePassword);
+    // on<ChangePassword>(_changePassword);
   }
 
   // starting the application
@@ -64,30 +64,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  // change password
-  Future<void> _changePassword(
-    ChangePassword event,
-    Emitter<AuthState> emit,
-  ) async {
-    if (event.newPassword != event.confirmPassword) {
-      emit(AuthFailure(message: 'Passwords do not match. Try again :)'));
-      return;
-    }
-    final currentState = state;
+  // // change password
+  // Future<void> _changePassword(
+  //   ChangePassword event,
+  //   Emitter<AuthState> emit,
+  // ) async {
+  //   if (event.newPassword != event.confirmPassword) {
+  //     emit(AuthFailure(message: 'Passwords do not match. Try again :)'));
+  //     return;
+  //   }
 
-    if (currentState is! Authenticated) {
-      throw Exception('User not logged in');
-    }
+  //   if (event.newPassword.length < 6) {
+  //     emit(AuthFailure(message: 'Password is less than 6 characters.'));
+  //   }
+  //   final currentState = state;
 
-    try {
-      await repository.changePassword(event.oldPassword, event.newPassword);
+  //   if (currentState is! Authenticated) {
+  //     throw Exception('User not logged in');
+  //   }
 
-      emit(PasswordChangeSuccess());
+  //   try {
+  //     await repository.changePassword(event.oldPassword, event.newPassword);
 
-      emit(Authenticated(user: currentState.user));
-    } catch (e) {
-      emit(AuthFailure(message: e.toString()));
-      emit(currentState);
-    }
-  }
+  //     emit(PasswordChangeSuccess());
+
+  //     emit(Authenticated(user: currentState.user));
+  //   } catch (e) {
+  //     emit(AuthFailure(message: e.toString()));
+  //     emit(currentState);
+  //   }
+  // }
 }

@@ -10,17 +10,17 @@ final class LoginRequested extends AuthEvent {
   LoginRequested({required this.email, required this.password});
 }
 
-final class ChangePassword extends AuthEvent {
-  final String oldPassword;
-  final String newPassword;
-  final String confirmPassword;
+// final class ChangePassword extends AuthEvent {
+//   final String oldPassword;
+//   final String newPassword;
+//   final String confirmPassword;
 
-  ChangePassword({
-    required this.oldPassword,
-    required this.newPassword,
-    required this.confirmPassword,
-  });
-}
+//   ChangePassword({
+//     required this.oldPassword,
+//     required this.newPassword,
+//     required this.confirmPassword,
+//   });
+// }
 
 final class LogoutRequested extends AuthEvent {}
 

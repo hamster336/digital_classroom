@@ -21,10 +21,10 @@ class Notice {
     return Notice(
       id: map['id'],
       title: map['title'],
-      publishedAt: DateTime.parse(map['published_at']),
+      publishedAt: DateTime.parse(map['published_at']).toLocal(),
       scheduledAt: map['scheduled_at'] == null
           ? null
-          : DateTime.parse(map['scheduled_at']),
+          : DateTime.parse(map['scheduled_at']).toLocal(),
       description: map['description'],
       priority: getPriority(map['priority']),
     );

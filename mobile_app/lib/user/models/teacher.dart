@@ -32,14 +32,14 @@ class Teacher extends AppUser {
       id: user['id'],
       name: user['full_name'],
       email: user['email'],
-      createdAt: DateTime.parse(user['created_at']),
+      createdAt: DateTime.parse(user['created_at']).toLocal(),
       role: UserRoles.teacher,
       avatarPath: teacherData['avatar_path'],
       avatarURL: teacherData['avatar_url'],
       empId: teacherData['employee_id'],
       subjectIds: List<String>.from(teacherData['subject_ids']),
       classIds: List<String>.from(teacherData['class_ids']),
-      lastCheckedNotices: DateTime.parse(teacherData['last_checked_notices']),
+      lastCheckedNotices: DateTime.parse(teacherData['last_checked_notices']).toLocal(),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/auth/bloc/auth_bloc.dart';
+import 'package:mobile_app/auth/bloc/password_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -35,18 +35,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
           padding: const EdgeInsetsGeometry.symmetric(horizontal: 20),
-          child: BlocListener<AuthBloc, AuthState>(
+          child: BlocListener<PasswordBloc, PasswordState>(
             listener: (context, state) {
-              if (dialogContext != null && Navigator.canPop(dialogContext!)) {
-                Navigator.pop(dialogContext!);
-                dialogContext = null;
-              }
-
-              if (state is AuthFailure) {
+              if (state is ChangePasswordFailure) {
                 CustomWidgets.customAltertBox(context, state.message, () {});
               }
 
-              if (state is PasswordChangeSuccess) {
+              if (state is ChangePasswordSuccess) {
                 CustomWidgets.customAltertBox(
                   context,
                   'Password changed successfully.',
@@ -54,39 +49,53 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 );
               }
             },
-            child: SizedBox.expand(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: size.height * 0.05),
+            child: BlocBuilder<PasswordBloc, PasswordState>(
+              builder: (context, state) {
+                if(state is PasswordStateLoading) {
+                  return CustomWidgets.customLoader();
+                }
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: .start,
+                    mainAxisSize: .min,
+                    children: [
+                      SizedBox(height: size.height * 0.05),
 
-                    CustomWidgets.customTextField(
-                      controller: oldPswController,
-                      label: 'Old Password',
-                      obscureText: false,
-                    ),
-                    SizedBox(height: size.height * 0.01),
-                    CustomWidgets.customTextField(
-                      controller: newPswController,
-                      label: 'New Password',
-                      obscureText: false,
-                    ),
-                    SizedBox(height: size.height * 0.01),
-                    CustomWidgets.customTextField(
-                      controller: confirmPswController,
-                      label: 'Confirm Password',
-                      obscureText: false,
-                    ),
-                    SizedBox(height: size.height * 0.05),
+                      CustomWidgets.customTextField(
+                        controller: oldPswController,
+                        label: 'Old Password',
+                        obscureText: false,
+                      ),
+                      SizedBox(height: size.height * 0.01),
+                      CustomWidgets.customTextField(
+                        controller: newPswController,
+                        label: 'New Password',
+                        obscureText: false,
+                      ),
+                      SizedBox(height: size.height * 0.01),
+                      CustomWidgets.customTextField(
+                        controller: confirmPswController,
+                        label: 'Confirm Password',
+                        obscureText: false,
+                      ),
+                      SizedBox(height: size.height * 0.01),
+                      const Text(
+                        '\t\tThe password must have atleast 6 characters.',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                      SizedBox(height: size.height * 0.05),
 
-                    CustomWidgets.customButton(
-                      size,
-                      'Change Password',
-                      () async => _change(),
-                    ),
-                  ],
-                ),
-              ),
+                      Center(
+                        child: CustomWidgets.customButton(
+                          size,
+                          'Change Password',
+                          () async => _change(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -107,16 +116,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
 
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (dialogCtx) {
-        dialogContext = dialogCtx;
-        return CustomWidgets.customLoader();
-      },
-    );
-
-    context.read<AuthBloc>().add(
+    context.read<PasswordBloc>().add(
       ChangePassword(
         oldPassword: oldPsw,
         newPassword: newPsw,

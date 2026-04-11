@@ -19,15 +19,14 @@ class Classroom {
     required this.isActive,
   });
 
-  // json object -> domain object mapping
   factory Classroom.fromMap(Map<String, dynamic> map) {
     return Classroom(
-      id: map['id'],    // oo11e........
-      name: map['name'],  // Sem 6, BCT
-      faculty: map['faculty'] ?? '', 
+      id: map['id'],
+      name: map['name'],
+      faculty: map['faculty'] ?? '',
       startYear: (map['start_year']),
       endYear: map['end_year'],
-      createdAt: DateTime.parse(map['created_at']),
+      createdAt: DateTime.parse(map['created_at']).toLocal(),
       studentCount: map['student_count'],
       isActive: map['is_active'],
     );

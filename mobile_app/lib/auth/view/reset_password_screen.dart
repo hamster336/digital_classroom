@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
-import 'package:mobile_app/auth/bloc/reset_password_bloc.dart';
+import 'package:mobile_app/auth/bloc/password_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Reset Password')),
       backgroundColor: Colors.white,
-      body: BlocListener<ResetPasswordBloc, ResetPasswordState>(
+      body: BlocListener<PasswordBloc, PasswordState>(
         listener: (context, state) {
           if (state is ResetPasswordFailure) {
             CustomWidgets.customAltertBox(context, state.message, () {});
@@ -41,7 +41,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             );
           }
         },
-        child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+        child: BlocBuilder<PasswordBloc, PasswordState>(
           builder: (context, state) {
             if (state is PasswordStateLoading) {
               return CustomWidgets.customLoader();
@@ -105,6 +105,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    context.read<ResetPasswordBloc>().add(ResetPassword(password: password));
+    context.read<PasswordBloc>().add(ResetPassword(password: password));
   }
 }
