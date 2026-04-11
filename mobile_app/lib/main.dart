@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
-import 'package:mobile_app/auth/bloc/reset_password_bloc.dart';
+import 'package:mobile_app/auth/bloc/password_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
@@ -132,8 +132,7 @@ class MyApp extends StatelessWidget {
           ),
           // reset password bloc
           BlocProvider(
-            create: (context) =>
-                ResetPasswordBloc(context.read<AuthRepoImpl>()),
+            create: (context) => PasswordBloc(context.read<AuthRepoImpl>()),
           ),
         ],
         child: MaterialApp(

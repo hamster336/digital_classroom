@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/auth/bloc/reset_password_bloc.dart';
+import 'package:mobile_app/auth/bloc/password_bloc.dart';
 import 'package:mobile_app/auth/view/verify_otp_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
@@ -20,7 +20,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Forgot Password')),
-      body: BlocListener<ResetPasswordBloc, ResetPasswordState>(
+      body: BlocListener<PasswordBloc, PasswordState>(
         listener: (context, state) {
           if (state is RequestOTPFailure) {
             CustomWidgets.customAltertBox(context, state.message, () {});
@@ -40,7 +40,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             );
           }
         },
-        child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+        child: BlocBuilder<PasswordBloc, PasswordState>(
           builder: (context, state) {
             if (state is PasswordStateLoading) {
               return CustomWidgets.customLoader();
@@ -99,6 +99,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    context.read<ResetPasswordBloc>().add(RequestOTP(email: email));
+    context.read<PasswordBloc>().add(RequestOTP(email: email));
   }
 }
