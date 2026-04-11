@@ -11,14 +11,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepoImpl repository;
 
   AuthBloc(this.repository) : super(AuthLoading()) {
-    on<AppStarted>(_appStarted);
+    on<CheckAuth>(_appStarted);
     on<LoginRequested>(_loginRequested);
     on<LogoutRequested>(_logoutRequested);
     on<ChangePassword>(_changePassword);
   }
 
   // starting the application
-  Future<void> _appStarted(AppStarted event, Emitter<AuthState> emit) async {
+  Future<void> _appStarted(CheckAuth event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
     try {
@@ -90,5 +90,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(currentState);
     }
   }
-
 }

@@ -9,4 +9,12 @@ abstract class AuthRepo {
   Future<void> login(String email, String password);
 
   Future<void> logout();
+
+  Future<void> changePassword(String oldPassword, String newPassword);
+
+  Future<void> requestOTP (String email);
+
+  Future<void> verifyOTP (String email, String otp);
+
+  Future<void> resetPassword (String password);
 }

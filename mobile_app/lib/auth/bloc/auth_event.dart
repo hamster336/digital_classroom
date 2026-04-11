@@ -2,7 +2,7 @@ part of 'auth_bloc.dart';
 
 sealed class AuthEvent {}
 
-final class AppStarted extends AuthEvent {}
+final class CheckAuth extends AuthEvent {}
 
 final class LoginRequested extends AuthEvent {
   final String email;
@@ -18,13 +18,9 @@ final class ChangePassword extends AuthEvent {
   ChangePassword({
     required this.oldPassword,
     required this.newPassword,
-    required this.confirmPassword, 
+    required this.confirmPassword,
   });
 }
 
 final class LogoutRequested extends AuthEvent {}
 
-final class ResetPassword extends AuthEvent {
-  final String email;
-  ResetPassword({required this.email});
-}

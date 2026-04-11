@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/auth/bloc/reset_password_bloc.dart';
+import 'package:mobile_app/auth/view/verify_otp_screen.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -9,51 +12,85 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final controller = TextEditingController();
+  final emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Reset Password')),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: .min,
-              children: [
-                SizedBox(height: size.height * 0.01),
+      appBar: AppBar(title: const Text('Forgot Password')),
+      body: BlocListener<ResetPasswordBloc, ResetPasswordState>(
+        listener: (context, state) {
+          if (state is RequestOTPFailure) {
+            CustomWidgets.customAltertBox(context, state.message, () {});
+          }
 
-                const Text(
-                  'Enter your email address. You will be sent an OTP if the email is valid and an account with that email exists.',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          if (state is RequestOTPSuccess) {
+            CustomWidgets.customAltertBox(
+              context,
+              'An otp has been sent to your email address.',
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      VerifyOtpScreen(email: emailController.text.trim()),
                 ),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+          builder: (context, state) {
+            if (state is PasswordStateLoading) {
+              return CustomWidgets.customLoader();
+            }
 
-                SizedBox(height: size.height * 0.01),
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: SingleChildScrollView(
+                child: Column(
+                  // mainAxisSize: .min,
+                  children: [
+                    SizedBox(height: size.height * 0.01),
 
-                CustomWidgets.customTextField(
-                  controller: controller,
-                  label: 'Email',
-                  obscureText: false,
+                    const Text(
+                      'Enter your email address. You will be sent an OTP if the email is valid and an account with that email exists.',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    SizedBox(height: size.height * 0.03),
+
+                    CustomWidgets.customTextField(
+                      controller: emailController,
+                      label: 'Email',
+                      obscureText: false,
+                    ),
+
+                    SizedBox(height: size.height * 0.05),
+
+                    CustomWidgets.customButton(
+                      size,
+                      'Send OTP',
+                      () => _requestOTP(),
+                    ),
+                  ],
                 ),
-
-                SizedBox(height: size.height * 0.05),
-
-                CustomWidgets.customButton(size, 'Send OTP', () => _resetPsw()),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  void _resetPsw() {
-    final text = controller.text.trim();
+  void _requestOTP() {
+    final email = emailController.text.trim();
 
-    if (text.isEmpty) {
+    if (email.isEmpty) {
       CustomWidgets.customAltertBox(
         context,
         'Field cannot be left empty.',
@@ -62,6 +99,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    
+    context.read<ResetPasswordBloc>().add(RequestOTP(email: email));
   }
 }

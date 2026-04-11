@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/app/auth_gate.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.impl.dart';
 import 'package:mobile_app/auth/bloc/auth_bloc.dart';
+import 'package:mobile_app/auth/bloc/reset_password_bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
 import 'package:mobile_app/classroom/repository/classroom_repo_impl.dart';
 import 'package:mobile_app/notes/repository/notes_repository_impl.dart';
@@ -121,10 +122,20 @@ class MyApp extends StatelessWidget {
         ),
       ],
 
-      child: BlocProvider(
-        // except auth bloc, all others blocs are injected in the authgate so they are rebuild after every login
-        create: (context) =>
-            AuthBloc(context.read<AuthRepoImpl>())..add(AppStarted()),
+      child: MultiBlocProvider(
+        providers: [
+          // other blocs are injected in auth gate so they are rebuild after every login attempt
+          // auth bloc
+          BlocProvider(
+            create: (context) =>
+                AuthBloc(context.read<AuthRepoImpl>())..add(CheckAuth()),
+          ),
+          // reset password bloc
+          BlocProvider(
+            create: (context) =>
+                ResetPasswordBloc(context.read<AuthRepoImpl>()),
+          ),
+        ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Academia',

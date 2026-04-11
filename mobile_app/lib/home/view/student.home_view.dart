@@ -4,6 +4,7 @@ import 'package:mobile_app/assignments/student_assignments/bloc/student.assignme
 import 'package:mobile_app/classroom/bloc/classroom_bloc.dart';
 import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
+import 'package:mobile_app/shared/custom_methods.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
 import 'package:mobile_app/shared/custom_widgets.dart';
@@ -163,7 +164,7 @@ class _StudentHomeViewState extends State<StudentHomeView> {
                   child: ListTile(
                     // greetings with user name
                     title: Text(
-                      'Hi, ${widget.student.name}',
+                      'Hi, ${CustomMethods.firstName(widget.student.name)}!',
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.w600,

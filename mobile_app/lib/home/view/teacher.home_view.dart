@@ -6,6 +6,7 @@ import 'package:mobile_app/classroom/classroom_gate.dart';
 import 'package:mobile_app/home/bloc/teachers_dashboard_bloc.dart';
 import 'package:mobile_app/notices/notice_bloc/notice_bloc.dart';
 import 'package:mobile_app/notices/unread_count_bloc/unread_count_bloc.dart';
+import 'package:mobile_app/shared/custom_methods.dart';
 import 'package:mobile_app/shared/required_enums.dart';
 import 'package:mobile_app/subject/bloc/subject_bloc.dart';
 import 'package:mobile_app/upcoming/bloc/upcoming_bloc.dart';
@@ -167,8 +168,8 @@ class _TeacherHomeViewState extends State<TeacherHomeView> {
                   bottom: false,
                   child: ListTile(
                     // greetings with user name
-                    title: const Text(
-                      'Hi, Jane Doe!',
+                    title: Text(
+                      'Hi, ${CustomMethods.firstName(widget.teacher.name)}!',
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.w600,
