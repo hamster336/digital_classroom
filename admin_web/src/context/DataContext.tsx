@@ -204,10 +204,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     employeeId: string,
     subjectIds: string[],
     classIds: string[],
-    avatarUrl: string | null
+    avatarpath: string | null
   ) => {
     try {
-      const newItem = await addTeacherDB(employeeId, subjectIds, classIds, avatarUrl);
+      const newItem = await addTeacherDB(employeeId, subjectIds, classIds, avatarpath);
       setTeachers(prev => [...prev, newItem]);
     } catch (err) {
       console.error("Failed to add teacher:", err);
@@ -220,11 +220,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     employeeId: string,
     subjectIds: string[],
     classIds: string[],
-    avatarUrl: string | null,
+    avatarpath: string | null,
     lastCheckedNotices: Date | null
   ) => {
     try {
-      const updated = await editTeacher(id, employeeId, subjectIds, classIds, avatarUrl, lastCheckedNotices);
+      const updated = await editTeacher(id, employeeId, subjectIds, classIds, avatarpath, lastCheckedNotices);
       setTeachers(prev => prev.map(i => i.id === id ? updated : i));
     } catch (err) {
       console.error("Failed to update teacher:", err);

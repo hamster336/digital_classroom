@@ -8,7 +8,7 @@ export const createTeacher = async (teacherData: Record<string, any>) => {
       employee_id:          teacherData.employee_id,
       subject_ids:          teacherData.subject_ids,
       class_ids:            teacherData.class_ids,
-      avatar_url:           teacherData.avatar_url,
+      avatar_path:           teacherData.avatar_path,
       last_checked_notices: teacherData.last_checked_notices, //  fixed: was cut off
     }])
     .select()
@@ -49,7 +49,7 @@ export const updateTeacher = async (id: string, updates: Record<string, any>) =>
       employee_id:          updates.employee_id,
       subject_ids:          updates.subject_ids,
       class_ids:            updates.class_ids,
-      avatar_url:           updates.avatar_url,
+      avatar_path:           updates.avatar_path,
       last_checked_notices: updates.last_checked_notices,
     })
     .eq("id", id)
