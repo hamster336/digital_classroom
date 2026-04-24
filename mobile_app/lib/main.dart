@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +19,7 @@ import 'package:mobile_app/submission/repository/submission_repo_impl.dart';
 import 'package:mobile_app/supabase/credentials/supabase.crendentials.dart';
 import 'package:mobile_app/supabase/services/assignment_services.dart';
 import 'package:mobile_app/supabase/services/notes_services.dart';
+import 'package:mobile_app/supabase/services/notification_services.dart';
 import 'package:mobile_app/supabase/services/schedule_services.dart';
 import 'package:mobile_app/supabase/services/submission_services.dart';
 import 'package:mobile_app/supabase/services/upcoming_services.dart';
@@ -31,6 +36,19 @@ import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([.portraitUp]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
+  await Firebase.initializeApp();
+
+  final permission = await FirebaseMessaging.instance.requestPermission();
+  log('${permission.authorizationStatus}');
+
+  await NotificationService().init();
 
   await sb.Supabase.initialize(
     url: SupabaseCredentials.APIURL,

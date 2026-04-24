@@ -141,7 +141,7 @@ class TeacherAssignmentBloc
 
       emit(CreateAssignmentSuccess());
     } catch (e) {
-      emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(CreateAssignmentError(message: e.toString()));
       emit(currentState);
     }
   }
@@ -161,7 +161,7 @@ class TeacherAssignmentBloc
       await assignmentRepo.updateAssignment(event.assignment);
       emit(UpdateAssignmentSuccess());
     } catch (e) {
-      emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(UpdateAssignmentError(message: e.toString()));
       emit(currentState);
     }
   }
@@ -182,7 +182,7 @@ class TeacherAssignmentBloc
       emit(DeleteAssignmentSuccess());
       emit(currentState);
     } catch (e) {
-      emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(DeleteAssignmentError(message: e.toString()));
       emit(currentState);
     }
   }

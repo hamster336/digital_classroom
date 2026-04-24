@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:mobile_app/auth/repository/auth_repo_impl.dart';
@@ -39,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await repository.getCurrentUser();
       emit(Authenticated(user: user));
     } catch (e) {
+      log(e.toString());
       emit(AuthFailure(message: e.toString()));
     }
   }
@@ -63,35 +65,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(currentState);
     }
   }
-
-  // // change password
-  // Future<void> _changePassword(
-  //   ChangePassword event,
-  //   Emitter<AuthState> emit,
-  // ) async {
-  //   if (event.newPassword != event.confirmPassword) {
-  //     emit(AuthFailure(message: 'Passwords do not match. Try again :)'));
-  //     return;
-  //   }
-
-  //   if (event.newPassword.length < 6) {
-  //     emit(AuthFailure(message: 'Password is less than 6 characters.'));
-  //   }
-  //   final currentState = state;
-
-  //   if (currentState is! Authenticated) {
-  //     throw Exception('User not logged in');
-  //   }
-
-  //   try {
-  //     await repository.changePassword(event.oldPassword, event.newPassword);
-
-  //     emit(PasswordChangeSuccess());
-
-  //     emit(Authenticated(user: currentState.user));
-  //   } catch (e) {
-  //     emit(AuthFailure(message: e.toString()));
-  //     emit(currentState);
-  //   }
-  // }
 }

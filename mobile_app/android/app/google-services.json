@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058890745075",
+    "project_id": "digital-classroom-8b4e8",
+    "storage_bucket": "digital-classroom-8b4e8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058890745075:android:090ad4bd33098a4ff9e386",
+        "android_client_info": {
+          "package_name": "com.hamster.mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ1WQ2GQztP514qFk_J216hTjl3RAEji8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

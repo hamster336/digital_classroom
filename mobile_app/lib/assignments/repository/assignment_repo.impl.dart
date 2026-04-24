@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:mobile_app/assignments/models/assignment.dart';
 import 'package:mobile_app/assignments/repository/assignment_repo.dart';
 import 'package:mobile_app/supabase/services/assignment_services.dart';
@@ -60,6 +62,7 @@ class AssignmentRepoImpl extends AssignmentRepo {
     try {
       await services.addAssignment(Assignment.toMap(assignment));
     } catch (e) {
+      log(e.toString());
       throw Exception(e.toString());
     }
   }
