@@ -151,6 +151,7 @@ class _StudentAssignmentDetailsScreenState
                         ),
                       ],
                     ),
+                    const SizedBox(height: 15),
                   ],
                 ),
               ),

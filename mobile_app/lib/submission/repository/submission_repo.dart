@@ -31,4 +31,10 @@ abstract class SubmissionRepo {
     required String className,
     required Function(int received, int total) onProgress,
   });
+
+  Future<void> gradeSubmission ({
+    required String submissionId,
+    required double score,
+    required String remarks,
+  });
 }

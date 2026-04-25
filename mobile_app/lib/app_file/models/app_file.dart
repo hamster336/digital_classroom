@@ -13,6 +13,8 @@ class AppFile {
   final String mimeType;
   final int fileSize;
   final DateTime createdAt;
+  double? score;
+  String? remarks;
 
   bool isDownloaded;
 
@@ -27,6 +29,8 @@ class AppFile {
     required this.mimeType,
     required this.fileSize,
     required this.createdAt,
+    this.score,
+    this.remarks,
     this.isDownloaded = false,
   });
 
@@ -60,6 +64,8 @@ class AppFile {
       mimeType: map['mime_type'],
       fileSize: map['file_size'],
       createdAt: DateTime.parse(map['created_at']).toLocal(),
+      score: map['score'],
+      remarks: map['remarks'],
     );
   }
 

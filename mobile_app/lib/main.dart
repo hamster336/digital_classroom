@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +43,7 @@ void main() async {
   );
   await Firebase.initializeApp();
 
-  final permission = await FirebaseMessaging.instance.requestPermission();
-  log('${permission.authorizationStatus}');
+  await FirebaseMessaging.instance.requestPermission();
 
   await NotificationService().init();
 

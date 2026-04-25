@@ -129,4 +129,21 @@ class SubmissionRepoImpl extends SubmissionRepo {
       throw Exception(e.toString());
     }
   }
+
+  @override
+  Future<void> gradeSubmission({
+    required String submissionId,
+    required double score,
+    required String remarks,
+  }) async {
+    try {
+      await subServices.gradeSubmission(
+        submissionId: submissionId,
+        score: score,
+        remarks: remarks,
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 }

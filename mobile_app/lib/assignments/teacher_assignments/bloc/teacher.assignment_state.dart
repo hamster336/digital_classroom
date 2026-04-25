@@ -61,4 +61,13 @@ final class DownloadAssignmentSubmissionError extends TeacherAssignmentState {
   DownloadAssignmentSubmissionError({required this.message});
 }
 
-final class DownloadAssignmentSubmissionSuccess extends TeacherAssignmentState {}
+final class DownloadAssignmentSubmissionSuccess
+    extends TeacherAssignmentState {}
+
+final class GradeSubmissionSuccess extends TeacherAssignmentState {}
+
+final class GradeSubmissionError extends TeacherAssignmentState {
+  final String message;
+
+  GradeSubmissionError({required this.message});
+}
