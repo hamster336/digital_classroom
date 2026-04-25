@@ -15,6 +15,13 @@ class VerifyOtpScreen extends StatefulWidget {
 
 class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   final otpController = TextEditingController();
+
+  @override
+  void dispose() {
+    otpController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;

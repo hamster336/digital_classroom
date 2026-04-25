@@ -29,6 +29,9 @@ class AuthRepoImpl extends AuthRepo {
     if (res.user == null) {
       throw Exception('Authentication Failed');
     }
+
+    // save the fcm token for the user
+    await userService.saveFcmToken();
   }
 
   // logout method

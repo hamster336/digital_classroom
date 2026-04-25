@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +10,7 @@ import 'package:mobile_app/shared/custom_widgets.dart';
 import 'package:mobile_app/subject/model/subject.dart';
 import 'package:mobile_app/submission/bloc/submission_bloc.dart';
 
-class SubmissionsView extends StatelessWidget {
+class SubmissionsView extends StatefulWidget {
   final Classroom cls;
   final Subject subject;
   final String assignmentId;
@@ -21,6 +23,11 @@ class SubmissionsView extends StatelessWidget {
   });
 
   @override
+  State<SubmissionsView> createState() => _SubmissionsViewState();
+}
+
+class _SubmissionsViewState extends State<SubmissionsView> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -30,9 +37,17 @@ class SubmissionsView extends StatelessWidget {
           final subBloc = context.read<SubmissionBloc>();
           final asgnBloc = context.read<TeacherAssignmentBloc>();
           asgnBloc.add(
-            RefreshAssignments(teacherId: subject.teacherId, classId: cls.id),
+            RefreshAssignments(
+              teacherId: widget.subject.teacherId,
+              classId: widget.cls.id,
+            ),
           );
-          subBloc.add(RefreshStudents(classId: cls.id, subjectId: subject.id));
+          subBloc.add(
+            RefreshStudents(
+              classId: widget.cls.id,
+              subjectId: widget.subject.id,
+            ),
+          );
 
           await subBloc.stream.firstWhere(
             (state) => state is StudentsLoaded || state is StudentsLoadingError,
@@ -61,9 +76,37 @@ class SubmissionsView extends StatelessWidget {
                   if (state is DownloadAssignmentSubmissionSuccess) {
                     context.read<TeacherAssignmentBloc>().add(
                       RefreshAssignments(
-                        teacherId: subject.teacherId,
-                        classId: cls.id,
+                        teacherId: widget.subject.teacherId,
+                        classId: widget.cls.id,
                       ),
+                    );
+                  }
+
+                  if (state is GradeSubmissionError) {
+                    CustomWidgets.customAltertBox(
+                      context,
+                      state.message,
+                      () {},
+                    );
+                  }
+                  if (state is GradeSubmissionSuccess) {
+                    context.read<TeacherAssignmentBloc>().add(
+                      RefreshAssignments(
+                        teacherId: widget.subject.teacherId,
+                        classId: widget.cls.id,
+                      ),
+                    );
+
+                    context.read<SubmissionBloc>().add(
+                      RefreshStudents(
+                        classId: widget.cls.id,
+                        subjectId: widget.subject.id,
+                      ),
+                    );
+                    CustomWidgets.customAltertBox(
+                      context,
+                      'Assignment graded successfully.',
+                      () {},
                     );
                   }
                 },
@@ -82,6 +125,10 @@ class SubmissionsView extends StatelessWidget {
             ],
             child: BlocBuilder<TeacherAssignmentBloc, TeacherAssignmentState>(
               builder: (context, state) {
+                if (state is TeacherAssignmentLoading) {
+                  return CustomWidgets.customLoader();
+                }
+
                 final List<AppFile> submissions =
                     (state is TeacherAssignmentLoaded) ? state.submissions : [];
 
@@ -115,7 +162,7 @@ class SubmissionsView extends StatelessWidget {
                           final sub = submissions.firstWhereOrNull(
                             (s) =>
                                 (s.uploaderId == student.id) &&
-                                (s.ownerId == assignmentId),
+                                (s.ownerId == widget.assignmentId),
                           );
 
                           final isDownloaded = (sub != null)
@@ -133,17 +180,51 @@ class SubmissionsView extends StatelessWidget {
                           return CustomWidgets.studentSubmissionCard(
                             student: student,
                             submission: sub,
-                            // icon: Icons.file_download_outlined,
                             onDownload: () =>
                                 context.read<TeacherAssignmentBloc>().add(
-                                  DownloadAssignmentSubmission(
+                                  DownloadSubmission(
                                     submission: sub!,
-                                    className: cls.name,
+                                    className: widget.cls.name,
                                   ),
                                 ),
                             isDownloaded: isDownloaded,
                             downloading: downloading,
                             progress: progress,
+                            onGrade: () async {
+                              if (sub == null) return;
+                              final bloc = context
+                                  .read<TeacherAssignmentBloc>();
+
+                              if (!isDownloaded) {
+                                bloc.add(
+                                  DownloadSubmission(
+                                    submission: sub,
+                                    className: widget.cls.name,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              final result = await showGradeDialog(
+                                initialScore: sub.score,
+                                initialRemarks: sub.remarks,
+                              );
+
+                              if (result == null) return;
+
+                              final score = result['score'];
+                              final remarks = result['remarks'];
+
+                              log('Score: $score \n Remarks: $remarks');
+
+                              bloc.add(
+                                GradeSubmission(
+                                  submissionId: sub.id!,
+                                  score: score,
+                                  remarks: remarks,
+                                ),
+                              );
+                            },
                           );
                         },
                       );
@@ -160,6 +241,107 @@ class SubmissionsView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  // grade submission
+  Future<Map<String, dynamic>?> showGradeDialog({
+    double? initialScore,
+    String? initialRemarks,
+  }) async {
+    final scoreController = TextEditingController(
+      text: initialScore != null ? initialScore.toString() : '',
+    );
+
+    final remarksController = TextEditingController(text: initialRemarks ?? '');
+
+    final formKey = GlobalKey<FormState>();
+
+    return showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            bool isChanged() {
+              final currentScore = scoreController.text.trim();
+              final currentRemarks = remarksController.text.trim();
+
+              final initialScoreStr = initialScore != null
+                  ? initialScore.toString()
+                  : '';
+              final initialRemarksStr = initialRemarks ?? '';
+
+              return currentScore != initialScoreStr ||
+                  currentRemarks != initialRemarksStr;
+            }
+
+            return AlertDialog(
+              title: const Text('Grade Submission'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: scoreController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Score (0 - 10)',
+                      ),
+                      onChanged: (_) => setState(() {}),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Enter score';
+                        }
+
+                        final score = double.tryParse(value);
+                        if (score == null) return 'Invalid number';
+                        if (score < 0 || score > 10) {
+                          return 'Score must be 0–10';
+                        }
+
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    TextFormField(
+                      controller: remarksController,
+                      maxLines: null,
+                      decoration: const InputDecoration(labelText: 'Remarks'),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+
+                ElevatedButton(
+                  onPressed: isChanged()
+                      ? () {
+                          if (formKey.currentState!.validate()) {
+                            Navigator.pop(context, {
+                              'score': double.parse(
+                                scoreController.text.trim(),
+                              ),
+                              'remarks': remarksController.text.trim(),
+                            });
+                          }
+                        }
+                      : null, // disabled if not changed
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -527,106 +527,83 @@ class CustomWidgets {
                   ),
                 )
               : Row(
-                  mainAxisAlignment: .spaceBetween,
+                  mainAxisAlignment: .spaceEvenly,
+                  crossAxisAlignment: .start,
                   children: [
-                    Column(
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              'Last Submission date:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: .center,
+                        children: [
+                          Text(
+                            'Last Submission date:\n${DateFormat('hh:mm a, dd MMM y').format(sub.createdAt)}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
-
-                            Text(
-                              DateFormat(
-                                'hh:mm a, dd MMM y',
-                              ).format(sub.createdAt),
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
+                            textAlign: .center,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'File name:\n${sub.fileName}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Column(
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  'File name:',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-
-                                Text(
-                                  sub.fileName,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
+                            textAlign: .center,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Grade:\n${(sub.score == null) ? 'Not graded yet' : '${sub.score} / 10'}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
-                          ],
-                        ),
-                      ],
+                            textAlign: .center,
+                          ),
+                        ],
+                      ),
                     ),
 
-                    Column(
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              'No of submissions:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: .center,
+                        mainAxisSize: .min,
+                        children: [
+                          Text(
+                            'No of submissions:\n${DateFormat('$count').format(sub.createdAt)}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
+                            textAlign: .center,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'File size:\n${formatSize(sub.fileSize)}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                            textAlign: .center,
+                          ),
 
-                            Text(
-                              DateFormat('$count').format(sub.createdAt),
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Remarks:',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Column(
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  'File size:',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-
-                                Text(
-                                  DateFormat(
-                                    formatSize(sub.fileSize),
-                                  ).format(sub.createdAt),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
+                          ),
+                          Text(
+                            '${(sub.remarks != null) ? sub.remarks : 'No remakrs'}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -1072,7 +1049,7 @@ class CustomWidgets {
           text,
           style: TextStyle(
             shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
-            fontSize: 26,
+            fontSize: 23,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
             color: Colors.white,
@@ -1421,6 +1398,7 @@ class CustomWidgets {
     required bool isDownloaded,
     required bool downloading,
     double? progress,
+    required VoidCallback onGrade,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5, bottom: 5),
@@ -1478,6 +1456,17 @@ class CustomWidgets {
                           ),
                         ],
                       ),
+
+                if (submission != null)
+                  ElevatedButton(
+                    onPressed: onGrade,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 25),
+                      backgroundColor: Color(0xFF2AB3AA),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Grade', style: TextStyle(fontSize: 16)),
+                  ),
               ],
             ),
             trailing: (submission == null)

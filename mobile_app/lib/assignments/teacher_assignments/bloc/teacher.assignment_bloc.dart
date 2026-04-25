@@ -23,7 +23,8 @@ class TeacherAssignmentBloc
     on<CreateAssignment>(_createAssignment);
     on<UpdateAssignment>(_updateAssignment);
     on<DeleteAssignment>(_deleteAssignment);
-    on<DownloadAssignmentSubmission>(_downloadSubmission);
+    on<DownloadSubmission>(_downloadSubmission);
+    on<GradeSubmission>(_gradeSubmission);
   }
 
   // cache asignments to prevent refetching each time the teacher navigates
@@ -141,7 +142,7 @@ class TeacherAssignmentBloc
 
       emit(CreateAssignmentSuccess());
     } catch (e) {
-      emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(CreateAssignmentError(message: e.toString()));
       emit(currentState);
     }
   }
@@ -161,7 +162,7 @@ class TeacherAssignmentBloc
       await assignmentRepo.updateAssignment(event.assignment);
       emit(UpdateAssignmentSuccess());
     } catch (e) {
-      emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(UpdateAssignmentError(message: e.toString()));
       emit(currentState);
     }
   }
@@ -182,13 +183,14 @@ class TeacherAssignmentBloc
       emit(DeleteAssignmentSuccess());
       emit(currentState);
     } catch (e) {
-      emit(TeacherAssignmentLoadingError(message: e.toString()));
+      emit(DeleteAssignmentError(message: e.toString()));
       emit(currentState);
     }
   }
 
+  // download submission
   Future<void> _downloadSubmission(
-    DownloadAssignmentSubmission event,
+    DownloadSubmission event,
     Emitter<TeacherAssignmentState> emit,
   ) async {
     if (state is! TeacherAssignmentLoaded) return;
@@ -222,5 +224,30 @@ class TeacherAssignmentBloc
       emit(DownloadAssignmentSubmissionError(message: e.toString()));
       emit(currentState);
     }
+  }
+
+  // grade submission
+  Future<void> _gradeSubmission(
+    GradeSubmission event,
+    Emitter<TeacherAssignmentState> emit,
+  ) async {
+    if (state is! TeacherAssignmentLoaded) return;
+
+    final currentState = state as TeacherAssignmentLoaded;
+
+    try {
+      emit(TeacherAssignmentLoading());
+
+      await submissionRepo.gradeSubmission(
+        submissionId: event.submissionId,
+        score: event.score,
+        remarks: event.remarks,
+      );
+
+      emit(GradeSubmissionSuccess());
+    } catch (e) {
+      emit(GradeSubmissionError(message: e.toString()));
+    }
+    emit(currentState);
   }
 }

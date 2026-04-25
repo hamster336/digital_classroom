@@ -14,7 +14,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final oldPswController = TextEditingController();
   final newPswController = TextEditingController();
   final confirmPswController = TextEditingController();
-  BuildContext? dialogContext;
 
   @override
   void dispose() {

@@ -8,7 +8,7 @@ final class LoadTeacherAssignments extends TeacherAssignmentEvent {
   LoadTeacherAssignments({required this.teacherId, required this.classId});
 }
 
-final class RefreshAssignments extends TeacherAssignmentEvent{
+final class RefreshAssignments extends TeacherAssignmentEvent {
   final String classId;
   final String teacherId;
   RefreshAssignments({required this.teacherId, required this.classId});
@@ -29,8 +29,20 @@ final class DeleteAssignment extends TeacherAssignmentEvent {
   DeleteAssignment({required this.assignmentId});
 }
 
-final class DownloadAssignmentSubmission extends TeacherAssignmentEvent {
+final class DownloadSubmission extends TeacherAssignmentEvent {
   final AppFile submission;
   String className;
-  DownloadAssignmentSubmission({required this.submission, required this.className});
+  DownloadSubmission({required this.submission, required this.className});
+}
+
+final class GradeSubmission extends TeacherAssignmentEvent {
+  final String submissionId;
+  final double score;
+  final String remarks;
+
+  GradeSubmission({
+    required this.submissionId,
+    required this.score,
+    required this.remarks,
+  });
 }

@@ -214,6 +214,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
 
   // delete assignment
   Future<void> _onDelete(String assignmentId) async {
+    final bloc = context.read<TeacherAssignmentBloc>();
     showDialog(
       context: context,
       builder: (context) {
@@ -223,7 +224,7 @@ class _TeacherAssignmentViewState extends State<TeacherAssignmentView> {
           content: 'Are you sure you want to delete this assignment?',
           onConfirm: () async {
             Navigator.pop(context);
-            context.read<TeacherAssignmentBloc>().add(
+            bloc.add(
               DeleteAssignment(assignmentId: assignmentId),
             );
           },

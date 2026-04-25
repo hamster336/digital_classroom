@@ -81,4 +81,18 @@ class SubmissionServices {
       throw Exception(e.toString());
     }
   }
+
+  // grade submission
+  Future<void> gradeSubmission({
+    required String submissionId,
+    required double score,
+    required String remarks,
+  }) async {
+    final data = {
+      'score': score,
+      'remarks': remarks
+    };
+
+    await client.from('app_files').update(data).eq('id', submissionId);
+  }
 }
