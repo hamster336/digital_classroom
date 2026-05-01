@@ -7,12 +7,12 @@ import {
   deleteTeacher,
 } from "../supabase/teacher";
 
-/** CREATE TEACHER */
+/** CREATE */
 export const addTeacher = async (
   employeeId: string,
   subjectIds: string[],
   classIds: string[],
-  avatarUrl: string | null,
+  avatarPath: string | null
 ): Promise<Teacher> => {
   try {
     const teacher = new Teacher(
@@ -20,47 +20,48 @@ export const addTeacher = async (
       employeeId,
       subjectIds,
       classIds,
-      avatarUrl,
-      null   // lastCheckedNotices null for new teacher
+      avatarPath,
+      null
     );
-    const result = await createTeacher(teacher.toMap());  // toMap() → UTC
-    return Teacher.fromMap(result);                        // fromMap() → Local
+
+    const result = await createTeacher(teacher.toMap());
+    return Teacher.fromMap(result);
   } catch (error) {
     console.error("Failed to create teacher:", error);
     throw error;
   }
 };
 
-/** GET ALL TEACHERS */
+/** READ ALL */
 export const fetchTeachers = async (): Promise<Teacher[]> => {
   try {
     const data = await getAllTeachers();
-    return data.map((item: Record<string, any>) => Teacher.fromMap(item));  // UTC → Local
+    return data.map((item: any) => Teacher.fromMap(item));
   } catch (error) {
     console.error("Failed to fetch teachers:", error);
     throw error;
   }
 };
 
-/** GET TEACHER BY ID */
+/** READ BY ID */
 export const fetchTeacherById = async (id: string): Promise<Teacher> => {
   try {
     const data = await getTeacherById(id);
-    return Teacher.fromMap(data);  // UTC → Local
+    return Teacher.fromMap(data);
   } catch (error) {
     console.error("Failed to fetch teacher:", error);
     throw error;
   }
 };
 
-/** UPDATE TEACHER */
+/** UPDATE */
 export const editTeacher = async (
   id: string,
   employeeId: string,
   subjectIds: string[],
   classIds: string[],
-  avatarUrl: string | null,
-  lastCheckedNotices: Date | null  
+  avatarPath: string | null,
+  lastCheckedNotices: Date | null
 ): Promise<Teacher> => {
   try {
     const teacher = new Teacher(
@@ -68,18 +69,19 @@ export const editTeacher = async (
       employeeId,
       subjectIds,
       classIds,
-      avatarUrl,
-      lastCheckedNotices  // toMap() converts to UTC
+      avatarPath,
+      lastCheckedNotices
     );
-    const result = await updateTeacher(id, teacher.toMap());  // toMap() → UTC
-    return Teacher.fromMap(result);                            // fromMap() → Local
+
+    const result = await updateTeacher(id, teacher.toMap());
+    return Teacher.fromMap(result);
   } catch (error) {
     console.error("Failed to update teacher:", error);
     throw error;
   }
 };
 
-/** DELETE TEACHER */
+/** DELETE */
 export const removeTeacher = async (id: string): Promise<boolean> => {
   try {
     await deleteTeacher(id);

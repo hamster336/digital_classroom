@@ -46,14 +46,14 @@ export const TeacherManagement = () => {
                     item.employeeId,
                     item.subjectIds ?? [],
                     item.classIds ?? [],
-                    item.avatarUrl ?? null,
+                    item.avatarPath ?? null,
                     item.lastCheckedNotices ?? null
                 );
                 else await addTeacher(
                     item.employeeId,
                     item.subjectIds ?? [],
                     item.classIds ?? [],
-                    item.avatarUrl ?? null
+                    item.avatarPath ?? null
                 );
             }}
             onDelete={async (id) => await deleteTeacher(id)}
@@ -62,7 +62,7 @@ export const TeacherManagement = () => {
                 employeeId: '',
                 subjectIds: [],
                 classIds: [],
-                avatarUrl: null,
+                avatarPath: null,
                 lastCheckedNotices: null,
             }}
             renderForm={(data, onChange) => (
@@ -78,8 +78,8 @@ export const TeacherManagement = () => {
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Avatar URL</label>
                         <Input
-                            value={data.avatarUrl || ''}
-                            onChange={(e) => onChange('avatarUrl', e.target.value || null)}
+                            value={data.avatarPath || ''}
+                            onChange={(e) => onChange('avatarPath', e.target.value || null)}
                             placeholder="https://..."
                         />
                     </div>
@@ -254,7 +254,7 @@ export const SubjectAssignment = () => {
                 ? teacher.subjectIds.filter(id => id !== subjectId)
                 : [...teacher.subjectIds, subjectId],
             teacher.classIds,
-            teacher.avatarUrl,
+            teacher.avatarPath,
             teacher.lastCheckedNotices
         );
     };
