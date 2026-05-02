@@ -7,14 +7,24 @@ import { Link, useNavigate } from 'react-router-dom';
 export const LoginPage: React.FC = () => {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [error, setError] = React.useState<string | null>(null);      
+    const [isLoading, setIsLoading] = React.useState(false);            
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {   // async
         e.preventDefault();
-        // In a real app, you'd validate credentials here
-        login(email, 'Admin User');
-        navigate('/dashboard');
+        try {
+            setIsLoading(true);
+            setError(null);
+            await login(email, password);   // real Supabase login with password
+            navigate('/dashboard');
+        } catch (err: any) {
+            // ✅ show real error message from Supabase
+            setError(err?.message || 'Login failed. Please check your credentials.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -41,6 +51,14 @@ export const LoginPage: React.FC = () => {
                     </CardHeader>
                     <CardContent className="pb-8">
                         <form onSubmit={handleSubmit} className="space-y-4">
+
+                            {/* show error message if login fails */}
+                            {error && (
+                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium">
+                                    {error}
+                                </div>
+                            )}
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
                                     Email
@@ -79,8 +97,14 @@ export const LoginPage: React.FC = () => {
                                     />
                                 </div>
                             </div>
-                            <Button type="submit" className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.01] active:scale-[0.99]">
-                                Sign In
+
+                            {/* show loading state on button */}
+                            <Button
+                                type="submit"
+                                className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                disabled={isLoading}   // disable while loading
+                            >
+                                {isLoading ? 'Signing in...' : 'Sign In'}   {/* loading text */}
                             </Button>
                         </form>
 

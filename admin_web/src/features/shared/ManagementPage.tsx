@@ -15,7 +15,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 interface Entity {
-    id: string;
+    id: string | null;
     [key: string]: any;
 }
 
@@ -27,8 +27,8 @@ export interface FilterConfig<T> {
 
 interface ManagementPageProps<T extends Entity> {
     title: string;
-    initialData?: T[]; // Now optional
-    data?: T[]; // New: external data
+    initialData?: T[];
+    data?: T[];
     columns: {
         key: keyof T;
         label: string;
@@ -142,7 +142,7 @@ export function ManagementPage<T extends Entity>({
         e.preventDefault();
         const newEntity = {
             ...formData,
-            id: editingId || Math.random().toString(36).substr(2, 9)
+            id: editingId || null  // null for new items, DB will generate UUID
         } as T;
 
         if (editingId) {
@@ -159,8 +159,8 @@ export function ManagementPage<T extends Entity>({
         handleCancel();
     };
 
-    const handleDeleteClick = (id: string) => {
-        setDeleteId(id);
+    const handleDeleteClick = (id: string | null) => {  // accept null
+        if (id) setDeleteId(id);  //  only set if not null
     };
 
     const confirmDelete = () => {
@@ -295,7 +295,7 @@ export function ManagementPage<T extends Entity>({
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10" onClick={() => handleEdit(item)}>
                                                 <Edit className="w-4 h-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(item.id)}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(item.id)}>  {/*  null-safe */}
                                                 <Trash className="w-4 h-4" />
                                             </Button>
                                         </td>
@@ -322,7 +322,7 @@ export function ManagementPage<T extends Entity>({
                                         <Button variant="ghost" size="icon" className="h-9 w-9 text-primary bg-primary/5" onClick={() => handleEdit(item)}>
                                             <Edit className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive bg-destructive/5" onClick={() => handleDeleteClick(item.id)}>
+                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive bg-destructive/5" onClick={() => handleDeleteClick(item.id)}>  {/*  null-safe */}
                                             <Trash className="w-4 h-4" />
                                         </Button>
                                     </div>

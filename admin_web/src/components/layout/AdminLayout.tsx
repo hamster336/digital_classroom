@@ -53,9 +53,13 @@ export const AdminLayout: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+    try {
+        await logout();
         navigate('/login');
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
     };
 
     const navItems = [

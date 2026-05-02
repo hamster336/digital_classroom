@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, School, User } from 'lucide-react';
+import { Lock, Mail, School, User } from 'lucide-react';  //  added Lock icon
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -8,14 +8,24 @@ export const SignupPage: React.FC = () => {
     const [name, setName] = React.useState('');
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [error, setError] = React.useState<string | null>(null);    
+    const [isLoading, setIsLoading] = React.useState(false);          // loading state
     const { signup } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {   // async
         e.preventDefault();
-        // In a real app, you'd perform registration here
-        signup(email, name);
-        navigate('/dashboard');
+        try {
+            setIsLoading(true);
+            setError(null);
+            await signup(email, password, name);   // real Supabase signup with password + name
+            navigate('/dashboard');
+        } catch (err: any) {
+            // show real error message from Supabase
+            setError(err?.message || 'Signup failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -42,6 +52,14 @@ export const SignupPage: React.FC = () => {
                     </CardHeader>
                     <CardContent className="pb-8">
                         <form onSubmit={handleSubmit} className="space-y-4">
+
+                            {/*  show error message if signup fails */}
+                            {error && (
+                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium">
+                                    {error}
+                                </div>
+                            )}
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium leading-none" htmlFor="name">
                                     Full Name
@@ -79,17 +97,27 @@ export const SignupPage: React.FC = () => {
                                 <label className="text-sm font-medium leading-none" htmlFor="password">
                                     Password
                                 </label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />  {/*  added Lock icon */}
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        className="pl-10"   
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <Button type="submit" className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.01] active:scale-[0.99]">
-                                Create Account
+
+                            {/*  show loading state on button */}
+                            <Button
+                                type="submit"
+                                className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                disabled={isLoading}   // disable while loading
+                            >
+                                {isLoading ? 'Creating Account...' : 'Create Account'}  {/* loading text */}
                             </Button>
                         </form>
 

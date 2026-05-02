@@ -1,6 +1,8 @@
 import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Input } from '@/components/ui';
 import { useData } from '@/context/DataContext';
-import { Student, Subject, Teacher } from '@/lib/dummy-data';
+import { Student } from '@/models/student';   
+import { Subject } from '@/models/subject';   
+import { Teacher } from '@/models/teacher';    
 import { cn } from '@/lib/utils';
 import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Plus, Search, SlidersHorizontal, UserCheck, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -14,30 +16,71 @@ export const TeacherManagement = () => {
             title="Teachers"
             data={teachers}
             columns={[
-                { key: 'name', label: 'Name' },
-                { key: 'email', label: 'Email' },
+                { key: 'employeeId', label: 'Employee ID' },  
+                {
+                    key: 'subjectIds',
+                    label: 'Subjects',
+                    render: (val: string[]) => (
+                        <span>{val?.length > 0 ? `${val.length} subjects` : 'None'}</span>
+                    )
+                },
+                {
+                    key: 'classIds',
+                    label: 'Classes',
+                    render: (val: string[]) => (
+                        <span>{val?.length > 0 ? `${val.length} classes` : 'None'}</span>
+                    )
+                },
+                {
+                    key: 'lastCheckedNotices',
+                    label: 'Last Active',
+                    render: (val) => (
+                        <span>{val instanceof Date ? val.toLocaleString() : 'Never'}</span>
+                    )
+                },
             ]}
-            onSave={(item) => {
+            onSave={async (item) => {
                 const existing = teachers.find(t => t.id === item.id);
-                if (existing) updateTeacher(item);
-                else addTeacher(item);
+                if (existing) await updateTeacher(
+                    item.id!,
+                    item.employeeId,
+                    item.subjectIds ?? [],
+                    item.classIds ?? [],
+                    item.avatarPath ?? null,
+                    item.lastCheckedNotices ?? null
+                );
+                else await addTeacher(
+                    item.employeeId,
+                    item.subjectIds ?? [],
+                    item.classIds ?? [],
+                    item.avatarPath ?? null
+                );
             }}
-            onDelete={deleteTeacher}
-            emptyEntity={{ name: '', email: '', subjects: [] }}
+            onDelete={async (id) => await deleteTeacher(id)}
+            emptyEntity={{
+                id: null,
+                employeeId: '',
+                subjectIds: [],
+                classIds: [],
+                avatarPath: null,
+                lastCheckedNotices: null,
+            }}
             renderForm={(data, onChange) => (
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Name</label>
+                        <label className="text-sm font-medium">Employee ID</label>
                         <Input
-                            value={data.name || ''}
-                            onChange={(e) => onChange('name', e.target.value)}
+                            value={data.employeeId || ''}
+                            onChange={(e) => onChange('employeeId', e.target.value)}
+                            placeholder="e.g. EMP001"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Email</label>
+                        <label className="text-sm font-medium">Avatar URL</label>
                         <Input
-                            value={data.email || ''}
-                            onChange={(e) => onChange('email', e.target.value)}
+                            value={data.avatarPath || ''}
+                            onChange={(e) => onChange('avatarPath', e.target.value || null)}
+                            placeholder="https://..."
                         />
                     </div>
                 </div>
@@ -53,51 +96,93 @@ export const StudentManagement = () => {
             title="Students"
             data={students}
             columns={[
-                { key: 'name', label: 'Name' },
-                { key: 'email', label: 'Email' },
+                { key: 'rollNo', label: 'Roll No' },  
+                {
+                    key: 'classId',
+                    label: 'Class',
+                    render: (val) => (
+                        <span>{classrooms.find(c => c.id === val)?.name ?? val}</span>
+                    )
+                },
+                {
+                    key: 'subjectIds',
+                    label: 'Subjects',
+                    render: (val: string[]) => (
+                        <span>{val?.length > 0 ? `${val.length} subjects` : 'None'}</span>
+                    )
+                },
+                {
+                    key: 'lastCheckedNotices',
+                    label: 'Last Active',
+                    render: (val) => (
+                        <span>{val instanceof Date ? val.toLocaleString() : 'Never'}</span>
+                    )
+                },
             ]}
             filters={[
                 {
-                    key: 'classroomId',
-                    label: 'Classroom',
+                    key: 'classId',  
+                    label: 'Class',
                     options: classrooms.map(c => ({
-                        label: `${c.name} - ${c.section} `,
-                        value: c.id
+                        label: c.name,
+                        value: c.id ?? ''
                     }))
                 }
             ]}
-            onSave={(item) => {
+            onSave={async (item) => {
                 const existing = students.find(s => s.id === item.id);
-                if (existing) updateStudent(item);
-                else addStudent(item);
+                if (existing) await updateStudent(
+                    item.id!,
+                    item.rollNo,
+                    item.subjectIds ?? [],
+                    item.avatarUrl ?? null,
+                    item.classId,
+                    item.lastCheckedNotices ?? null
+                );
+                else await addStudent(
+                    item.rollNo,
+                    item.subjectIds ?? [],
+                    item.avatarUrl ?? null,
+                    item.classId
+                );
             }}
-            onDelete={deleteStudent}
-            emptyEntity={{ name: '', email: '', classroomId: classrooms[0]?.id || '' }}
+            onDelete={async (id) => await deleteStudent(id)}
+            emptyEntity={{
+                id: null,
+                rollNo: 0,
+                classId: classrooms[0]?.id ?? '',
+                subjectIds: [],
+                avatarUrl: null,
+                lastCheckedNotices: null,
+            }}
             renderForm={(data, onChange) => (
                 <div className="grid gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Name</label>
+                        <label className="text-sm font-medium">Roll No</label>
                         <Input
-                            value={data.name || ''}
-                            onChange={(e) => onChange('name', e.target.value)}
+                            type="number"
+                            value={data.rollNo || ''}
+                            onChange={(e) => onChange('rollNo', parseInt(e.target.value))}
+                            placeholder="e.g. 1"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Email</label>
+                        <label className="text-sm font-medium">Avatar URL</label>
                         <Input
-                            value={data.email || ''}
-                            onChange={(e) => onChange('email', e.target.value)}
+                            value={data.avatarUrl || ''}
+                            onChange={(e) => onChange('avatarUrl', e.target.value || null)}
+                            placeholder="https://..."
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Classroom</label>
+                        <label className="text-sm font-medium">Class</label>
                         <select
                             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            value={data.classroomId || ''}
-                            onChange={(e) => onChange('classroomId', e.target.value)}
+                            value={data.classId || ''}
+                            onChange={(e) => onChange('classId', e.target.value)}
                         >
                             {classrooms.map(c => (
-                                <option key={c.id} value={c.id}>{c.name} - {c.section}</option>
+                                <option key={c.id} value={c.id ?? ''}>{c.name}</option>
                             ))}
                         </select>
                     </div>
@@ -138,13 +223,12 @@ export const SubjectAssignment = () => {
     const filteredTeachers = useMemo(() => {
         return teachers.filter(t => {
             const matchesSearch = !searchTerm ||
-                t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                t.email.toLowerCase().includes(searchTerm.toLowerCase());
+                t.employeeId.toLowerCase().includes(searchTerm.toLowerCase()); 
 
             let matchesLoad = true;
-            if (loadFilter === 'unassigned') matchesLoad = t.subjects.length === 0;
-            else if (loadFilter === 'active') matchesLoad = t.subjects.length > 0;
-            else if (loadFilter === 'overloaded') matchesLoad = t.subjects.length >= 3;
+            if (loadFilter === 'unassigned') matchesLoad = t.subjectIds.length === 0;      
+            else if (loadFilter === 'active') matchesLoad = t.subjectIds.length > 0;       
+            else if (loadFilter === 'overloaded') matchesLoad = t.subjectIds.length >= 3; 
 
             return matchesSearch && matchesLoad;
         });
@@ -161,15 +245,18 @@ export const SubjectAssignment = () => {
         setCurrentPage(1);
     }, [searchTerm, loadFilter]);
 
-    const toggleSubject = (teacher: Teacher, subjectId: string) => {
-        const hasSubject = teacher.subjects.includes(subjectId);
-        const updatedTeacher = {
-            ...teacher,
-            subjects: hasSubject
-                ? teacher.subjects.filter(id => id !== subjectId)
-                : [...teacher.subjects, subjectId]
-        };
-        updateTeacher(updatedTeacher);
+    const toggleSubject = async (teacher: Teacher, subjectId: string) => {
+        const hasSubject = teacher.subjectIds.includes(subjectId);  
+        await updateTeacher(
+            teacher.id!,
+            teacher.employeeId,
+            hasSubject
+                ? teacher.subjectIds.filter(id => id !== subjectId)
+                : [...teacher.subjectIds, subjectId],
+            teacher.classIds,
+            teacher.avatarPath,
+            teacher.lastCheckedNotices
+        );
     };
 
     return (
@@ -207,7 +294,7 @@ export const SubjectAssignment = () => {
                 <div className="relative flex-1 w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
-                        placeholder="Search faculty by name or email..."
+                        placeholder="Search faculty by employee ID..."
                         className="pl-10 bg-slate-50/50 border-none h-12 text-base rounded-xl focus:ring-primary/20"
                         value={searchTerm}
                         onChange={(e) => updateSearchParam('q', e.target.value)}
@@ -321,33 +408,28 @@ interface TeacherAssignmentCardProps {
 }
 
 const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmentCardProps) => {
-    const assignedSubjects = subjects.filter(s => teacher.subjects.includes(s.id));
+    const assignedSubjects = subjects.filter(s => teacher.subjectIds.includes(s.id ?? '')); 
     const [manageSearch, setManageSearch] = useState('');
 
     const filteredManageSubjects = useMemo(() => {
         return subjects.filter(s =>
-            s.name.toLowerCase().includes(manageSearch.toLowerCase()) ||
-            s.code.toLowerCase().includes(manageSearch.toLowerCase())
+            s.name.toLowerCase().includes(manageSearch.toLowerCase())
+            //  removed s.code and s.department — not in real Subject model
         );
     }, [subjects, manageSearch]);
 
-    // Group by department
-    const groupedSubjects = useMemo(() => {
-        const groups: Record<string, Subject[]> = {};
-        filteredManageSubjects.forEach(s => {
-            if (!groups[s.department]) groups[s.department] = [];
-            groups[s.department].push(s);
-        });
-        return groups;
-    }, [filteredManageSubjects]);
+    // Group by department — removed
+    // Using flat list instead
 
     return (
         <Card className="group border-none shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 rounded-2xl overflow-hidden bg-white ring-1 ring-slate-100">
             <CardHeader className="p-6 pb-4 bg-slate-50/50 border-b border-slate-100">
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                        <CardTitle className="text-xl font-black text-slate-800 group-hover:text-primary transition-colors">{teacher.name}</CardTitle>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{teacher.email}</p>
+                        <CardTitle className="text-xl font-black text-slate-800 group-hover:text-primary transition-colors">{teacher.employeeId}</CardTitle> {/* ✅ real field */}
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            {teacher.classIds.length} Classes • {teacher.subjectIds.length} Subjects
+                        </p>
                     </div>
                     <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
                         <GraduationCap className="w-5 h-5 text-primary" />
@@ -372,7 +454,7 @@ const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmen
                                 >
                                     <span className="text-xs font-bold text-slate-700 group-hover/tag:text-red-700 transition-colors">{subject.name}</span>
                                     <button
-                                        onClick={() => onToggle(subject.id)}
+                                        onClick={() => onToggle(subject.id ?? '')} //  null-safe
                                         className="p-1 rounded-md text-slate-300 hover:bg-red-100 hover:text-red-600 transition-all opacity-0 group-hover/tag:opacity-100"
                                     >
                                         <X className="w-3 h-3" />
@@ -402,7 +484,7 @@ const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmen
                                 </div>
                                 <div className="space-y-1">
                                     <DialogTitle className="text-2xl font-black">Manage Assignments</DialogTitle>
-                                    <p className="text-slate-500 font-medium">Assigning subjects to <span className="text-primary font-bold">{teacher.name}</span></p>
+                                    <p className="text-slate-500 font-medium">Assigning subjects to <span className="text-primary font-bold">{teacher.employeeId}</span></p>
                                 </div>
                             </div>
                         </DialogHeader>
@@ -419,42 +501,34 @@ const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmen
                             </div>
 
                             <div className="space-y-8">
-                                {Object.entries(groupedSubjects).map(([dept, deptSubjects]) => (
-                                    <div key={dept} className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{dept}</h3>
-                                            <div className="h-px bg-slate-100 flex-1" />
+                                <div className="grid sm:grid-cols-2 gap-3">
+                                    {filteredManageSubjects.map(s => (
+                                        <div
+                                            key={s.id}
+                                            onClick={() => onToggle(s.id ?? '')} //  null-safe
+                                            className={cn(
+                                                "flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer group/item",
+                                                teacher.subjectIds.includes(s.id ?? '') 
+                                                    ? "bg-primary/5 border-primary shadow-sm shadow-primary/5"
+                                                    : "bg-white border-slate-100 hover:border-primary/30 hover:bg-slate-50"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                                                teacher.subjectIds.includes(s.id ?? '') 
+                                                    ? "bg-primary border-primary"
+                                                    : "bg-white border-slate-300 group-hover/item:border-primary/50"
+                                            )}>
+                                                {teacher.subjectIds.includes(s.id ?? '') && <Check className="w-3.5 h-3.5 text-white stroke-[4]" />}
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                <p className={cn("text-sm font-bold", teacher.subjectIds.includes(s.id ?? '') ? "text-primary" : "text-slate-700")}>{s.name}</p>
+                                                {    }
+                                            </div>
                                         </div>
-                                        <div className="grid sm:grid-cols-2 gap-3">
-                                            {deptSubjects.map(s => (
-                                                <div
-                                                    key={s.id}
-                                                    onClick={() => onToggle(s.id)}
-                                                    className={cn(
-                                                        "flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer group/item",
-                                                        teacher.subjects.includes(s.id)
-                                                            ? "bg-primary/5 border-primary shadow-sm shadow-primary/5"
-                                                            : "bg-white border-slate-100 hover:border-primary/30 hover:bg-slate-50"
-                                                    )}
-                                                >
-                                                    <div className={cn(
-                                                        "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
-                                                        teacher.subjects.includes(s.id)
-                                                            ? "bg-primary border-primary"
-                                                            : "bg-white border-slate-300 group-hover/item:border-primary/50"
-                                                    )}>
-                                                        {teacher.subjects.includes(s.id) && <Check className="w-3.5 h-3.5 text-white stroke-[4]" />}
-                                                    </div>
-                                                    <div className="space-y-0.5">
-                                                        <p className={cn("text-sm font-bold", teacher.subjects.includes(s.id) ? "text-primary" : "text-slate-700")}>{s.name}</p>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{s.code} • {s.credits} Credits</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                                {Object.keys(groupedSubjects).length === 0 && (
+                                    ))}
+                                </div>
+                                {filteredManageSubjects.length === 0 && (
                                     <div className="py-20 text-center">
                                         <p className="text-slate-400 font-bold">No subjects match your search.</p>
                                     </div>
