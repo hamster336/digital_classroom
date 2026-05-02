@@ -43,14 +43,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <DataProvider>
           <AppRoutes />
-        </Router>
-      </DataProvider>
-    </AuthProvider>
+        </DataProvider>
+      </AuthProvider>
+    </Router>
   );
 }
-
 export default App;

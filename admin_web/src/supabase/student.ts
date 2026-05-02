@@ -1,72 +1,99 @@
 import { supabase } from "./supabase-client";
+import { Student } from "../models/student";
 
-/** CREATE */
-export const createStudent = async (studentData: Record<string, any>) => {
+export const createStudentDB = async (student: Student): Promise<Student> => {
+  console.log("Creating student in DB:", student);
+
   const { data, error } = await supabase
     .from("student")
-    .insert([{
-      roll_number:              studentData.roll_no,        
-      subject_ids:          studentData.subject_ids,    
-      avatar_url:           studentData.avatar_url,     
-      class_id:             studentData.class_id,      
-      last_checked_notices: studentData.last_checked_notices, 
-    }])
+    .insert([student.toInsertMap()]) //  excludes id
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("CREATE ERROR:", error);
+    throw error;
+  }
+
+  return Student.fromMap(data);
 };
 
-/** READ ALL */
-export const getAllStudents = async () => {
+export const getAllStudentsDB = async (): Promise<Student[]> => {
   const { data, error } = await supabase
     .from("student")
-    .select("*")
-    .order("roll_number", { ascending: true });  
+    .select("*");
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("FETCH ERROR:", error);
+    return [];
+  }
+
+  if (!data || data.length === 0) return [];
+
+  return data.map((item: any) => {
+    try {
+      return Student.fromMap(item);
+    } catch (err) {
+      console.error("Mapping error:", item, err);
+      return null;
+    }
+  }).filter(Boolean) as Student[];
 };
 
-/** READ BY ID */
-export const getStudentById = async (id: string) => {  // added missing function
+export const getStudentByIdDB = async (id: string): Promise<Student | null> => {
   const { data, error } = await supabase
     .from("student")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("GET BY ID ERROR:", error);
+    return null;
+  }
+
+  return data ? Student.fromMap(data) : null;
 };
 
-/** UPDATE */
-export const updateStudent = async (id: string, updates: Record<string, any>) => {
+export const updateStudentDB = async (
+  id: string,
+  updates: Partial<Student>
+): Promise<Student | null> => {
+  // convert camelCase → snake_case for Supabase
+  const dbUpdates: any = {};
+  if (updates.rollNumber !== undefined) dbUpdates.roll_number = updates.rollNumber;
+  if (updates.classId !== undefined) dbUpdates.class_id = updates.classId;
+  if (updates.avatarPath !== undefined) dbUpdates.avatar_path = updates.avatarPath;
+  if (updates.subjectIds !== undefined) dbUpdates.subject_ids = updates.subjectIds;
+  if (updates.lastCheckedNotices instanceof Date) {
+    dbUpdates.last_checked_notices = updates.lastCheckedNotices.toISOString();
+  }
+
   const { data, error } = await supabase
     .from("student")
-    .update({
-      roll_number:              updates.roll_number,        
-      subject_ids:          updates.subject_ids,    
-      avatar_url:           updates.avatar_url,     
-      class_id:             updates.class_id,       
-      last_checked_notices: updates.last_checked_notices, 
-    })
+    .update(dbUpdates)
     .eq("id", id)
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("UPDATE ERROR:", error);
+    return null;
+  }
+
+  return data ? Student.fromMap(data) : null;
 };
 
-/** DELETE */
-export const deleteStudent = async (id: string) => {
+export const deleteStudentDB = async (id: string): Promise<boolean> => {
   const { error } = await supabase
     .from("student")
     .delete()
     .eq("id", id);
 
-  if (error) throw error;
+  if (error) {
+    console.error("DELETE ERROR:", error);
+    return false;
+  }
+
   return true;
 };
