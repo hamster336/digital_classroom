@@ -1,14 +1,27 @@
+
 import { supabase } from "./supabase-client";
 
 /** CREATE */
 export const createSubject = async (subjectData: Record<string, any>) => {
+  console.log("Insert payload:", subjectData); 
+
   const { data, error } = await supabase
     .from("subjects")
-    .insert([subjectData])
+    .insert([
+      {
+        name: subjectData.name,
+        class_id: subjectData.class_id,
+        teacher_id: subjectData.teacher_id,
+      },
+    ])
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase INSERT error:", error.message, error.details);
+    throw error;
+  }
+
   return data;
 };
 
@@ -46,15 +59,28 @@ export const getSubjectsByClass = async (classId: string) => {
 };
 
 /** UPDATE */
-export const updateSubject = async (id: string, updates: Record<string, any>) => {
+export const updateSubject = async (
+  id: string,
+  updates: Record<string, any>
+) => {
+  console.log("Update payload:", updates); // 🔍 debug
+
   const { data, error } = await supabase
     .from("subjects")
-    .update(updates)
+    .update({
+      name: updates.name,
+      class_id: updates.class_id,
+      teacher_id: updates.teacher_id,
+    })
     .eq("id", id)
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase UPDATE error:", error.message);
+    throw error;
+  }
+
   return data;
 };
 
@@ -65,5 +91,8 @@ export const deleteSubject = async (id: string): Promise<void> => {
     .delete()
     .eq("id", id);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase DELETE error:", error.message);
+    throw error;
+  }
 };
