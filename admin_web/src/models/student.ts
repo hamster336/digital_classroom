@@ -1,52 +1,56 @@
 export class Student {
-  id: string | null;
-  rollNo: number;
+  id: string;
+  rollNumber: string;
   subjectIds: string[];
-  avatarUrl: string | null;
+  avatarPath: string | null;
   classId: string;
-  lastCheckedNotices: Date | null;  
+  lastCheckedNotices: Date | null;
 
   constructor(
-    id: string | null,
-    rollNo: number,
+    id: string,
+    rollNumber: string,
     subjectIds: string[],
-    avatarUrl: string | null,
+    avatarPath: string | null,
     classId: string,
-    lastCheckedNotices: Date | null 
+    lastCheckedNotices: Date | null
   ) {
     this.id = id;
-    this.rollNo = rollNo;
+    this.rollNumber = rollNumber;
     this.subjectIds = subjectIds;
-    this.avatarUrl = avatarUrl;
+    this.avatarPath = avatarPath;
     this.classId = classId;
     this.lastCheckedNotices = lastCheckedNotices;
   }
 
-  // Convert API response to Student object
   static fromMap(map: any): Student {
     return new Student(
-      map.id ?? null,
-      map.roll_no,
-      map.subject_ids ?? [],        
-      map.avatar_url ?? null,
+      map.id,
+      map.roll_number,
+      map.subject_ids || [],
+      map.avatar_path,
       map.class_id,
-      map.last_checked_notices      
-        ? new Date(map.last_checked_notices)
-        : null
+      map.last_checked_notices ? new Date(map.last_checked_notices) : null
     );
   }
 
-  // Convert Student object to API
+  //  Full map including id (used for updates/reads)
   toMap() {
     return {
       id: this.id,
-      roll_no: this.rollNo,
+
+      roll_number: this.rollNumber,
       subject_ids: this.subjectIds,
-      avatar_url: this.avatarUrl,
+      avatar_path: this.avatarPath,
       class_id: this.classId,
-      last_checked_notices: this.lastCheckedNotices     
+      last_checked_notices: this.lastCheckedNotices
         ? this.lastCheckedNotices.toISOString()
         : null,
     };
+  }
+
+  //  Used only on INSERT — omits id so Supabase generates UUID
+  toInsertMap() {
+    const { id, ...rest } = this.toMap();
+    return rest;
   }
 }

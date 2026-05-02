@@ -35,8 +35,8 @@ interface ManagementPageProps<T extends Entity> {
         render?: (value: any, item: T) => React.ReactNode;
     }[];
     filters?: FilterConfig<T>[];
-    onSave: (data: T) => void;
-    onDelete: (id: string) => void;
+    onSave: (data: T) => Promise<void>;   
+    onDelete: (id: string) => Promise<void>; 
     renderForm: (data: Partial<T>, onChange: (field: keyof T, value: any) => void) => React.ReactNode;
     emptyEntity: Partial<T>;
 }
@@ -59,10 +59,12 @@ export function ManagementPage<T extends Entity>({
     const [isAdding, setIsAdding] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
-    // URL-State Sync
-    const [searchParams, setSearchParams] = useSearchParams();
+    //  added loading and error states
+    const [submitLoading, setSubmitLoading] = React.useState(false);
+    const [submitError, setSubmitError] = React.useState<string | null>(null);
+    const [deleteLoading, setDeleteLoading] = React.useState(false);
 
-    // Initialize search and filters from URL
+    const [searchParams, setSearchParams] = useSearchParams();
     const searchTerm = searchParams.get('q') || '';
 
     const activeFilters = React.useMemo(() => {
@@ -77,7 +79,6 @@ export function ManagementPage<T extends Entity>({
     const [currentPage, setCurrentPage] = React.useState(1);
     const itemsPerPage = 8;
 
-    // Helpers to update URL
     const updateSearchParam = (key: string, value: string) => {
         setSearchParams(prev => {
             const newParams = new URLSearchParams(prev);
@@ -93,25 +94,19 @@ export function ManagementPage<T extends Entity>({
 
     const hasActiveFilters = searchTerm !== '' || Object.keys(activeFilters).length > 0;
 
-    // Reset pagination on search or filter change
     React.useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, activeFilters]);
 
-    // Derived Logic
     const filteredData = React.useMemo(() => {
         return data.filter(item => {
-            // Search match
             const matchesSearch = !searchTerm || Object.values(item).some(val =>
                 String(val).toLowerCase().includes(searchTerm.toLowerCase())
             );
-
-            // Filter match
             const matchesFilters = Object.entries(activeFilters).every(([key, value]) => {
                 if (!value) return true;
                 return String(item[key]) === value;
             });
-
             return matchesSearch && matchesFilters;
         });
     }, [data, searchTerm, activeFilters]);
@@ -124,52 +119,64 @@ export function ManagementPage<T extends Entity>({
         setEditingId(item.id);
         setFormData(item);
         setIsAdding(false);
+        setSubmitError(null); // clear error on open
     };
 
     const handleAdd = () => {
         setIsAdding(true);
         setEditingId(null);
         setFormData(emptyEntity);
+        setSubmitError(null); // clear error on open
     };
 
     const handleCancel = () => {
         setEditingId(null);
         setIsAdding(false);
         setFormData(emptyEntity);
+        setSubmitError(null); // clear error on close
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // now async and properly awaits onSave
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const newEntity = {
             ...formData,
-            id: editingId || null  // null for new items, DB will generate UUID
+            id: editingId || null
         } as T;
 
-        if (editingId) {
-            if (externalData === undefined) {
-                setInternalData(prev => prev.map(item => item.id === editingId ? newEntity : item));
-            }
-        } else {
-            if (externalData === undefined) {
-                setInternalData(prev => [...prev, newEntity]);
-            }
+        try {
+            setSubmitLoading(true);
+            setSubmitError(null);
+            await onSave(newEntity); //properly awaited
+            handleCancel();
+        } catch (err: any) {
+            console.error("Save error:", err);
+            setSubmitError(err?.message || "Failed to save. Please try again.");
+        } finally {
+            setSubmitLoading(false);
         }
-
-        onSave(newEntity);
-        handleCancel();
     };
 
-    const handleDeleteClick = (id: string | null) => {  // accept null
-        if (id) setDeleteId(id);  //  only set if not null
+    const handleDeleteClick = (id: string | null) => {
+        if (id) setDeleteId(id);
     };
 
-    const confirmDelete = () => {
+    //  now async and properly awaits onDelete
+    const confirmDelete = async () => {
         if (deleteId) {
-            if (externalData === undefined) {
-                setInternalData(prev => prev.filter(item => item.id !== deleteId));
+            try {
+                setDeleteLoading(true);
+                await onDelete(deleteId); //  properly awaited
+                if (externalData === undefined) {
+                    setInternalData(prev => prev.filter(item => item.id !== deleteId));
+                }
+                setDeleteId(null);
+            } catch (err: any) {
+                console.error("Delete error:", err);
+                setDeleteId(null);
+            } finally {
+                setDeleteLoading(false);
             }
-            onDelete(deleteId);
-            setDeleteId(null);
         }
     };
 
@@ -225,22 +232,41 @@ export function ManagementPage<T extends Entity>({
                 </div>
             </div>
 
+            {/* Add / Edit Dialog */}
             <Dialog open={isAdding || editingId !== null} onOpenChange={(open) => !open && handleCancel()}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>{isAdding ? 'Add New' : 'Edit'} {title.slice(0, -1)}</DialogTitle>
                         <DialogDescription>
-                            {isAdding ? `Fill in the details to create a new ${title.slice(0, -1).toLowerCase()}.` : `Update the information for this ${title.slice(0, -1).toLowerCase()}.`}
+                            {isAdding
+                                ? `Fill in the details to create a new ${title.slice(0, -1).toLowerCase()}.`
+                                : `Update the information for this ${title.slice(0, -1).toLowerCase()}.`}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {/*  error banner inside modal */}
+                    {submitError && (
+                        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg border border-red-200">
+                            {submitError}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                         {renderForm(formData, handleChange)}
                         <div className="flex justify-end gap-2 pt-6">
-                            <Button type="button" variant="outline" onClick={handleCancel}>
+                            <Button type="button" variant="outline" onClick={handleCancel} disabled={submitLoading}>
                                 Cancel
                             </Button>
-                            <Button type="submit" className="px-8">
-                                <Save className="w-4 h-4 mr-2" /> {editingId ? 'Update' : 'Save'}
+                            {/*  FIX: disabled and shows spinner while saving */}
+                            <Button type="submit" className="px-8" disabled={submitLoading}>
+                                {submitLoading ? (
+                                    <>
+                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <><Save className="w-4 h-4 mr-2" />{editingId ? 'Update' : 'Save'}</>
+                                )}
                             </Button>
                         </div>
                     </form>
@@ -260,11 +286,17 @@ export function ManagementPage<T extends Entity>({
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="sm:justify-center gap-2 mt-2">
-                        <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1">
+                        <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1" disabled={deleteLoading}>
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={confirmDelete} className="flex-1">
-                            Delete
+                        {/* disabled and shows spinner while deleting */}
+                        <Button variant="destructive" onClick={confirmDelete} className="flex-1" disabled={deleteLoading}>
+                            {deleteLoading ? (
+                                <>
+                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    Deleting...
+                                </>
+                            ) : 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -295,7 +327,7 @@ export function ManagementPage<T extends Entity>({
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10" onClick={() => handleEdit(item)}>
                                                 <Edit className="w-4 h-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(item.id)}>  {/*  null-safe */}
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(item.id)}>
                                                 <Trash className="w-4 h-4" />
                                             </Button>
                                         </td>
@@ -322,7 +354,7 @@ export function ManagementPage<T extends Entity>({
                                         <Button variant="ghost" size="icon" className="h-9 w-9 text-primary bg-primary/5" onClick={() => handleEdit(item)}>
                                             <Edit className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive bg-destructive/5" onClick={() => handleDeleteClick(item.id)}>  {/*  null-safe */}
+                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive bg-destructive/5" onClick={() => handleDeleteClick(item.id)}>
                                             <Trash className="w-4 h-4" />
                                         </Button>
                                     </div>
@@ -355,7 +387,6 @@ export function ManagementPage<T extends Entity>({
                             >
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
-
                             <div className="flex items-center gap-1">
                                 {[...Array(totalPages)].map((_, i) => (
                                     <Button
@@ -369,7 +400,6 @@ export function ManagementPage<T extends Entity>({
                                     </Button>
                                 ))}
                             </div>
-
                             <Button
                                 variant="outline"
                                 size="sm"

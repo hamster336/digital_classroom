@@ -1,46 +1,51 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-//  Import  models
+// Import models
 import { Classroom } from '../models/classroom';
 import { Notice } from '../models/notice';
 import { Student } from '../models/student';
 import { Subject } from '../models/subject';
 import { Teacher } from '../models/teacher';
 
-//  Import controllers
+// Import controllers
 import {
   addClassroom as addClassroomDB,
   editClassroom,
   fetchClassrooms,
   removeClassroom,
 } from '../controllers/classroomController';
+
 import {
   addNotice as addNoticeDB,
   editNotice,
   fetchNotices,
   removeNotice,
 } from '../controllers/noticeController';
-import {
-  addStudent as addStudentDB,
-  editStudent,
-  fetchStudents,
-  removeStudent,
-} from '../controllers/studentController';
+
 import {
   addSubject as addSubjectDB,
   editSubject,
   fetchSubject,
   removeSubject,
 } from '../controllers/subjectController';
+
 import {
-  addTeacher as addTeacherDB,
-  editTeacher,
-  fetchTeachers,
-  removeTeacher,
+  createTeacher,
+  getAllTeachers,
+  updateTeacher as updateTeacherController,
+  deleteTeacher as deleteTeacherController,
 } from '../controllers/teacherController';
 
+import {
+  createStudent,
+  getAllStudents,
+  updateStudent as updateStudentController,
+  deleteStudent as deleteStudentController,
+} from '../controllers/studentController';
+
+import { signUpUser } from '../controllers/userController';
+
 interface DataContextType {
-  // State
   classrooms: Classroom[];
   subjects: Subject[];
   teachers: Teacher[];
@@ -60,13 +65,25 @@ interface DataContextType {
   deleteSubject: (id: string) => Promise<void>;
 
   // Teacher
-  addTeacher: (employeeId: string, subjectIds: string[], classIds: string[], avatarUrl: string | null) => Promise<void>;
-  updateTeacher: (id: string, employeeId: string, subjectIds: string[], classIds: string[], avatarUrl: string | null, lastCheckedNotices: Date | null) => Promise<void>;
+  addTeacher: (
+    fullName: string,
+    email: string,
+    employeeId: string,
+    subjectIds: string[],
+    classIds: string[]
+  ) => Promise<void>;
+  updateTeacher: (id: string, updates: Partial<Teacher>) => Promise<void>;
   deleteTeacher: (id: string) => Promise<void>;
 
   // Student
-  addStudent: (rollNo: number, subjectIds: string[], avatarUrl: string | null, classId: string) => Promise<void>;
-  updateStudent: (id: string, rollNo: number, subjectIds: string[], avatarUrl: string | null, classId: string, lastCheckedNotices: Date | null) => Promise<void>;
+  addStudent: (
+    fullName: string,
+    email: string,
+    rollNumber: string,
+    subjectIds: string[],
+    classId: string
+  ) => Promise<void>;
+  updateStudent: (id: string, updates: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
 
   // Notice
@@ -74,7 +91,6 @@ interface DataContextType {
   updateNotice: (id: string, title: string, description: string, scheduledAt: Date | null, priority: string, publishedAt: Date) => Promise<void>;
   deleteNotice: (id: string) => Promise<void>;
 
-  // Refresh
   refreshAll: () => Promise<void>;
 }
 
@@ -89,7 +105,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  //  Load all data from Supabase on mount
   const loadAll = async () => {
     try {
       setIsLoading(true);
@@ -97,8 +112,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const [c, s, t, st, n] = await Promise.all([
         fetchClassrooms(),
         fetchSubject(),
-        fetchTeachers(),
-        fetchStudents(),
+        getAllTeachers(),
+        getAllStudents(),
         fetchNotices(),
       ]);
       setClassrooms(c);
@@ -114,16 +129,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  useEffect(() => {
-    loadAll();
-  }, []);
+  useEffect(() => { loadAll(); }, []);
 
-  // Refresh all data
-  const refreshAll = async () => {
-    await loadAll();
-  };
+  const refreshAll = async () => { await loadAll(); };
 
-  // CLASSROOM handlers
+  // ── CLASSROOM ────────────────────────────────────────────
   const addClassroom = async (
     name: string,
     faculty: string,
@@ -133,7 +143,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   ) => {
     try {
       const newItem = await addClassroomDB(name, faculty, startYear, endYear, isActive);
-      setClassrooms(prev => [...prev, newItem]); // update state instantly
+      setClassrooms(prev => [...prev, newItem]);
     } catch (err) {
       console.error("Failed to add classroom:", err);
       throw err;
@@ -151,7 +161,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   ) => {
     try {
       const updated = await editClassroom(id, name, faculty, startYear, endYear, isActive, createdAt);
-      setClassrooms(prev => prev.map(i => i.id === id ? updated : i)); 
+      setClassrooms(prev => prev.map(i => i.id === id ? updated : i));
     } catch (err) {
       console.error("Failed to update classroom:", err);
       throw err;
@@ -161,14 +171,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const deleteClassroom = async (id: string) => {
     try {
       await removeClassroom(id);
-      setClassrooms(prev => prev.filter(i => i.id !== id)); 
+      setClassrooms(prev => prev.filter(i => i.id !== id));
     } catch (err) {
       console.error("Failed to delete classroom:", err);
       throw err;
     }
   };
 
-  //  SUBJECT handlers
+  // ── SUBJECT ──────────────────────────────────────────────
   const addSubject = async (name: string, classId: string, teacherId: string) => {
     try {
       const newItem = await addSubjectDB(name, classId, teacherId);
@@ -199,15 +209,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  //  TEACHER handlers
+  // ── TEACHER ──────────────────────────────────────────────
   const addTeacher = async (
+    fullName: string,
+    email: string,
     employeeId: string,
-    subjectIds: string[],
-    classIds: string[],
-    avatarpath: string | null
+    subjectIds: string[] = [],
+    classIds: string[] = []
   ) => {
     try {
-      const newItem = await addTeacherDB(employeeId, subjectIds, classIds, avatarpath);
+      const newItem = await createTeacher(fullName, email, employeeId, subjectIds, classIds);
       setTeachers(prev => [...prev, newItem]);
     } catch (err) {
       console.error("Failed to add teacher:", err);
@@ -215,17 +226,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateTeacher = async (
-    id: string,
-    employeeId: string,
-    subjectIds: string[],
-    classIds: string[],
-    avatarpath: string | null,
-    lastCheckedNotices: Date | null
-  ) => {
+  const updateTeacher = async (id: string, updates: Partial<Teacher>) => {
     try {
-      const updated = await editTeacher(id, employeeId, subjectIds, classIds, avatarpath, lastCheckedNotices);
-      setTeachers(prev => prev.map(i => i.id === id ? updated : i));
+      const updated = await updateTeacherController(id, updates);
+      if (updated) {
+        setTeachers(prev => prev.map(i => i.id === id ? updated : i));
+      }
     } catch (err) {
       console.error("Failed to update teacher:", err);
       throw err;
@@ -234,7 +240,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const deleteTeacher = async (id: string) => {
     try {
-      await removeTeacher(id);
+      await deleteTeacherController(id);
       setTeachers(prev => prev.filter(i => i.id !== id));
     } catch (err) {
       console.error("Failed to delete teacher:", err);
@@ -242,15 +248,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  //  STUDENT handlers
+  // ── STUDENT ──────────────────────────────────────────────
   const addStudent = async (
-    rollNo: number,
-    subjectIds: string[],
-    avatarUrl: string | null,
-    classId: string
+    fullName: string,
+    email: string,
+    rollNumber: string,
+    subjectIds: string[] = [],
+    classId: string = ''
   ) => {
     try {
-      const newItem = await addStudentDB(rollNo, subjectIds, avatarUrl, classId);
+      const newUser = await signUpUser(fullName, email, 'student');
+      const newItem = await createStudent(newUser.id, rollNumber, subjectIds, classId, null);
       setStudents(prev => [...prev, newItem]);
     } catch (err) {
       console.error("Failed to add student:", err);
@@ -258,17 +266,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateStudent = async (
-    id: string,
-    rollNo: number,
-    subjectIds: string[],
-    avatarUrl: string | null,
-    classId: string,
-    lastCheckedNotices: Date | null
-  ) => {
+  const updateStudent = async (id: string, updates: Partial<Student>) => {
     try {
-      const updated = await editStudent(id, rollNo, subjectIds, avatarUrl, classId, lastCheckedNotices);
-      setStudents(prev => prev.map(i => i.id === id ? updated : i));
+      const updated = await updateStudentController(id, updates);
+      if (updated) {
+        setStudents(prev => prev.map(i => i.id === id ? updated : i));
+      }
     } catch (err) {
       console.error("Failed to update student:", err);
       throw err;
@@ -277,7 +280,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const deleteStudent = async (id: string) => {
     try {
-      await removeStudent(id);
+      await deleteStudentController(id);
       setStudents(prev => prev.filter(i => i.id !== id));
     } catch (err) {
       console.error("Failed to delete student:", err);
@@ -285,7 +288,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  //  NOTICE handlers
+  // ── NOTICE ───────────────────────────────────────────────
   const addNotice = async (
     title: string,
     description: string,
@@ -362,4 +365,4 @@ export function useData() {
     throw new Error('useData must be used within a DataProvider');
   }
   return context;
-}   
+}
