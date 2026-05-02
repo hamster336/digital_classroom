@@ -179,10 +179,6 @@ class _StudentAssignmentDetailsScreenState
 
     final file = result.files.single;
 
-    // if (oldSubmission != null) {
-    //   bloc.add(ResubmitAssignment(file: file, oldSubmission: oldSubmission));
-    // } else {
-    // }
     bloc.add(
       SubmitAssignment(
         submision: file,
