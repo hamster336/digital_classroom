@@ -267,6 +267,7 @@ class _TeacherNotesViewState extends State<TeacherNotesView> {
 
   // delete assignment
   Future<void> _onDelete(String noteId, String filePath) async {
+    final bloc = context.read<NotesBloc>();
     showDialog(
       context: context,
       builder: (context) {
@@ -275,10 +276,8 @@ class _TeacherNotesViewState extends State<TeacherNotesView> {
           title: 'Delete Note',
           content: 'Are you sure you want to delete this file?',
           onConfirm: () async {
+            bloc.add(DeleteNote(noteId: noteId, filePath: filePath));
             Navigator.pop(context);
-            context.read<NotesBloc>().add(
-              DeleteNote(noteId: noteId, filePath: filePath),
-            );
           },
         );
       },
