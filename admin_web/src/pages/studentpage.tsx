@@ -163,7 +163,7 @@ export default function StudentPage() {
           <table style={styles.table}>
             <thead>
               <tr>
-                {["Roll No", "Class", "Subjects", "Avatar", "Actions"].map((h) => (
+                {["Full Name", "Roll No", "Class", "Subjects", "Actions"].map((h) => (
                   <th key={h} style={styles.th}>{h}</th>
                 ))}
               </tr>
@@ -171,6 +171,7 @@ export default function StudentPage() {
             <tbody>
               {filtered.map((student) => (
                 <tr key={student.id} style={styles.tr}>
+                  <td style={styles.td}>{student.fullName}</td>
                   <td style={styles.td}>{student.rollNumber}</td>
                   <td style={styles.td}>{student.classId}</td>
                   <td style={styles.td}>
@@ -178,7 +179,7 @@ export default function StudentPage() {
                       ? student.subjectIds.length + " subject(s)"
                       : <span style={styles.muted}>None</span>}
                   </td>
-                  <td style={styles.td}>
+                  {/* <td style={styles.td}>
                     {student.avatarPath ? (
                       <img src={student.avatarPath} alt="avatar" style={styles.avatar} />
                     ) : (
@@ -186,7 +187,7 @@ export default function StudentPage() {
                         {student.rollNumber.charAt(0).toUpperCase()}
                       </div>
                     )}
-                  </td>
+                  </td> */}
                   <td style={styles.td}>
                     <button style={styles.editBtn} onClick={() => openEdit(student)}>✏</button>
                     <button style={styles.deleteBtn} onClick={() => setDeletingId(student.id)}>🗑</button>

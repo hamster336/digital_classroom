@@ -34,7 +34,7 @@ export const TeacherManagement = () => {
 
     const teacherFormData: TeacherFormData[] = teachers.map(t => ({
         id: t.id,
-        fullName: '',
+        fullName: t.fullName,
         email: '',
         employeeId: t.employeeId,
         subjectIds: t.subjectIds,
@@ -47,18 +47,19 @@ export const TeacherManagement = () => {
             data={teacherFormData}
             columns={[
                 { key: 'employeeId', label: 'Employee ID' },
+                { key: 'fullName', label: 'Full Name' },
                 {
                     key: 'subjectIds',
                     label: 'Subjects',
                     render: (val: string[]) => (
-                        <span>{val?.length > 0 ? `${val.length} subjects` : 'None'}</span>
+                        <span>{val?.length > 0 ? `${val.length}` : 'None'}</span>
                     )
                 },
                 {
                     key: 'classIds',
                     label: 'Classes',
                     render: (val: string[]) => (
-                        <span>{val?.length > 0 ? `${val.length} classes` : 'None'}</span>
+                        <span>{val?.length > 0 ? `${val.length}` : 'None'}</span>
                     )
                 },
             ]}
@@ -132,7 +133,7 @@ export const StudentManagement = () => {
 
     const studentFormData: StudentFormData[] = students.map(s => ({
         id: s.id,
-        fullName: '',
+        fullName: s.fullName,
         email: '',
         rollNumber: s.rollNumber,
         subjectIds: s.subjectIds,
@@ -145,6 +146,7 @@ export const StudentManagement = () => {
             data={studentFormData}
             columns={[
                 { key: 'rollNumber', label: 'Roll No' },
+                { key: 'fullName', label: 'Full Name' },
                 {
                     key: 'classId',
                     label: 'Class',
@@ -156,7 +158,7 @@ export const StudentManagement = () => {
                     key: 'subjectIds',
                     label: 'Subjects',
                     render: (val: string[]) => (
-                        <span>{val?.length > 0 ? `${val.length} subjects` : 'None'}</span>
+                        <span>{val?.length > 0 ? `${val.length}` : 'None'}</span>
                     )
                 },
             ]}

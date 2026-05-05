@@ -1,5 +1,6 @@
 export class Student {
   id: string;
+  fullName: string;
   rollNumber: string;
   subjectIds: string[];
   avatarPath: string | null;
@@ -8,6 +9,7 @@ export class Student {
 
   constructor(
     id: string,
+    fullName: string,
     rollNumber: string,
     subjectIds: string[],
     avatarPath: string | null,
@@ -15,6 +17,7 @@ export class Student {
     lastCheckedNotices: Date | null
   ) {
     this.id = id;
+    this.fullName = fullName;
     this.rollNumber = rollNumber;
     this.subjectIds = subjectIds;
     this.avatarPath = avatarPath;
@@ -25,6 +28,7 @@ export class Student {
   static fromMap(map: any): Student {
     return new Student(
       map.id,
+      map.full_name,
       map.roll_number,
       map.subject_ids || [],
       map.avatar_path,
@@ -37,7 +41,7 @@ export class Student {
   toMap() {
     return {
       id: this.id,
-
+      full_name: this.fullName,
       roll_number: this.rollNumber,
       subject_ids: this.subjectIds,
       avatar_path: this.avatarPath,
@@ -50,7 +54,7 @@ export class Student {
 
   //  Used only on INSERT — omits id so Supabase generates UUID
   toInsertMap() {
-    const { id, ...rest } = this.toMap();
+    const { id, full_name, ...rest } = this.toMap();
     return rest;
   }
 }
