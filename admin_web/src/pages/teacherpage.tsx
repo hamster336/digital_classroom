@@ -135,7 +135,7 @@ const TeacherPage: React.FC = () => {
           <table style={styles.table}>
             <thead>
               <tr>
-                {["Employee ID", "Subjects", "Classes", "Actions"].map((h) => (
+                {["Full Name", "Employee ID", "Subjects", "Classes", "Actions"].map((h) => (
                   <th key={h} style={styles.th}>{h}</th>
                 ))}
               </tr>
@@ -143,6 +143,7 @@ const TeacherPage: React.FC = () => {
             <tbody>
               {teachers.map((teacher) => (
                 <tr key={teacher.id} style={styles.tr}>
+                  <td style={styles.td}>{teacher.fullName}</td>
                   <td style={styles.td}>{teacher.employeeId}</td>
                   <td style={styles.td}>
                     {teacher.subjectIds.length > 0

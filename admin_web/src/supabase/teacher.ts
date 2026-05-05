@@ -4,7 +4,7 @@ import { Teacher } from "../models/teacher";
 export const createTeacherDB = async (teacher: Teacher): Promise<Teacher> => {
   const { data, error } = await supabase
     .from("teacher")
-    .insert([teacher.toInsertMap()])
+    .insert([teacher.toMap()])
     .select()
     .single();
 
@@ -15,7 +15,7 @@ export const createTeacherDB = async (teacher: Teacher): Promise<Teacher> => {
 export const getAllTeachersDB = async (): Promise<Teacher[]> => {
   const { data, error } = await supabase
     .from("teacher")
-    .select("*");
+    .select("*, users(full_name)");
 
   if (error) throw error;
   return (data || []).map((t) => Teacher.fromMap(t));
@@ -24,7 +24,7 @@ export const getAllTeachersDB = async (): Promise<Teacher[]> => {
 export const getTeacherByIdDB = async (id: string): Promise<Teacher | null> => {
   const { data, error } = await supabase
     .from("teacher")
-    .select("*")
+    .select("*, users(full_name)")
     .eq("user_id", id)
     .single();
 

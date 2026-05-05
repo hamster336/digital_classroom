@@ -21,7 +21,7 @@ export const createStudentDB = async (student: Student): Promise<Student> => {
 export const getAllStudentsDB = async (): Promise<Student[]> => {
   const { data, error } = await supabase
     .from("student")
-    .select("*");
+    .select("*, users(full_name)");
 
   if (error) {
     console.error("FETCH ERROR:", error);
@@ -32,7 +32,10 @@ export const getAllStudentsDB = async (): Promise<Student[]> => {
 
   return data.map((item: any) => {
     try {
-      return Student.fromMap(item);
+     return Student.fromMap({
+        ...item,
+        full_name: item.users?.full_name, 
+      });
     } catch (err) {
       console.error("Mapping error:", item, err);
       return null;
