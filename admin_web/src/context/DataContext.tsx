@@ -43,7 +43,7 @@ import {
   deleteStudent as deleteStudentController,
 } from '../controllers/studentController';
 
-import { signUpUser } from '../controllers/userController';
+import { signUpStudent } from '../controllers/userController';
 
 interface DataContextType {
   classrooms: Classroom[];
@@ -133,7 +133,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAll = async () => { await loadAll(); };
 
-  // ── CLASSROOM ────────────────────────────────────────────
+  // CLASSROOM 
   const addClassroom = async (
     name: string,
     faculty: string,
@@ -178,7 +178,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ── SUBJECT ──────────────────────────────────────────────
+  //SUBJECT
   const addSubject = async (name: string, classId: string, teacherId: string) => {
     try {
       const newItem = await addSubjectDB(name, classId, teacherId);
@@ -209,7 +209,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ── TEACHER ──────────────────────────────────────────────
+  // TEACHER
   const addTeacher = async (
     fullName: string,
     email: string,
@@ -248,7 +248,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ── STUDENT ──────────────────────────────────────────────
+  // STUDENT
   const addStudent = async (
     fullName: string,
     email: string,
@@ -257,7 +257,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     classId: string = ''
   ) => {
     try {
-      const newUser = await signUpUser(fullName, email, 'student');
+      const newUser = await signUpStudent(fullName, email, 'student');
       const newItem = await createStudent(newUser.id, rollNumber, subjectIds, classId, null);
       setStudents(prev => [...prev, newItem]);
     } catch (err) {
@@ -288,7 +288,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ── NOTICE ───────────────────────────────────────────────
+  // NOTICE
   const addNotice = async (
     title: string,
     description: string,

@@ -16,14 +16,14 @@ export const createStudent = async (
 ): Promise<Student> => {
   if (!id) throw new Error("ID is required to create a student.");
 
-  const student = new Student(
-    "",           // id is placeholder — toInsertMap() omits it
+const student = new Student(
+    id,           //  use real auth UUID
     rollNumber,
     subjectIds,
     avatarPath,
     classId,
-    null          // lastCheckedNotices defaults to null
-  );
+    null
+);
 
   return await createStudentDB(student);
 };

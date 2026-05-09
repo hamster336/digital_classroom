@@ -1,84 +1,98 @@
-import { supabase } from "./supabase-client"; 
+import { supabase } from "./supabase-client";
+import { supabaseAdmin } from "./supabase-admin-client";
+import { Schedule } from "../models/schedules";
 
-/** READ ALL */
-export const getAllSchedules = async () => {
-  const { data, error } = await supabase
-    .from("schedules")
-    .select("*")
-    .order("day_of_week", { ascending: true });  
+export interface ScheduleFile {
+    name: string;
+    url: string;
+    type: 'image' | 'pdf';
+    path: string;
+}
 
-  if (error) throw error;
-  return data;
+// Get all schedules from DB table
+export const getAllSchedulesDB = async (): Promise<Schedule[]> => {
+    const { data, error } = await supabase
+        .from("schedules")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map((item: any) => Schedule.fromMap(item));
 };
 
-/** READ BY ID */
-export const getScheduleById = async (id: string) => {  
-  const { data, error } = await supabase
-    .from("schedules")
-    .select("*")
-    .eq("id", id)
-    .single();
+// Create schedule record in DB table
+export const createScheduleDB = async (schedule: Schedule): Promise<Schedule> => {
+    const { data, error } = await supabaseAdmin
+        .from("schedules")
+        .insert([schedule.toInsertMap()])
+        .select()
+        .single();
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return Schedule.fromMap(data);
 };
 
-/** READ BY CLASS ID */
-export const getSchedulesByClass = async (classId: string) => {
-  const { data, error } = await supabase
-    .from("schedules")
-    .select("*")
-    .eq("class_id", classId)
-    .order("day_of_week", { ascending: true });
+//  Delete schedule record from DB table
+export const deleteScheduleDB = async (id: string): Promise<void> => {
+    const { error } = await supabaseAdmin
+        .from("schedules")
+        .delete()
+        .eq("id", id);
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
 };
 
-/** CREATE */
-export const createSchedule = async (scheduleData: Record<string, any>) => {
-  const { data, error } = await supabase
-    .from("schedules")
-    .insert([{
-      class_id:    scheduleData.class_id,    
-      subject_id:  scheduleData.subject_id,  
-      day_of_week: scheduleData.day_of_week, 
-      start_time:  scheduleData.start_time,  
-      end_time:    scheduleData.end_time,    
-    }])
-    .select()
-    .single();
+// Upload file to bucket
+export const uploadScheduleFileDB = async (
+    file: File,
+    folderName: string
+): Promise<ScheduleFile> => {
+    const filePath = `${folderName}/${file.name}`;
 
-  if (error) throw error;
-  return data;
+    const { error } = await supabaseAdmin.storage
+        .from("schedules")
+        .upload(filePath, file, { upsert: true });
+
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage
+        .from("schedules")
+        .getPublicUrl(filePath);
+
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const type = ext === 'pdf' ? 'pdf' : 'image';
+
+    return {
+        name: file.name,
+        url: urlData.publicUrl,
+        type,
+        path: filePath,
+    };
 };
 
-/** UPDATE */
-export const updateSchedule = async (id: string, updates: Record<string, any>) => {
-  const { data, error } = await supabase
-    .from("schedules")
-    .update({
-      class_id:    updates.class_id,    //  explicit mapping
-      subject_id:  updates.subject_id,
-      day_of_week: updates.day_of_week,
-      start_time:  updates.start_time,
-      end_time:    updates.end_time,
-    })
-    .eq("id", id)
-    .select()
-    .single();
+//  Delete file from bucket
+export const deleteScheduleFileDB_storage = async (path: string): Promise<void> => {
+    const { error } = await supabaseAdmin.storage
+        .from("schedules")
+        .remove([path]);
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
 };
 
-/** DELETE */
-export const deleteSchedule = async (id: string) => {
-  const { error } = await supabase
-    .from("schedules")
-    .delete()
-    .eq("id", id);
+//  Get public URL from file_path
+export const getScheduleFileUrl = (filePath: string): ScheduleFile => {
+    const { data: urlData } = supabase.storage
+        .from("schedules")
+        .getPublicUrl(filePath);
 
-  if (error) throw error;
-  return true;  // added return value
+    const ext = filePath.split('.').pop()?.toLowerCase();
+    const type = ext === 'pdf' ? 'pdf' : 'image';
+    const name = filePath.split('/').pop() || filePath;
+
+    return {
+        name,
+        url: urlData.publicUrl,
+        type,
+        path: filePath,
+    };
 };

@@ -71,3 +71,4 @@ export const updateUser = async (
 export const deleteUser = async (id: string): Promise<boolean> => {
     return await deleteUserDB(id);
 };
+export const signUpStudent = signUpUser;

@@ -20,7 +20,7 @@ export const LoginPage: React.FC = () => {
             await login(email, password);   // real Supabase login with password
             navigate('/dashboard');
         } catch (err: any) {
-            // ✅ show real error message from Supabase
+            //  show real error message from Supabase
             setError(err?.message || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);

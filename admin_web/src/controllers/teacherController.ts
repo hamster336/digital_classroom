@@ -45,12 +45,15 @@ export const createTeacher = async (
   if (userInsertError) throw userInsertError;
 
   // Step 3: insert into teacher table
-  const teacher = new Teacher(
+// Step 3: insert into teacher table
+const teacher = new Teacher(
     authData.user.id,
+    fullName,      
+    email,          
     employeeId,
     subjectIds,
     classIds
-  );
+);
 
   return await createTeacherDB(teacher);
 };

@@ -28,14 +28,13 @@ interface StudentFormData {
     [key: string]: any;
 }
 
-// TEACHER MANAGEMENT
 export const TeacherManagement = () => {
-    const { teachers, addTeacher, updateTeacher, deleteTeacher } = useData();
+    const { teachers, addTeacher, updateTeacher, deleteTeacher, subjects, classrooms } = useData();
 
     const teacherFormData: TeacherFormData[] = teachers.map(t => ({
         id: t.id,
-        fullName: '',
-        email: '',
+        fullName: t.fullName || '',
+        email: t.email || '',
         employeeId: t.employeeId,
         subjectIds: t.subjectIds,
         classIds: t.classIds,
@@ -46,23 +45,35 @@ export const TeacherManagement = () => {
             title="Teachers"
             data={teacherFormData}
             columns={[
+                { key: 'fullName', label: 'Full Name' },
                 { key: 'employeeId', label: 'Employee ID' },
                 {
                     key: 'subjectIds',
                     label: 'Subjects',
                     render: (val: string[]) => (
-                        <span>{val?.length > 0 ? `${val.length} subjects` : 'None'}</span>
+                        <span>
+                            {val?.length > 0
+                                ? val.map(id => subjects.find(s => s.id === id)?.name).filter(Boolean).join(', ')
+                                : 'None'}
+                        </span>
                     )
                 },
                 {
                     key: 'classIds',
                     label: 'Classes',
                     render: (val: string[]) => (
-                        <span>{val?.length > 0 ? `${val.length} classes` : 'None'}</span>
+                        <span>
+                            {val?.length > 0
+                                ? val.map(id => classrooms.find(c => c.id === id)?.name).filter(Boolean).join(', ')
+                                : 'None'}
+                        </span>
                     )
                 },
             ]}
             onSave={async (item) => {
+                if (!item.employeeId?.trim()) throw new Error("Employee ID is required.");
+                if (!item.id && !item.fullName?.trim()) throw new Error("Full Name is required.");
+                if (!item.id && !item.email?.trim()) throw new Error("Email is required.");
                 const existing = teachers.find(t => t.id === item.id);
                 if (existing) {
                     await updateTeacher(item.id!, {
@@ -120,15 +131,83 @@ export const TeacherManagement = () => {
                             placeholder="e.g. EMP001"
                         />
                     </div>
+
+                    <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm font-medium">Assign Classes</label>
+                        <div className="flex flex-wrap gap-2 p-3 border rounded-lg min-h-[48px]">
+                            {classrooms.length === 0 ? (
+                                <p className="text-sm text-slate-400">No classes available. Add classrooms first.</p>
+                            ) : (
+                                classrooms.map(c => (
+                                    <button
+                                        key={c.id}
+                                        type="button"
+                                        onClick={() => {
+                                            const current = data.classIds || [];
+                                            const updated = current.includes(c.id!)
+                                                ? current.filter((id: string) => id !== c.id)
+                                                : [...current, c.id!];
+                                            onChange('classIds', updated);
+                                            onChange('subjectIds', []);
+                                        }}
+                                        className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                                            (data.classIds || []).includes(c.id!)
+                                                ? 'bg-primary text-white border-primary'
+                                                : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
+                                        }`}
+                                    >
+                                        {c.name}
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm font-medium">Assign Subjects</label>
+                        {(data.classIds || []).length === 0 ? (
+                            <p className="text-sm text-slate-400 p-3 border rounded-lg">
+                                Select a class first to see available subjects.
+                            </p>
+                        ) : (
+                            <div className="flex flex-wrap gap-2 p-3 border rounded-lg min-h-[48px]">
+                                {subjects.filter(s => (data.classIds || []).includes(s.classId)).length === 0 ? (
+                                    <p className="text-sm text-slate-400">No subjects found for selected classes.</p>
+                                ) : (
+                                    subjects
+                                        .filter(s => (data.classIds || []).includes(s.classId))
+                                        .map(s => (
+                                            <button
+                                                key={s.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    const current = data.subjectIds || [];
+                                                    const updated = current.includes(s.id!)
+                                                        ? current.filter((id: string) => id !== s.id)
+                                                        : [...current, s.id!];
+                                                    onChange('subjectIds', updated);
+                                                }}
+                                                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                                                    (data.subjectIds || []).includes(s.id!)
+                                                        ? 'bg-primary text-white border-primary'
+                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
+                                                }`}
+                                            >
+                                                {s.name}
+                                            </button>
+                                        ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         />
     );
 };
 
-// STUDENT MANAGEMENT
 export const StudentManagement = () => {
-    const { students, addStudent, updateStudent, deleteStudent, classrooms } = useData();
+    const { students, addStudent, updateStudent, deleteStudent, classrooms, subjects } = useData();
 
     const studentFormData: StudentFormData[] = students.map(s => ({
         id: s.id,
@@ -156,7 +235,11 @@ export const StudentManagement = () => {
                     key: 'subjectIds',
                     label: 'Subjects',
                     render: (val: string[]) => (
-                        <span>{val?.length > 0 ? `${val.length} subjects` : 'None'}</span>
+                        <span>
+                            {val?.length > 0
+                                ? val.map(id => subjects.find(s => s.id === id)?.name).filter(Boolean).join(', ')
+                                : 'None'}
+                        </span>
                     )
                 },
             ]}
@@ -171,6 +254,13 @@ export const StudentManagement = () => {
                 }
             ]}
             onSave={async (item) => {
+                if (!item.rollNumber?.trim()) throw new Error("Roll number is required.");
+                if (!item.id) {
+                    const duplicate = students.find(s => s.rollNumber === item.rollNumber);
+                    if (duplicate) throw new Error("Roll number already exists.");
+                    if (!item.fullName?.trim()) throw new Error("Full Name is required.");
+                    if (!item.email?.trim()) throw new Error("Email is required.");
+                }
                 const existing = students.find(s => s.id === item.id);
                 if (existing) {
                     await updateStudent(item.id!, {
@@ -221,7 +311,7 @@ export const StudentManagement = () => {
                         </>
                     )}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Roll No</label>
+                        <label className="text-sm font-medium">Roll No *</label>
                         <Input
                             value={data.rollNumber || ''}
                             onChange={(e) => onChange('rollNumber', e.target.value)}
@@ -233,20 +323,59 @@ export const StudentManagement = () => {
                         <select
                             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                             value={data.classId || ''}
-                            onChange={(e) => onChange('classId', e.target.value)}
+                            onChange={(e) => {
+                                onChange('classId', e.target.value);
+                                onChange('subjectIds', []);
+                            }}
                         >
                             {classrooms.map(c => (
                                 <option key={c.id} value={c.id ?? ''}>{c.name}</option>
                             ))}
                         </select>
                     </div>
+
+                    <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm font-medium">Assign Subjects</label>
+                        {!data.classId ? (
+                            <p className="text-sm text-slate-400 p-3 border rounded-lg">
+                                Select a class first to see available subjects.
+                            </p>
+                        ) : (
+                            <div className="flex flex-wrap gap-2 p-3 border rounded-lg min-h-[48px]">
+                                {subjects.filter(s => s.classId === data.classId).length === 0 ? (
+                                    <p className="text-sm text-slate-400">No subjects found for this class.</p>
+                                ) : (
+                                    subjects
+                                        .filter(s => s.classId === data.classId)
+                                        .map(s => (
+                                            <button
+                                                key={s.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    const current = data.subjectIds || [];
+                                                    const updated = current.includes(s.id!)
+                                                        ? current.filter((id: string) => id !== s.id)
+                                                        : [...current, s.id!];
+                                                    onChange('subjectIds', updated);
+                                                }}
+                                                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                                                    (data.subjectIds || []).includes(s.id!)
+                                                        ? 'bg-primary text-white border-primary'
+                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
+                                                }`}
+                                            >
+                                                {s.name}
+                                            </button>
+                                        ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         />
     );
 };
-
-// ─── SUBJECT ASSIGNMENT ──────────────────────────────────────────────────────
 
 export const SubjectAssignment = () => {
     const { teachers, subjects, updateTeacher } = useData();
@@ -345,7 +474,6 @@ export const SubjectAssignment = () => {
                         onChange={(e) => updateSearchParam('q', e.target.value)}
                     />
                 </div>
-
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="flex items-center gap-2 mr-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Filter By Load:</span>
@@ -360,7 +488,6 @@ export const SubjectAssignment = () => {
                             <option value="overloaded">High Load (3+)</option>
                         </select>
                     </div>
-
                     {hasActiveFilters && (
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-px bg-slate-100 hidden sm:block mx-1" />
@@ -403,38 +530,18 @@ export const SubjectAssignment = () => {
                         Showing <span className="text-slate-900 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-slate-900 font-bold">{Math.min(currentPage * itemsPerPage, filteredTeachers.length)}</span> of <span className="text-slate-900 font-bold">{filteredTeachers.length}</span> faculty
                     </p>
                     <div className="flex items-center gap-1">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(c => c - 1)}
-                            className="w-9 h-9 border-slate-200 rounded-lg hover:bg-slate-50"
-                        >
+                        <Button variant="outline" size="icon" disabled={currentPage === 1} onClick={() => setCurrentPage(c => c - 1)} className="w-9 h-9 border-slate-200 rounded-lg hover:bg-slate-50">
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
                         <div className="flex items-center">
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                                <Button
-                                    key={p}
-                                    variant={currentPage === p ? "default" : "ghost"}
-                                    size="sm"
-                                    onClick={() => setCurrentPage(p)}
-                                    className={cn(
-                                        "w-9 h-9 rounded-lg font-bold text-xs",
-                                        currentPage === p ? "shadow-md shadow-primary/20" : "text-slate-500"
-                                    )}
-                                >
+                                <Button key={p} variant={currentPage === p ? "default" : "ghost"} size="sm" onClick={() => setCurrentPage(p)}
+                                    className={cn("w-9 h-9 rounded-lg font-bold text-xs", currentPage === p ? "shadow-md shadow-primary/20" : "text-slate-500")}>
                                     {p}
                                 </Button>
                             ))}
                         </div>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(c => c + 1)}
-                            className="w-9 h-9 border-slate-200 rounded-lg hover:bg-slate-50"
-                        >
+                        <Button variant="outline" size="icon" disabled={currentPage === totalPages} onClick={() => setCurrentPage(c => c + 1)} className="w-9 h-9 border-slate-200 rounded-lg hover:bg-slate-50">
                             <ChevronRight className="w-4 h-4" />
                         </Button>
                     </div>
@@ -465,9 +572,11 @@ const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmen
             <CardHeader className="p-6 pb-4 bg-slate-50/50 border-b border-slate-100">
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                        <CardTitle className="text-xl font-black text-slate-800 group-hover:text-primary transition-colors">{teacher.employeeId}</CardTitle>
+                        <CardTitle className="text-xl font-black text-slate-800 group-hover:text-primary transition-colors">
+                            {teacher.fullName || teacher.employeeId}
+                        </CardTitle>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            {teacher.classIds.length} Classes • {teacher.subjectIds.length} Subjects
+                            {teacher.employeeId} • {teacher.classIds.length} Classes • {teacher.subjectIds.length} Subjects
                         </p>
                     </div>
                     <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
@@ -523,7 +632,9 @@ const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmen
                                 </div>
                                 <div className="space-y-1">
                                     <DialogTitle className="text-2xl font-black">Manage Assignments</DialogTitle>
-                                    <p className="text-slate-500 font-medium">Assigning subjects to <span className="text-primary font-bold">{teacher.employeeId}</span></p>
+                                    <p className="text-slate-500 font-medium">
+                                        Assigning subjects to <span className="text-primary font-bold">{teacher.fullName || teacher.employeeId}</span>
+                                    </p>
                                 </div>
                             </div>
                         </DialogHeader>
@@ -539,35 +650,33 @@ const TeacherAssignmentCard = ({ teacher, subjects, onToggle }: TeacherAssignmen
                                 />
                             </div>
 
-                            <div className="space-y-8">
-                                <div className="grid sm:grid-cols-2 gap-3">
-                                    {filteredManageSubjects.map(s => (
-                                        <div
-                                            key={s.id}
-                                            onClick={() => onToggle(s.id ?? '')}
-                                            className={cn(
-                                                "flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer group/item",
-                                                teacher.subjectIds.includes(s.id ?? '')
-                                                    ? "bg-primary/5 border-primary shadow-sm shadow-primary/5"
-                                                    : "bg-white border-slate-100 hover:border-primary/30 hover:bg-slate-50"
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
-                                                teacher.subjectIds.includes(s.id ?? '')
-                                                    ? "bg-primary border-primary"
-                                                    : "bg-white border-slate-300 group-hover/item:border-primary/50"
-                                            )}>
-                                                {teacher.subjectIds.includes(s.id ?? '') && <Check className="w-3.5 h-3.5 text-white stroke-[4]" />}
-                                            </div>
-                                            <div className="space-y-0.5">
-                                                <p className={cn("text-sm font-bold", teacher.subjectIds.includes(s.id ?? '') ? "text-primary" : "text-slate-700")}>{s.name}</p>
-                                            </div>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                                {filteredManageSubjects.map(s => (
+                                    <div
+                                        key={s.id}
+                                        onClick={() => onToggle(s.id ?? '')}
+                                        className={cn(
+                                            "flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer group/item",
+                                            teacher.subjectIds.includes(s.id ?? '')
+                                                ? "bg-primary/5 border-primary shadow-sm shadow-primary/5"
+                                                : "bg-white border-slate-100 hover:border-primary/30 hover:bg-slate-50"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                                            teacher.subjectIds.includes(s.id ?? '')
+                                                ? "bg-primary border-primary"
+                                                : "bg-white border-slate-300 group-hover/item:border-primary/50"
+                                        )}>
+                                            {teacher.subjectIds.includes(s.id ?? '') && <Check className="w-3.5 h-3.5 text-white stroke-[4]" />}
                                         </div>
-                                    ))}
-                                </div>
+                                        <p className={cn("text-sm font-bold", teacher.subjectIds.includes(s.id ?? '') ? "text-primary" : "text-slate-700")}>
+                                            {s.name}
+                                        </p>
+                                    </div>
+                                ))}
                                 {filteredManageSubjects.length === 0 && (
-                                    <div className="py-20 text-center">
+                                    <div className="py-20 text-center col-span-2">
                                         <p className="text-slate-400 font-bold">No subjects match your search.</p>
                                     </div>
                                 )}
