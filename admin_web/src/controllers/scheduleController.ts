@@ -1,113 +1,76 @@
-import { Schedule, DayOfWeek } from "../models/schedules";
+import { Schedule } from "../models/schedules";
 import {
-  getAllSchedules,
-  getScheduleById,
-  getSchedulesByClass,
-  createSchedule,
-  updateSchedule,
-  deleteSchedule,
+    getAllSchedulesDB,
+    createScheduleDB,
+    deleteScheduleDB,
+    uploadScheduleFileDB,
+    deleteScheduleFileDB_storage,
+    getScheduleFileUrl,
+    ScheduleFile,
 } from "../supabase/schedule";
 
-// Validation moved here from constructor
-const validateTimes = (startTime: string, endTime: string) => {
-  if (startTime >= endTime) {
-    throw new Error("End time must be after start time");
-  }
+const SCHEDULE_FOLDER = "0011e270-2b78-4d7b-b597-37f75780c705";
+
+// Get all schedules with file info
+export const getSchedules = async (): Promise<(Schedule & { file: ScheduleFile })[]> => {
+    const schedules = await getAllSchedulesDB();
+
+    return schedules.map((schedule) => ({
+        ...schedule,
+        file: getScheduleFileUrl(schedule.filePath),
+    }));
 };
 
-/** CREATE SCHEDULE */
-export const addSchedules = async (
-  classId: string,
-  subjectId: string,
-  dayOfWeek: DayOfWeek,
-  startTime: string,
-  endTime: string
-): Promise<Schedule> => {
-  try {
-    validateTimes(startTime, endTime);  
-    const schedule = new Schedule(
-      null,
-      classId,
-      subjectId,
-      dayOfWeek,
-      startTime,
-      endTime
+// Add schedule
+export const addSchedule = async (
+    name: string,
+    classId: string,
+    file: File
+): Promise<Schedule & { file: ScheduleFile }> => {
+
+    const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        throw new Error("Only image and PDF files are allowed.");
+    }
+
+    // Upload file to bucket
+    const uploadedFile = await uploadScheduleFileDB(
+        file,
+        SCHEDULE_FOLDER
     );
-    const result = await createSchedule(schedule.toMap());
-    return Schedule.fromMap(result);
-  } catch (error) {
-    console.error("Failed to create schedule:", error);
-    throw error;
-  }
-};
 
-/** GET ALL SCHEDULES */
-export const fetchSchedules = async (): Promise<Schedule[]> => {
-  try {
-    const data = await getAllSchedules();
-    return data.map((item: Record<string, any>) => Schedule.fromMap(item));
-  } catch (error) {
-    console.error("Failed to fetch schedules:", error);
-    throw error;
-  }
-};
-
-/** GET SCHEDULE BY ID */
-export const fetchScheduleById = async (id: string): Promise<Schedule> => {
-  try {
-    const data = await getScheduleById(id);
-    return Schedule.fromMap(data);
-  } catch (error) {
-    console.error("Failed to fetch schedule:", error);
-    throw error;
-  }
-};
-
-/** GET SCHEDULES BY CLASS */
-export const fetchSchedulesByClass = async (classId: string): Promise<Schedule[]> => {
-  try {
-    const data = await getSchedulesByClass(classId);
-    return data.map((item: Record<string, any>) => Schedule.fromMap(item));
-  } catch (error) {
-    console.error("Failed to fetch schedules by class:", error);
-    throw error;
-  }
-};
-
-/** UPDATE SCHEDULE */
-export const editSchedule = async (
-  id: string,
-  classId: string,
-  subjectId: string,
-  dayOfWeek: DayOfWeek,
-  startTime: string,
-  endTime: string
-): Promise<Schedule> => {
-  try {
-    validateTimes(startTime, endTime); 
+    // Create DB record
     const schedule = new Schedule(
-      id,
-      classId,
-      subjectId,
-      dayOfWeek,
-      startTime,
-      endTime
+        "",
+        name,
+        classId,
+        uploadedFile.path,
+        new Date().toISOString()
     );
-    const result = await updateSchedule(id, schedule.toMap());
-    return Schedule.fromMap(result);
-  } catch (error) {
-    console.error("Failed to update schedule:", error);
-    throw error;
-  }
+
+    const createdSchedule = await createScheduleDB(schedule);
+
+    return {
+        ...createdSchedule,
+        file: uploadedFile,
+    };
 };
 
-/** DELETE SCHEDULE */
-export const removeSchedule = async (id: string): Promise<boolean> => {
-  try {
-    await deleteSchedule(id);
-    return true;
-  } catch (error) {
-    console.error("Failed to delete schedule:", error);
-    return false;
-  }
+// Delete schedule
+export const deleteSchedule = async (
+    id: string,
+    filePath: string
+): Promise<void> => {
+
+    // Delete file from storage
+    await deleteScheduleFileDB_storage(filePath);
+
+    // Delete DB record
+    await deleteScheduleDB(id);
 };

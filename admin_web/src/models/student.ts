@@ -50,7 +50,15 @@ export class Student {
 
   //  Used only on INSERT — omits id so Supabase generates UUID
   toInsertMap() {
-    const { id, ...rest } = this.toMap();
-    return rest;
+    return {
+      id: this.id,
+      roll_number: this.rollNumber,
+      subject_ids: this.subjectIds,
+      avatar_path: this.avatarPath,
+      class_id: this.classId,
+      last_checked_notices: this.lastCheckedNotices
+        ? this.lastCheckedNotices.toISOString()
+        : new Date().toISOString(), 
+    };
   }
 }

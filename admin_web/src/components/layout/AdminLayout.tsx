@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import {
     Bell,
     BookOpen,
-    ClipboardList,
+    Calendar,       
     LayoutDashboard,
     LogOut,
     Menu,
@@ -48,18 +48,18 @@ const NavItem = ({ icon: Icon, label, to, active }: NavItemProps) => (
 );
 
 export const AdminLayout: React.FC = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false); // Default to closed on mobile
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const location = useLocation();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-    try {
-        await logout();
-        navigate('/login');
-    } catch (error) {
-        console.error("Logout failed:", error);
-    }
+        try {
+            await logout();
+            navigate('/login');
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
 
     const navItems = [
@@ -69,14 +69,13 @@ export const AdminLayout: React.FC = () => {
         { id: 'teachers', label: 'Teachers', icon: UserSquare2, to: '/teachers' },
         { id: 'students', label: 'Students', icon: Users, to: '/students' },
         { id: 'notices', label: 'Notices', icon: Bell, to: '/notices' },
-        { id: 'assignments', label: 'Assignment', icon: ClipboardList, to: '/assignments' },
+        { id: 'schedules', label: 'Schedules', icon: Calendar, to: '/schedules' }, // ✅ added
     ];
 
     const currentTab = navItems.find(item => item.to === location.pathname)?.label || 'Dashboard';
 
     return (
         <div className="flex h-screen bg-background">
-            {/* Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] lg:hidden"
@@ -84,7 +83,6 @@ export const AdminLayout: React.FC = () => {
                 />
             )}
 
-            {/* Sidebar */}
             <aside
                 className={cn(
                     "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 shadow-xl lg:shadow-none",
@@ -135,9 +133,7 @@ export const AdminLayout: React.FC = () => {
                 </div>
             </aside>
 
-            {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                {/* Header */}
                 <header className="flex items-center justify-between h-16 px-4 sm:px-6 bg-card border-b sticky top-0 z-30 shadow-sm shadow-slate-200/20">
                     <button
                         className="p-2 -ml-2 rounded-md hover:bg-accent lg:hidden"
@@ -179,32 +175,28 @@ export const AdminLayout: React.FC = () => {
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="cursor-pointer" asChild>
+                                <DropdownMenuItem asChild>
                                     <Link to="/profile" className="flex items-center w-full">
                                         <UserIcon className="mr-2 h-4 w-4" />
-                                        <span>Profile</span>
+                                        Profile
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer" asChild>
+                                <DropdownMenuItem asChild>
                                     <Link to="/settings" className="flex items-center w-full">
                                         <Settings className="mr-2 h-4 w-4" />
-                                        <span>Settings</span>
+                                        Settings
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive cursor-pointer"
-                                    onClick={handleLogout}
-                                >
+                                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Log out</span>
+                                    Log out
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
                 </header>
 
-                {/* Page Content */}
                 <div className="flex-1 overflow-y-auto bg-slate-50/50">
                     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                         <Outlet />

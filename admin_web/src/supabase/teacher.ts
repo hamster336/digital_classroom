@@ -15,7 +15,7 @@ export const createTeacherDB = async (teacher: Teacher): Promise<Teacher> => {
 export const getAllTeachersDB = async (): Promise<Teacher[]> => {
   const { data, error } = await supabase
     .from("teacher")
-    .select("*");
+    .select("*");  // ✅ no join
 
   if (error) throw error;
   return (data || []).map((t) => Teacher.fromMap(t));
@@ -24,8 +24,8 @@ export const getAllTeachersDB = async (): Promise<Teacher[]> => {
 export const getTeacherByIdDB = async (id: string): Promise<Teacher | null> => {
   const { data, error } = await supabase
     .from("teacher")
-    .select("*")
-    .eq("user_id", id)
+    .select("*")   // ✅ no join
+    .eq("id", id)
     .single();
 
   if (error) return null;
@@ -44,8 +44,8 @@ export const updateTeacherDB = async (
   const { data, error } = await supabase
     .from("teacher")
     .update(dbUpdates)
-    .eq("user_id", id)
-    .select()
+    .eq("id", id)
+    .select("*")   // no join
     .single();
 
   if (error) return null;
@@ -56,7 +56,7 @@ export const deleteTeacherDB = async (id: string): Promise<boolean> => {
   const { error } = await supabase
     .from("teacher")
     .delete()
-    .eq("user_id", id);
+    .eq("id", id);
 
   if (error) return false;
   return true;
