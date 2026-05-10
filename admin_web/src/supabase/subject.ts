@@ -1,8 +1,9 @@
+
 import { supabase } from "./supabase-client";
 
 /** CREATE */
 export const createSubject = async (subjectData: Record<string, any>) => {
-  console.log("Insert payload:", subjectData); // 🔍 debug
+  console.log("Insert payload:", subjectData); 
 
   const { data, error } = await supabase
     .from("subjects")

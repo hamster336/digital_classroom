@@ -12,10 +12,10 @@ import {
 } from './features/management/Entities';
 import {
   StudentManagement,
-  SubjectAssignment,
   TeacherManagement
 } from './features/management/Users';
 import { ProfilePage } from './features/profile/ProfilePage';
+import SchedulePage from './pages/schedulespage';
 import { SettingsPage } from './features/settings/SettingsPage';
 
 function AppRoutes() {
@@ -32,7 +32,7 @@ function AppRoutes() {
         <Route path="teachers" element={<TeacherManagement />} />
         <Route path="students" element={<StudentManagement />} />
         <Route path="notices" element={<NoticeManagement />} />
-        <Route path="assignments" element={<SubjectAssignment />} />
+        <Route path="schedules" element={<SchedulePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<div className="p-8 text-center text-xl">404 - Page Not Found</div>} />
@@ -43,13 +43,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <DataProvider>
           <AppRoutes />
-        </Router>
-      </DataProvider>
-    </AuthProvider>
+        </DataProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

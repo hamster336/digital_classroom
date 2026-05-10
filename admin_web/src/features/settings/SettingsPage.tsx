@@ -5,6 +5,20 @@ import React from 'react';
 
 export const SettingsPage: React.FC = () => {
     const { refreshAll } = useData();
+
+    const [darkMode, setDarkMode] = React.useState(() => {
+        return localStorage.getItem('darkMode') === 'true';
+    });
+
+    React.useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('darkMode', String(darkMode));
+    }, [darkMode]);
+
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col gap-2">
@@ -37,9 +51,12 @@ export const SettingsPage: React.FC = () => {
                         <div className="flex items-center justify-between py-6">
                             <div className="space-y-1">
                                 <Label className="text-base">Dark Mode</Label>
-                                <p className="text-sm text-muted-foreground">Toggle between light and dark theme (requires refresh).</p>
+                                <p className="text-sm text-muted-foreground">Toggle between light and dark theme.</p>
                             </div>
-                            <Switch />
+                            <Switch
+                                checked={darkMode}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDarkMode(e.target.checked)}
+                            />
                         </div>
                         <div className="flex items-center justify-between py-6">
                             <div className="space-y-1">

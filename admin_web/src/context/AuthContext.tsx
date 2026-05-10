@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { loginAdmin, logoutAdmin, getCurrentAdmin } from '@/supabase/auth'; // ✅ real auth
-import { signUp } from '@/supabase/signup'; // ✅ real signup
+import { loginAdmin, logoutAdmin, getCurrentAdmin } from '@/supabase/auth'; 
+import { signUp } from '@/supabase/signup'; 
 
 interface User {
     id: string;

@@ -1,72 +1,131 @@
 import { supabase } from "./supabase-client";
+import { supabaseAdmin } from "./supabase-admin-client";
+import { Teacher } from "../models/teacher";
 
-/** CREATE */
-export const createTeacher = async (teacherData: Record<string, any>) => {
+export const createTeacherDB = async (
+  teacher: Teacher
+): Promise<Teacher> => {
+
   const { data, error } = await supabase
     .from("teacher")
-    .insert([{
-      employee_id:          teacherData.employee_id,
-      subject_ids:          teacherData.subject_ids,
-      class_ids:            teacherData.class_ids,
-      avatar_path:           teacherData.avatar_path,
-      last_checked_notices: teacherData.last_checked_notices, //  fixed: was cut off
-    }])
+    .insert([
+      {
+        id: teacher.id,
+        fullName: teacher.fullName,
+        email: teacher.email,
+        employeeId: teacher.employeeId,
+        subjectIds: teacher.subjectIds,
+        classIds: teacher.classIds,
+        avatarPath: teacher.avatarPath,
+      }
+    ])
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+
+  return Teacher.fromMap(data);
 };
 
-/** READ ALL */
-export const getAllTeachers = async () => {
+export const getAllTeachersDB = async (): Promise<Teacher[]> => {
+
   const { data, error } = await supabase
     .from("teacher")
-    .select("*")
-    .order("employee_id", { ascending: true });
+    .select("*");
 
   if (error) throw error;
-  return data;
+
+  return (data || []).map((t) => Teacher.fromMap(t));
 };
 
-/** READ BY ID */
-export const getTeacherById = async (id: string) => {
+export const getTeacherByIdDB = async (
+  id: string
+): Promise<Teacher | null> => {
+
   const { data, error } = await supabase
     .from("teacher")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (error) throw error;
-  return data;
+  if (error) return null;
+
+  return data ? Teacher.fromMap(data) : null;
 };
 
-/** UPDATE */
-export const updateTeacher = async (id: string, updates: Record<string, any>) => {
+export const updateTeacherDB = async (
+  id: string,
+  updates: Partial<Teacher>
+): Promise<Teacher | null> => {
+
+  const dbUpdates: any = {};
+
+  if (updates.fullName !== undefined) {
+    dbUpdates.fullName = updates.fullName;
+  }
+
+  if (updates.employeeId !== undefined) {
+    dbUpdates.employeeId = updates.employeeId;
+  }
+
+  if (updates.subjectIds !== undefined) {
+    dbUpdates.subjectIds = updates.subjectIds;
+  }
+
+  if (updates.classIds !== undefined) {
+    dbUpdates.classIds = updates.classIds;
+  }
+
+  if (updates.avatarPath !== undefined) {
+    dbUpdates.avatarPath = updates.avatarPath;
+  }
+
   const { data, error } = await supabase
     .from("teacher")
-    .update({
-      employee_id:          updates.employee_id,
-      subject_ids:          updates.subject_ids,
-      class_ids:            updates.class_ids,
-      avatar_path:           updates.avatar_path,
-      last_checked_notices: updates.last_checked_notices,
-    })
+    .update(dbUpdates)
     .eq("id", id)
-    .select()
+    .select("*")
     .single();
 
-  if (error) throw error;
-  return data;
+  if (error) return null;
+
+  return data ? Teacher.fromMap(data) : null;
 };
 
-/** DELETE */
-export const deleteTeacher = async (id: string) => {  //  fixed: was incomplete
+export const deleteTeacherDB = async (
+  id: string
+): Promise<boolean> => {
+
   const { error } = await supabase
     .from("teacher")
     .delete()
     .eq("id", id);
 
-  if (error) throw error;  //  fixed: was cut off
+  if (error) return false;
+
   return true;
+};
+
+// Upload avatar to avatars bucket
+
+export const uploadTeacherAvatarDB = async (
+  file: File,
+  teacherId: string
+): Promise<string> => {
+
+  const filePath = `${teacherId}-${file.name}`;
+
+  const { error } = await supabaseAdmin.storage
+    .from("avatars")
+    .upload(filePath, file, {
+      upsert: true
+    });
+
+  if (error) throw error;
+
+  const { data: urlData } = supabaseAdmin.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
 };

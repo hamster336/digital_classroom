@@ -26,7 +26,6 @@
     "noFallthroughCasesInSwitch": true,
     "allowJs": true,//allow importing .js files in .ts
     "checkJs": false,// skip type checking inside .js file
-    /* Path Alias */
     "paths": {
       "@/*": [
         "./src/*"

@@ -1,93 +1,211 @@
 import { Teacher } from "../models/teacher";
+import { User } from "../models/user";
+
 import {
-  createTeacher,
-  getAllTeachers,
-  getTeacherById,
-  updateTeacher,
-  deleteTeacher,
+  createTeacherDB,
+  getAllTeachersDB,
+  getTeacherByIdDB,
+  updateTeacherDB,
+  deleteTeacherDB,
+  uploadTeacherAvatarDB,
 } from "../supabase/teacher";
 
-/** CREATE */
-export const addTeacher = async (
+import { deleteUserDB } from "../supabase/user";
+
+import { supabaseAdmin } from "../supabase/supabase-admin-client";
+
+/**
+ * Create Teacher
+ */
+
+export const createTeacher = async (
+  fullName: string,
+  email: string,
   employeeId: string,
-  subjectIds: string[],
-  classIds: string[],
-  avatarPath: string | null
+  subjectIds: string[] = [],
+  classIds: string[] = [],
+  avatarFile: File | null = null
 ): Promise<Teacher> => {
-  try {
-    const teacher = new Teacher(
-      null,
-      employeeId,
-      subjectIds,
-      classIds,
-      avatarPath,
-      null
-    );
 
-    const result = await createTeacher(teacher.toMap());
-    return Teacher.fromMap(result);
-  } catch (error) {
-    console.error("Failed to create teacher:", error);
-    throw error;
+  const password = "@user123";
+
+  // Step 1: Create Auth User
+
+  const {
+    data: authData,
+    error: authError
+  } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+
+  if (authError) {
+    throw authError;
   }
+
+  if (!authData.user) {
+    throw new Error("Failed to create auth user.");
+  }
+
+  const userId = authData.user.id;
+
+  // Step 2: Upload Avatar
+
+  let finalAvatarPath: string | null = null;
+
+  if (avatarFile) {
+
+    try {
+
+      finalAvatarPath = await uploadTeacherAvatarDB(
+        avatarFile,
+        userId
+      );
+
+    } catch (uploadErr) {
+
+      console.error(
+        "Avatar upload failed:",
+        uploadErr
+      );
+    }
+  }
+
+  // Step 3: Insert into users table
+
+  const user = new User(
+    userId,
+    fullName,
+    email,
+    "teacher",
+    new Date().toISOString()
+  );
+
+  const {
+    error: userInsertError
+  } = await supabaseAdmin
+    .from("users")
+    .insert([
+      {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+      }
+    ]);
+
+  if (userInsertError) {
+    throw userInsertError;
+  }
+
+  // Step 4: Insert into teacher table
+
+  const teacher = new Teacher(
+    userId,
+    fullName,
+    email,
+    employeeId,
+    subjectIds,
+    classIds,
+    finalAvatarPath
+  );
+
+  return await createTeacherDB(teacher);
 };
 
-/** READ ALL */
-export const fetchTeachers = async (): Promise<Teacher[]> => {
-  try {
-    const data = await getAllTeachers();
-    return data.map((item: any) => Teacher.fromMap(item));
-  } catch (error) {
-    console.error("Failed to fetch teachers:", error);
-    throw error;
-  }
+/**
+ * Get All Teachers
+ */
+
+export const getAllTeachers = async (): Promise<Teacher[]> => {
+
+  return await getAllTeachersDB();
 };
 
-/** READ BY ID */
-export const fetchTeacherById = async (id: string): Promise<Teacher> => {
-  try {
-    const data = await getTeacherById(id);
-    return Teacher.fromMap(data);
-  } catch (error) {
-    console.error("Failed to fetch teacher:", error);
-    throw error;
-  }
+/**
+ * Get Teacher By ID
+ */
+
+export const getTeacherById = async (
+  id: string
+): Promise<Teacher | null> => {
+
+  return await getTeacherByIdDB(id);
 };
 
-/** UPDATE */
-export const editTeacher = async (
+/**
+ * Update Teacher
+ */
+
+export const updateTeacher = async (
   id: string,
-  employeeId: string,
-  subjectIds: string[],
-  classIds: string[],
-  avatarPath: string | null,
-  lastCheckedNotices: Date | null
-): Promise<Teacher> => {
-  try {
-    const teacher = new Teacher(
-      id,
-      employeeId,
-      subjectIds,
-      classIds,
-      avatarPath,
-      lastCheckedNotices
-    );
+  updates: Partial<Teacher>
+): Promise<Teacher | null> => {
 
-    const result = await updateTeacher(id, teacher.toMap());
-    return Teacher.fromMap(result);
-  } catch (error) {
-    console.error("Failed to update teacher:", error);
-    throw error;
-  }
+  return await updateTeacherDB(id, updates);
 };
 
-/** DELETE */
-export const removeTeacher = async (id: string): Promise<boolean> => {
-  try {
-    await deleteTeacher(id);
-    return true;
-  } catch (error) {
-    console.error("Failed to delete teacher:", error);
+/**
+ * Delete Teacher
+ */
+
+export const deleteTeacher = async (
+  id: string
+): Promise<boolean> => {
+
+  const teacher = await getTeacherByIdDB(id);
+
+  if (!teacher) {
     return false;
   }
+
+  // Delete from teacher table
+
+  await deleteTeacherDB(id);
+
+  // Delete from users table
+
+  await deleteUserDB(id);
+
+  // Delete auth user
+
+  const { error } =
+    await supabaseAdmin.auth.admin.deleteUser(id);
+
+  if (error) {
+
+    console.warn(
+      "Auth delete failed:",
+      error.message
+    );
+  }
+
+  return true;
+};
+
+/**
+ * Upload Teacher Avatar
+ */
+
+export const uploadTeacherAvatar = async (
+  teacherId: string,
+  file: File
+): Promise<string> => {
+
+  // Upload image
+
+  const avatarUrl = await uploadTeacherAvatarDB(
+    file,
+    teacherId
+  );
+
+  // Update teacher record
+
+  await updateTeacherDB(teacherId, {
+    avatarPath: avatarUrl,
+  });
+
+  return avatarUrl;
 };

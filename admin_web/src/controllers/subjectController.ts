@@ -15,7 +15,7 @@ export const addSubject = async (
   teacherId: string
 ): Promise<Subject> => {
   try {
-    // 🔍 Debug log (very important)
+    
     console.log("Adding subject:", { name, classId, teacherId });
 
     const subject = new Subject(null, name, classId, teacherId);

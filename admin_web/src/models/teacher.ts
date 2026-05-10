@@ -1,52 +1,60 @@
 export class Teacher {
-  id: string | null;
+  id: string;
+  fullName: string;
+  email: string;
   employeeId: string;
   subjectIds: string[];
   classIds: string[];
-  avatarPath: string | null;
-  lastCheckedNotices: Date | null;
+  avatarPath: string | null;  // ✅ added
 
   constructor(
-    id: string | null,
+    id: string,
+    fullName: string,
+    email: string,
     employeeId: string,
     subjectIds: string[],
     classIds: string[],
-    avatarPath: string | null,
-    lastCheckedNotices: Date | null
+    avatarPath: string | null   // ✅ added
   ) {
     this.id = id;
+    this.fullName = fullName;
+    this.email = email;
     this.employeeId = employeeId;
     this.subjectIds = subjectIds;
     this.classIds = classIds;
-    this.avatarPath = avatarPath;
-    this.lastCheckedNotices = lastCheckedNotices;
+    this.avatarPath = avatarPath;  // ✅ added
   }
 
-  /** DB → App */
-  static fromMap(map: any): Teacher {
-    return new Teacher(
-      map.id ?? null,
-      map.employee_id ?? "",
-      map.subject_ids ?? [],
-      map.class_ids ?? [],
-      map.avatar_path ?? null,
-      map.last_checked_notices
-        ? new Date(map.last_checked_notices)
-        : null
-    );
-  }
-
-  /** App → DB */
+static fromMap(map: any): Teacher {
+  return new Teacher(
+    map.id,
+    map.fullName || '',
+    map.email || '',
+    map.employeeId,
+    map.subjectIds || [],
+    map.classIds || [],
+    map.avatarPath || null
+  );
+}
   toMap() {
     return {
-      ...(this.id && { id: this.id }),
+      id: this.id,
+      full_name: this.fullName,      // ✅ added
       employee_id: this.employeeId,
       subject_ids: this.subjectIds,
       class_ids: this.classIds,
-      avatar_path: this.avatarPath,
-      last_checked_notices: this.lastCheckedNotices
-        ? this.lastCheckedNotices.toISOString()
-        : null,
+      avatar_path: this.avatarPath,  // ✅ added
+    };
+  }
+
+  toInsertMap() {
+    return {
+      id: this.id,
+      full_name: this.fullName,      // ✅ added
+      employee_id: this.employeeId,
+      subject_ids: this.subjectIds,
+      class_ids: this.classIds,
+      avatar_path: this.avatarPath,  // ✅ added
     };
   }
 }
