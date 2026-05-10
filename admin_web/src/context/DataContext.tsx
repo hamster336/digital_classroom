@@ -28,12 +28,12 @@ import {
   fetchSubject,
   removeSubject,
 } from '../controllers/subjectController';
-
 import {
   createTeacher,
   getAllTeachers,
   updateTeacher as updateTeacherController,
   deleteTeacher as deleteTeacherController,
+  uploadTeacherAvatar,
 } from '../controllers/teacherController';
 
 import {
@@ -65,13 +65,14 @@ interface DataContextType {
   deleteSubject: (id: string) => Promise<void>;
 
   // Teacher
-  addTeacher: (
-    fullName: string,
-    email: string,
-    employeeId: string,
-    subjectIds: string[],
-    classIds: string[]
-  ) => Promise<void>;
+ addTeacher: (
+  fullName: string,
+  email: string,
+  employeeId: string,
+  subjectIds: string[],
+  classIds: string[],
+  avatarFile?: File | null
+) => Promise<void>;
   updateTeacher: (id: string, updates: Partial<Teacher>) => Promise<void>;
   deleteTeacher: (id: string) => Promise<void>;
 
@@ -215,10 +216,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     email: string,
     employeeId: string,
     subjectIds: string[] = [],
-    classIds: string[] = []
+    classIds: string[] = [],
+    avatarFile: File | null = null
   ) => {
     try {
-      const newItem = await createTeacher(fullName, email, employeeId, subjectIds, classIds);
+      const newItem = await createTeacher(fullName, email, employeeId, subjectIds, classIds, avatarFile);
       setTeachers(prev => [...prev, newItem]);
     } catch (err) {
       console.error("Failed to add teacher:", err);
