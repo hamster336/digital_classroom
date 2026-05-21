@@ -15,6 +15,8 @@ interface TeacherFormData {
     employeeId: string;
     subjectIds: string[];
     classIds: string[];
+    avatarFile?: File | null;
+    avatarPath?: string | null;
     [key: string]: any;
 }
 
@@ -38,6 +40,8 @@ export const TeacherManagement = () => {
         employeeId: t.employeeId,
         subjectIds: t.subjectIds,
         classIds: t.classIds,
+        avatarFile: null,
+        avatarPath: t.avatarPath || null,
     }));
 
     return (
@@ -45,6 +49,23 @@ export const TeacherManagement = () => {
             title="Teachers"
             data={teacherFormData}
             columns={[
+                {
+                    key: 'avatarPath',
+                    label: 'Photo',
+                    render: (val: string | null, item: TeacherFormData) => (
+                        val ? (
+                            <img
+                                src={val}
+                                alt="avatar"
+                                className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
+                            />
+                        ) : (
+                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                                {item.fullName?.charAt(0).toUpperCase() || '?'}
+                            </div>
+                        )
+                    )
+                },
                 { key: 'fullName', label: 'Full Name' },
                 { key: 'employeeId', label: 'Employee ID' },
                 {
@@ -75,11 +96,12 @@ export const TeacherManagement = () => {
                 if (!item.id && !item.fullName?.trim()) throw new Error("Full Name is required.");
                 if (!item.id && !item.email?.trim()) throw new Error("Email is required.");
                 const existing = teachers.find(t => t.id === item.id);
-                if (existing) {
+                if (existing && item.id) {
                     await updateTeacher(item.id!, {
                         employeeId: item.employeeId,
                         subjectIds: item.subjectIds ?? [],
                         classIds: item.classIds ?? [],
+
                     });
                 } else {
                     await addTeacher(
@@ -87,7 +109,8 @@ export const TeacherManagement = () => {
                         item.email,
                         item.employeeId,
                         item.subjectIds ?? [],
-                        item.classIds ?? []
+                        item.classIds ?? [],
+                        item.avatarFile ?? null
                     );
                 }
             }}
@@ -99,6 +122,7 @@ export const TeacherManagement = () => {
                 employeeId: '',
                 subjectIds: [],
                 classIds: [],
+                avatarFile: null,
             }}
             renderForm={(data, onChange) => (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -131,6 +155,53 @@ export const TeacherManagement = () => {
                             placeholder="e.g. EMP001"
                         />
                     </div>
+                    {/*  Avatar upload */}
+                    <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm font-medium">Profile Photo</label>
+                        <div className="flex items-center gap-4">
+                            {data.avatarPath ? (
+                                <img
+                                    src={data.avatarPath}
+                                    alt="avatar"
+                                    className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                                    {data.fullName?.charAt(0).toUpperCase() || '?'}
+                                </div>
+                            )}
+                            <div className="space-y-1">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="text-sm text-slate-600"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        if (data.id) {
+                                            // existing teacher — upload immediately
+                                            
+                                            try {
+                                                const { uploadTeacherAvatar
+                                                } = await import('@/controllers/teacherController');
+                                                const url = await uploadTeacherAvatar(data.id, file);
+                                                onChange('avatarPath', url);
+                                            } catch (err: any) {
+                                                console.error("Upload failed:", err);
+                                            }
+                                        } else {
+                                            // new teacher — store file for upload on save
+                                            onChange('avatarFile', file);
+                                            onChange('avatarPath', URL.createObjectURL(file)); // preview
+                                        }
+                                    }}
+                                />
+                                <p className="text-xs text-slate-400">
+                                    {data.id ? 'Upload to change photo' : 'Will be uploaded on save'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div className="space-y-2 sm:col-span-2">
                         <label className="text-sm font-medium">Assign Classes</label>
@@ -150,11 +221,10 @@ export const TeacherManagement = () => {
                                             onChange('classIds', updated);
                                             onChange('subjectIds', []);
                                         }}
-                                        className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
-                                            (data.classIds || []).includes(c.id!)
-                                                ? 'bg-primary text-white border-primary'
-                                                : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${(data.classIds || []).includes(c.id!)
+                                            ? 'bg-primary text-white border-primary'
+                                            : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
+                                            }`}
                                     >
                                         {c.name}
                                     </button>
@@ -187,11 +257,10 @@ export const TeacherManagement = () => {
                                                         : [...current, s.id!];
                                                     onChange('subjectIds', updated);
                                                 }}
-                                                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
-                                                    (data.subjectIds || []).includes(s.id!)
-                                                        ? 'bg-primary text-white border-primary'
-                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
-                                                }`}
+                                                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${(data.subjectIds || []).includes(s.id!)
+                                                    ? 'bg-primary text-white border-primary'
+                                                    : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
+                                                    }`}
                                             >
                                                 {s.name}
                                             </button>
@@ -358,11 +427,10 @@ export const StudentManagement = () => {
                                                         : [...current, s.id!];
                                                     onChange('subjectIds', updated);
                                                 }}
-                                                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
-                                                    (data.subjectIds || []).includes(s.id!)
-                                                        ? 'bg-primary text-white border-primary'
-                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
-                                                }`}
+                                                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${(data.subjectIds || []).includes(s.id!)
+                                                    ? 'bg-primary text-white border-primary'
+                                                    : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'
+                                                    }`}
                                             >
                                                 {s.name}
                                             </button>
