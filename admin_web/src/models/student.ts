@@ -1,5 +1,6 @@
 export class Student {
   id: string;
+  fullName: string;
   rollNumber: string;
   subjectIds: string[];
   avatarPath: string | null;
@@ -8,6 +9,7 @@ export class Student {
 
   constructor(
     id: string,
+    fullName: string,
     rollNumber: string,
     subjectIds: string[],
     avatarPath: string | null,
@@ -15,6 +17,7 @@ export class Student {
     lastCheckedNotices: Date | null
   ) {
     this.id = id;
+    this.fullName = fullName;
     this.rollNumber = rollNumber;
     this.subjectIds = subjectIds;
     this.avatarPath = avatarPath;
@@ -25,6 +28,7 @@ export class Student {
   static fromMap(map: any): Student {
     return new Student(
       map.id,
+      map.full_name || map.fullName || "",  // from users JOIN or memory
       map.roll_number,
       map.subject_ids || [],
       map.avatar_path,
@@ -37,7 +41,7 @@ export class Student {
   toMap() {
     return {
       id: this.id,
-
+      // full_name lives in users table — NOT in student table
       roll_number: this.rollNumber,
       subject_ids: this.subjectIds,
       avatar_path: this.avatarPath,
@@ -52,13 +56,14 @@ export class Student {
   toInsertMap() {
     return {
       id: this.id,
+      // full_name lives in users table — NOT in student table
       roll_number: this.rollNumber,
       subject_ids: this.subjectIds,
       avatar_path: this.avatarPath,
       class_id: this.classId,
       last_checked_notices: this.lastCheckedNotices
         ? this.lastCheckedNotices.toISOString()
-        : new Date().toISOString(), 
+        : new Date().toISOString(),
     };
   }
 }

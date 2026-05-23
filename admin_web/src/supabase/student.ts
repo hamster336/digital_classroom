@@ -1,4 +1,5 @@
 import { supabase } from "./supabase-client";
+import { supabaseAdmin } from "./supabase-admin-client";
 import { Student } from "../models/student";
 
 export const createStudentDB = async (student: Student): Promise<Student> => {
@@ -15,13 +16,18 @@ export const createStudentDB = async (student: Student): Promise<Student> => {
     throw error;
   }
 
-  return Student.fromMap(data);
+  // full_name comes from users table — pass from memory after insert
+  return Student.fromMap({
+    ...data,
+    full_name: student.fullName,
+  });
 };
 
 export const getAllStudentsDB = async (): Promise<Student[]> => {
+  // JOIN users to get full_name (not stored in student table)
   const { data, error } = await supabase
     .from("student")
-    .select("*");
+    .select("*, users(full_name)");
 
   if (error) {
     console.error("FETCH ERROR:", error);
@@ -30,20 +36,25 @@ export const getAllStudentsDB = async (): Promise<Student[]> => {
 
   if (!data || data.length === 0) return [];
 
-  return data.map((item: any) => {
-    try {
-      return Student.fromMap(item);
-    } catch (err) {
-      console.error("Mapping error:", item, err);
-      return null;
-    }
-  }).filter(Boolean) as Student[];
+  return data
+    .map((item: any) => {
+      try {
+        return Student.fromMap({
+          ...item,
+          full_name: (item.users as any)?.full_name || "",
+        });
+      } catch (err) {
+        console.error("Mapping error:", item, err);
+        return null;
+      }
+    })
+    .filter(Boolean) as Student[];
 };
 
 export const getStudentByIdDB = async (id: string): Promise<Student | null> => {
   const { data, error } = await supabase
     .from("student")
-    .select("*")
+    .select("*, users(full_name)")
     .eq("id", id)
     .single();
 
@@ -52,7 +63,12 @@ export const getStudentByIdDB = async (id: string): Promise<Student | null> => {
     return null;
   }
 
-  return data ? Student.fromMap(data) : null;
+  return data
+    ? Student.fromMap({
+        ...data,
+        full_name: (data.users as any)?.full_name || "",
+      })
+    : null;
 };
 
 export const updateStudentDB = async (
@@ -73,7 +89,7 @@ export const updateStudentDB = async (
     .from("student")
     .update(dbUpdates)
     .eq("id", id)
-    .select()
+    .select("*, users(full_name)")
     .single();
 
   if (error) {
@@ -81,7 +97,12 @@ export const updateStudentDB = async (
     return null;
   }
 
-  return data ? Student.fromMap(data) : null;
+  return data
+    ? Student.fromMap({
+        ...data,
+        full_name: (data.users as any)?.full_name || "",
+      })
+    : null;
 };
 
 export const deleteStudentDB = async (id: string): Promise<boolean> => {
@@ -96,4 +117,19 @@ export const deleteStudentDB = async (id: string): Promise<boolean> => {
   }
 
   return true;
+};
+
+export const uploadStudentAvatarDB = async (
+  file: File,
+  studentId: string
+): Promise<string> => {
+  const filePath = `${studentId}-${file.name}`;
+
+  const { error } = await supabaseAdmin.storage
+    .from("avatars")
+    .upload(filePath, file, { upsert: true });
+
+  if (error) throw error;
+
+  return filePath;
 };

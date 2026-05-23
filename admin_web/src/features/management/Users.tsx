@@ -27,6 +27,9 @@ interface StudentFormData {
     rollNumber: string;
     subjectIds: string[];
     classId: string;
+    avatarFile?: File | null;
+    avatarPath?: string | null;
+    avatarPreview?: string | null;
     [key: string]: any;
 }
 
@@ -48,7 +51,7 @@ export const TeacherManagement = () => {
         <ManagementPage<TeacherFormData>
             title="Teachers"
             data={teacherFormData}
-            columns={[
+        columns={[
                 {
                     key: 'avatarPath',
                     label: 'Photo',
@@ -280,11 +283,14 @@ export const StudentManagement = () => {
 
     const studentFormData: StudentFormData[] = students.map(s => ({
         id: s.id,
-        fullName: '',
+        fullName: s.fullName || '',
         email: '',
         rollNumber: s.rollNumber,
         subjectIds: s.subjectIds,
         classId: s.classId,
+        avatarFile: null,
+        avatarPath: s.avatarPath || null,
+        avatarPreview: s.avatarPath || null,
     }));
 
     return (
@@ -292,6 +298,24 @@ export const StudentManagement = () => {
             title="Students"
             data={studentFormData}
             columns={[
+                {
+                    key: 'avatarPath',
+                    label: 'Photo',
+                    render: (val: string | null, item: StudentFormData) => (
+                        val ? (
+                            <img
+                                src={val}
+                                alt="avatar"
+                                className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
+                            />
+                        ) : (
+                            <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-sm">
+                                {item.fullName?.charAt(0).toUpperCase() || '?'}
+                            </div>
+                        )
+                    )
+                },
+                { key: 'fullName', label: 'Full Name' },
                 { key: 'rollNumber', label: 'Roll No' },
                 {
                     key: 'classId',
@@ -331,19 +355,35 @@ export const StudentManagement = () => {
                     if (!item.email?.trim()) throw new Error("Email is required.");
                 }
                 const existing = students.find(s => s.id === item.id);
-                if (existing) {
+                if (existing && item.id) {
                     await updateStudent(item.id!, {
+                        fullName: item.fullName,
                         rollNumber: item.rollNumber,
                         subjectIds: item.subjectIds ?? [],
                         classId: item.classId,
                     });
+                    // Upload avatar if new file selected
+                    if (item.avatarFile && item.id) {
+                        try {
+                            const { uploadStudentAvatar } = await import('@/controllers/studentController');
+                            const url = await uploadStudentAvatar(item.avatarFile, item.id);
+                            // Update with cache buster - add timestamp to force browser to refetch
+                            await updateStudent(item.id!, {
+                                avatarPath: url + `?t=${Date.now()}`,
+                            });
+                        } catch (err: any) {
+                            console.error("Avatar upload failed:", err);
+                        }
+                    }
                 } else {
+                    // ADD new student with avatar support (pass avatarFile as 6th parameter)
                     await addStudent(
                         item.fullName,
                         item.email,
                         item.rollNumber,
                         item.subjectIds ?? [],
-                        item.classId
+                        item.classId,
+                        item.avatarFile ?? null
                     );
                 }
             }}
@@ -355,9 +395,52 @@ export const StudentManagement = () => {
                 rollNumber: '',
                 classId: classrooms[0]?.id ?? '',
                 subjectIds: [],
+                avatarFile: null,
+                avatarPath: null,
+                avatarPreview: null,
             }}
             renderForm={(data, onChange) => (
                 <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Avatar upload - available for BOTH add and edit */}
+                    <div className="space-y-2 sm:col-span-1">
+                        <label className="text-sm font-medium">Profile Photo</label>
+                        <div className="flex items-center gap-4">
+                            {data.avatarPreview ? (
+                                <img
+                                    src={data.avatarPreview}
+                                    alt="avatar"
+                                    className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xl">
+                                    {data.fullName?.charAt(0).toUpperCase() || '?'}
+                                </div>
+                            )}
+                            <div className="space-y-1">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="text-sm text-slate-600"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        onChange('avatarFile', file);
+                                        // Create preview
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            onChange('avatarPreview', reader.result as string);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }}
+                                />
+                                <p className="text-xs text-slate-400">
+                                    {data.id ? 'Change photo' : 'Choose photo (optional)'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Full Name and Email - only for new students */}
                     {!data.id && (
                         <>
                             <div className="space-y-2">
