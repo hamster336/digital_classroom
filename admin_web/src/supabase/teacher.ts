@@ -5,7 +5,7 @@ import { Teacher } from "../models/teacher";
 export const createTeacherDB = async (
   teacher: Teacher
 ): Promise<Teacher> => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin  // ✅ fixed: was supabase
     .from("teacher")
     .insert([teacher.toInsertMap()])
     .select()
@@ -13,7 +13,6 @@ export const createTeacherDB = async (
 
   if (error) throw error;
 
-  // full_name and email come from users table — pass from memory after insert
   return Teacher.fromMap({
     ...data,
     full_name: teacher.fullName,
@@ -22,7 +21,6 @@ export const createTeacherDB = async (
 };
 
 export const getAllTeachersDB = async (): Promise<Teacher[]> => {
-  // JOIN users to get full_name and email (not stored in teacher table)
   const { data, error } = await supabase
     .from("teacher")
     .select("*, users(full_name, email)");
@@ -64,13 +62,12 @@ export const updateTeacherDB = async (
 ): Promise<Teacher | null> => {
   const dbUpdates: any = {};
 
-  // full_name and email are NOT in teacher table — skip them here
   if (updates.employeeId !== undefined) dbUpdates.employee_id = updates.employeeId;
   if (updates.subjectIds !== undefined) dbUpdates.subject_ids = updates.subjectIds;
   if (updates.classIds !== undefined) dbUpdates.class_ids = updates.classIds;
   if (updates.avatarPath !== undefined) dbUpdates.avatar_path = updates.avatarPath;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin  // ✅ fixed: was supabase
     .from("teacher")
     .update(dbUpdates)
     .eq("id", id)
@@ -105,17 +102,13 @@ export const uploadTeacherAvatarDB = async (
   file: File,
   teacherId: string
 ): Promise<string> => {
-  const filePath = `${teacherId}-${file.name}`;
+  const sanitizedName = file.name.replace(/\s+/g, "-");
+  const filePath = `${teacherId}-${sanitizedName}`;
 
   const { error } = await supabaseAdmin.storage
     .from("avatars")
     .upload(filePath, file, { upsert: true });
 
   if (error) throw error;
-
-  const { data: urlData } = supabaseAdmin.storage
-    .from("avatars")
-    .getPublicUrl(filePath);
-
-  return urlData.publicUrl;
+  return filePath;
 };

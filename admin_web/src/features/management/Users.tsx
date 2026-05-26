@@ -8,6 +8,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ManagementPage } from '../shared/ManagementPage';
 
+//  Avatar URL helpers — builds full URL from short path, passes full URL as-is
+const getAvatarUrl = (path: string | null): string | null => {
+    if (!path) return null;
+    if (path.startsWith("http") || path.startsWith("blob:")) return path;
+    return `https://ksebauxqprpstdvmwwse.supabase.co/storage/v1/object/public/avatars/${path}`;
+};
+
+const getStudentAvatarUrl = (path: string | null): string | null => {
+    if (!path) return null;
+    if (path.startsWith("http") || path.startsWith("blob:")) return path;
+    return `https://ksebauxqprpstdvmwwse.supabase.co/storage/v1/object/public/avatars/${path}`;
+};
+
 interface TeacherFormData {
     id: string | null;
     fullName: string;
@@ -35,7 +48,7 @@ interface StudentFormData {
 
 export const TeacherManagement = () => {
     const { teachers, addTeacher, updateTeacher, deleteTeacher, subjects, classrooms } = useData();
-
+ 
     const teacherFormData: TeacherFormData[] = teachers.map(t => ({
         id: t.id,
         fullName: t.fullName || '',
@@ -46,19 +59,19 @@ export const TeacherManagement = () => {
         avatarFile: null,
         avatarPath: t.avatarPath || null,
     }));
-
+ 
     return (
         <ManagementPage<TeacherFormData>
             title="Teachers"
             data={teacherFormData}
-        columns={[
+            columns={[
                 {
                     key: 'avatarPath',
                     label: 'Photo',
                     render: (val: string | null, item: TeacherFormData) => (
                         val ? (
                             <img
-                                src={val}
+                                src={getAvatarUrl(val)!}  // ✅ build full URL
                                 alt="avatar"
                                 className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
                             />
@@ -104,7 +117,6 @@ export const TeacherManagement = () => {
                         employeeId: item.employeeId,
                         subjectIds: item.subjectIds ?? [],
                         classIds: item.classIds ?? [],
-
                     });
                 } else {
                     await addTeacher(
@@ -158,13 +170,14 @@ export const TeacherManagement = () => {
                             placeholder="e.g. EMP001"
                         />
                     </div>
-                    {/*  Avatar upload */}
+
+                    {/* ── Avatar Upload ── */}
                     <div className="space-y-2 sm:col-span-2">
                         <label className="text-sm font-medium">Profile Photo</label>
                         <div className="flex items-center gap-4">
                             {data.avatarPath ? (
                                 <img
-                                    src={data.avatarPath}
+                                    src={getAvatarUrl(data.avatarPath)!}  // ✅ build full URL
                                     alt="avatar"
                                     className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
                                 />
@@ -183,10 +196,8 @@ export const TeacherManagement = () => {
                                         if (!file) return;
                                         if (data.id) {
                                             // existing teacher — upload immediately
-                                            
                                             try {
-                                                const { uploadTeacherAvatar
-                                                } = await import('@/controllers/teacherController');
+                                                const { uploadTeacherAvatar } = await import('@/controllers/teacherController');
                                                 const url = await uploadTeacherAvatar(data.id, file);
                                                 onChange('avatarPath', url);
                                             } catch (err: any) {
@@ -205,7 +216,8 @@ export const TeacherManagement = () => {
                             </div>
                         </div>
                     </div>
-
+                    {/* ── End Avatar Upload ── */}
+ 
                     <div className="space-y-2 sm:col-span-2">
                         <label className="text-sm font-medium">Assign Classes</label>
                         <div className="flex flex-wrap gap-2 p-3 border rounded-lg min-h-[48px]">
@@ -235,7 +247,7 @@ export const TeacherManagement = () => {
                             )}
                         </div>
                     </div>
-
+ 
                     <div className="space-y-2 sm:col-span-2">
                         <label className="text-sm font-medium">Assign Subjects</label>
                         {(data.classIds || []).length === 0 ? (
@@ -277,7 +289,6 @@ export const TeacherManagement = () => {
         />
     );
 };
-
 export const StudentManagement = () => {
     const { students, addStudent, updateStudent, deleteStudent, classrooms, subjects } = useData();
 
@@ -304,7 +315,7 @@ export const StudentManagement = () => {
                     render: (val: string | null, item: StudentFormData) => (
                         val ? (
                             <img
-                                src={val}
+                                src={getStudentAvatarUrl(val)!}
                                 alt="avatar"
                                 className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
                             />
@@ -356,27 +367,24 @@ export const StudentManagement = () => {
                 }
                 const existing = students.find(s => s.id === item.id);
                 if (existing && item.id) {
+                    // ── existing student: upload avatar immediately (mirrors teacher pattern) ──
+                    let avatarPath = existing.avatarPath;
+                    if (item.avatarFile && item.id) {
+                        try {
+                            const { uploadStudentAvatar } = await import('@/controllers/studentController');
+                            avatarPath = await uploadStudentAvatar(item.avatarFile, item.id);
+                        } catch (err: any) {
+                            console.error("Avatar upload failed:", err);
+                        }
+                    }
                     await updateStudent(item.id!, {
                         fullName: item.fullName,
                         rollNumber: item.rollNumber,
                         subjectIds: item.subjectIds ?? [],
                         classId: item.classId,
+                        avatarPath,   // single update call, clean path, no ?t= timestamp
                     });
-                    // Upload avatar if new file selected
-                    if (item.avatarFile && item.id) {
-                        try {
-                            const { uploadStudentAvatar } = await import('@/controllers/studentController');
-                            const url = await uploadStudentAvatar(item.avatarFile, item.id);
-                            // Update with cache buster - add timestamp to force browser to refetch
-                            await updateStudent(item.id!, {
-                                avatarPath: url + `?t=${Date.now()}`,
-                            });
-                        } catch (err: any) {
-                            console.error("Avatar upload failed:", err);
-                        }
-                    }
                 } else {
-                    // ADD new student with avatar support (pass avatarFile as 6th parameter)
                     await addStudent(
                         item.fullName,
                         item.email,
@@ -401,46 +409,6 @@ export const StudentManagement = () => {
             }}
             renderForm={(data, onChange) => (
                 <div className="grid gap-4 sm:grid-cols-2">
-                    {/* Avatar upload - available for BOTH add and edit */}
-                    <div className="space-y-2 sm:col-span-1">
-                        <label className="text-sm font-medium">Profile Photo</label>
-                        <div className="flex items-center gap-4">
-                            {data.avatarPreview ? (
-                                <img
-                                    src={data.avatarPreview}
-                                    alt="avatar"
-                                    className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
-                                />
-                            ) : (
-                                <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xl">
-                                    {data.fullName?.charAt(0).toUpperCase() || '?'}
-                                </div>
-                            )}
-                            <div className="space-y-1">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="text-sm text-slate-600"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (!file) return;
-                                        onChange('avatarFile', file);
-                                        // Create preview
-                                        const reader = new FileReader();
-                                        reader.onloadend = () => {
-                                            onChange('avatarPreview', reader.result as string);
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }}
-                                />
-                                <p className="text-xs text-slate-400">
-                                    {data.id ? 'Change photo' : 'Choose photo (optional)'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Full Name and Email - only for new students */}
                     {!data.id && (
                         <>
                             <div className="space-y-2">
@@ -462,6 +430,7 @@ export const StudentManagement = () => {
                             </div>
                         </>
                     )}
+
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Roll No *</label>
                         <Input
@@ -470,6 +439,7 @@ export const StudentManagement = () => {
                             placeholder="e.g. 001"
                         />
                     </div>
+
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Class</label>
                         <select
@@ -485,6 +455,53 @@ export const StudentManagement = () => {
                             ))}
                         </select>
                     </div>
+
+                    {/* ── Avatar Upload — mirrors teacher layout exactly ── */}
+                    <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm font-medium">Profile Photo</label>
+                        <div className="flex items-center gap-4">
+                            {data.avatarPath ? (
+                                <img
+                                    src={getStudentAvatarUrl(data.avatarPath)!}
+                                    alt="avatar"
+                                    className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xl">
+                                    {data.fullName?.charAt(0).toUpperCase() || '?'}
+                                </div>
+                            )}
+                            <div className="space-y-1">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="text-sm text-slate-600"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        if (data.id) {
+                                            // existing student — upload immediately, same as teacher
+                                            try {
+                                                const { uploadStudentAvatar } = await import('@/controllers/studentController');
+                                                const url = await uploadStudentAvatar(file, data.id);
+                                                onChange('avatarPath', url);
+                                            } catch (err: any) {
+                                                console.error("Upload failed:", err);
+                                            }
+                                        } else {
+                                            // new student — store file for upload on save, show preview
+                                            onChange('avatarFile', file);
+                                            onChange('avatarPath', URL.createObjectURL(file));
+                                        }
+                                    }}
+                                />
+                                <p className="text-xs text-slate-400">
+                                    {data.id ? 'Upload to change photo' : 'Will be uploaded on save'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {/* ── End Avatar Upload ── */}
 
                     <div className="space-y-2 sm:col-span-2">
                         <label className="text-sm font-medium">Assign Subjects</label>
