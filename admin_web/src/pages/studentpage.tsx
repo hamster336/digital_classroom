@@ -7,7 +7,6 @@ import {
   deleteStudent,
   uploadStudentAvatar,
 } from "../controllers/studentController";
-import { signUpUser } from "../controllers/userController";
 
 interface AddForm {
   fullName: string;
@@ -96,20 +95,8 @@ export default function StudentPage() {
       setAddLoading(true);
       setAddError(null);
 
-      const newUser = await signUpUser(fullName, email, "student");
-      await createStudent(
-        newUser.id,
-        fullName,
-        rollNumber,
-        [],
-        classId,
-        null
-      );
-
-      // Upload avatar if provided
-      if (avatarFile) {
-        await uploadStudentAvatar(avatarFile, newUser.id);
-      }
+      // Controller handles: signUp → avatar upload → createStudentDB in one call
+      await createStudent(fullName, email, rollNumber, [], classId, avatarFile);
 
       await loadStudents();
       setShowAdd(false);
@@ -224,13 +211,9 @@ export default function StudentPage() {
           <table style={styles.table}>
             <thead>
               <tr>
-                {["Student", "Roll No", "Class", "Subjects", "Actions"].map(
-                  (h) => (
-                    <th key={h} style={styles.th}>
-                      {h}
-                    </th>
-                  )
-                )}
+                {["Student", "Roll No", "Class", "Subjects", "Actions"].map((h) => (
+                  <th key={h} style={styles.th}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -265,18 +248,8 @@ export default function StudentPage() {
                       : <span style={styles.muted}>None</span>}
                   </td>
                   <td style={styles.td}>
-                    <button
-                      style={styles.editBtn}
-                      onClick={() => openEdit(student)}
-                    >
-                      ✏
-                    </button>
-                    <button
-                      style={styles.deleteBtn}
-                      onClick={() => setDeletingId(student.id)}
-                    >
-                      🗑
-                    </button>
+                    <button style={styles.editBtn} onClick={() => openEdit(student)}>✏</button>
+                    <button style={styles.deleteBtn} onClick={() => setDeletingId(student.id)}>🗑</button>
                   </td>
                 </tr>
               ))}
@@ -289,18 +262,15 @@ export default function StudentPage() {
       {showAdd && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
-            <h2 style={styles.modalTitle}>Add Student</h2>
+            <h2 style={styles.modalTitle}>Add New Student</h2>
+            <p style={styles.modalSubtitle}>Fill in the details to create a new student.</p>
             {addError && <div style={styles.errorBanner}>{addError}</div>}
 
             <div style={styles.fieldWrap}>
               <label style={styles.label}>Profile Photo</label>
               <div style={styles.avatarUploadWrap}>
                 {addForm.avatarPreview ? (
-                  <img
-                    src={addForm.avatarPreview}
-                    alt="preview"
-                    style={styles.avatarPreview}
-                  />
+                  <img src={addForm.avatarPreview} alt="preview" style={styles.avatarPreview} />
                 ) : (
                   <div style={styles.avatarPlaceholderLg}>
                     {addForm.fullName?.charAt(0).toUpperCase() || "?"}
@@ -312,9 +282,7 @@ export default function StudentPage() {
                     type="button"
                     onClick={() => addFileRef.current?.click()}
                   >
-                    {addForm.avatarFile
-                      ? "📸 " + addForm.avatarFile.name
-                      : "Choose Photo"}
+                    {addForm.avatarFile ? addForm.avatarFile.name : "Choose File  No file chosen"}
                   </button>
                   <input
                     type="file"
@@ -326,87 +294,72 @@ export default function StudentPage() {
                       setAddForm({
                         ...addForm,
                         avatarFile: file,
-                        avatarPreview: file
-                          ? URL.createObjectURL(file)
-                          : addForm.avatarPreview,
+                        avatarPreview: file ? URL.createObjectURL(file) : null,
                       });
                     }}
                   />
                   <p style={{ fontSize: 11, color: "#888", marginTop: 4 }}>
-                    Optional - Choose to add photo
+                    Will be uploaded on save
                   </p>
                 </div>
               </div>
             </div>
 
-            <div style={styles.fieldWrap}>
-              <label style={styles.label}>Full Name *</label>
-              <input
-                style={styles.input}
-                type="text"
-                value={addForm.fullName}
-                onChange={(e) =>
-                  setAddForm({ ...addForm, fullName: e.target.value })
-                }
-                placeholder="e.g. Jane Doe"
-              />
+            <div style={styles.rowWrap}>
+              <div style={{ ...styles.fieldWrap, flex: 1 }}>
+                <label style={styles.label}>Full Name *</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={addForm.fullName}
+                  onChange={(e) => setAddForm({ ...addForm, fullName: e.target.value })}
+                  placeholder="e.g. Jane Doe"
+                />
+              </div>
+              <div style={{ ...styles.fieldWrap, flex: 1 }}>
+                <label style={styles.label}>Email *</label>
+                <input
+                  style={styles.input}
+                  type="email"
+                  value={addForm.email}
+                  onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                  placeholder="e.g. jane@school.com"
+                />
+              </div>
             </div>
 
-            <div style={styles.fieldWrap}>
-              <label style={styles.label}>Email *</label>
-              <input
-                style={styles.input}
-                type="email"
-                value={addForm.email}
-                onChange={(e) =>
-                  setAddForm({ ...addForm, email: e.target.value })
-                }
-                placeholder="e.g. jane@school.com"
-              />
-            </div>
-
-            <div style={styles.fieldWrap}>
-              <label style={styles.label}>Roll Number *</label>
-              <input
-                style={styles.input}
-                type="text"
-                value={addForm.rollNumber}
-                onChange={(e) =>
-                  setAddForm({ ...addForm, rollNumber: e.target.value })
-                }
-                placeholder="e.g. 001"
-              />
-            </div>
-
-            <div style={styles.fieldWrap}>
-              <label style={styles.label}>Class *</label>
-              <input
-                style={styles.input}
-                type="text"
-                value={addForm.classId}
-                onChange={(e) =>
-                  setAddForm({ ...addForm, classId: e.target.value })
-                }
-                placeholder="e.g. Class A"
-              />
+            <div style={styles.rowWrap}>
+              <div style={{ ...styles.fieldWrap, flex: 1 }}>
+                <label style={styles.label}>Roll No *</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={addForm.rollNumber}
+                  onChange={(e) => setAddForm({ ...addForm, rollNumber: e.target.value })}
+                  placeholder="e.g. 001"
+                />
+              </div>
+              <div style={{ ...styles.fieldWrap, flex: 1 }}>
+                <label style={styles.label}>Class *</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={addForm.classId}
+                  onChange={(e) => setAddForm({ ...addForm, classId: e.target.value })}
+                  placeholder="e.g. BE civil 7th sem"
+                />
+              </div>
             </div>
 
             <div style={styles.modalActions}>
               <button
                 style={styles.cancelBtn}
-                onClick={() => {
-                  setShowAdd(false);
-                  setAddForm(EMPTY_ADD);
-                }}
+                onClick={() => { setShowAdd(false); setAddForm(EMPTY_ADD); }}
               >
                 Cancel
               </button>
-              <button
-                style={styles.addBtn}
-                onClick={handleAdd}
-                disabled={addLoading}
-              >
-                {addLoading ? "Saving..." : "Save"}
+              <button style={styles.addBtn} onClick={handleAdd} disabled={addLoading}>
+                {addLoading ? "Saving..." : "💾 Save"}
               </button>
             </div>
           </div>
@@ -424,11 +377,7 @@ export default function StudentPage() {
               <label style={styles.label}>Profile Photo</label>
               <div style={styles.avatarUploadWrap}>
                 {editForm.avatarPreview ? (
-                  <img
-                    src={editForm.avatarPreview}
-                    alt="preview"
-                    style={styles.avatarPreview}
-                  />
+                  <img src={editForm.avatarPreview} alt="preview" style={styles.avatarPreview} />
                 ) : (
                   <div style={styles.avatarPlaceholderLg}>
                     {editingStudent.fullName?.charAt(0).toUpperCase() || "?"}
@@ -440,9 +389,7 @@ export default function StudentPage() {
                     type="button"
                     onClick={() => editFileRef.current?.click()}
                   >
-                    {editForm.avatarFile
-                      ? "📸 " + editForm.avatarFile.name
-                      : "Change Photo"}
+                    {editForm.avatarFile ? editForm.avatarFile.name : "Change Photo"}
                   </button>
                   <input
                     type="file"
@@ -454,9 +401,7 @@ export default function StudentPage() {
                       setEditForm({
                         ...editForm,
                         avatarFile: file,
-                        avatarPreview: file
-                          ? URL.createObjectURL(file)
-                          : editForm.avatarPreview,
+                        avatarPreview: file ? URL.createObjectURL(file) : editForm.avatarPreview,
                       });
                     }}
                   />
@@ -473,51 +418,39 @@ export default function StudentPage() {
                 style={styles.input}
                 type="text"
                 value={editForm.fullName}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, fullName: e.target.value })
-                }
+                onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
                 placeholder="e.g. Jane Doe"
               />
             </div>
 
-            <div style={styles.fieldWrap}>
-              <label style={styles.label}>Roll Number *</label>
-              <input
-                style={styles.input}
-                type="text"
-                value={editForm.rollNumber}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, rollNumber: e.target.value })
-                }
-                placeholder="e.g. 001"
-              />
-            </div>
-
-            <div style={styles.fieldWrap}>
-              <label style={styles.label}>Class *</label>
-              <input
-                style={styles.input}
-                type="text"
-                value={editForm.classId}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, classId: e.target.value })
-                }
-                placeholder="e.g. Class A"
-              />
+            <div style={styles.rowWrap}>
+              <div style={{ ...styles.fieldWrap, flex: 1 }}>
+                <label style={styles.label}>Roll Number *</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={editForm.rollNumber}
+                  onChange={(e) => setEditForm({ ...editForm, rollNumber: e.target.value })}
+                  placeholder="e.g. 001"
+                />
+              </div>
+              <div style={{ ...styles.fieldWrap, flex: 1 }}>
+                <label style={styles.label}>Class *</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={editForm.classId}
+                  onChange={(e) => setEditForm({ ...editForm, classId: e.target.value })}
+                  placeholder="e.g. BE civil 7th sem"
+                />
+              </div>
             </div>
 
             <div style={styles.modalActions}>
-              <button
-                style={styles.cancelBtn}
-                onClick={() => setEditingStudent(null)}
-              >
+              <button style={styles.cancelBtn} onClick={() => setEditingStudent(null)}>
                 Cancel
               </button>
-              <button
-                style={styles.addBtn}
-                onClick={handleEdit}
-                disabled={editLoading}
-              >
+              <button style={styles.addBtn} onClick={handleEdit} disabled={editLoading}>
                 {editLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
@@ -530,21 +463,10 @@ export default function StudentPage() {
         <div style={styles.overlay}>
           <div style={{ ...styles.modal, maxWidth: 380 }}>
             <h2 style={styles.modalTitle}>Delete Student?</h2>
-            <p style={{ color: "#555", marginBottom: 24 }}>
-              This action cannot be undone.
-            </p>
+            <p style={{ color: "#555", marginBottom: 24 }}>This action cannot be undone.</p>
             <div style={styles.modalActions}>
-              <button
-                style={styles.cancelBtn}
-                onClick={() => setDeletingId(null)}
-              >
-                Cancel
-              </button>
-              <button
-                style={styles.deleteConfirmBtn}
-                onClick={handleDelete}
-                disabled={deleteLoading}
-              >
+              <button style={styles.cancelBtn} onClick={() => setDeletingId(null)}>Cancel</button>
+              <button style={styles.deleteConfirmBtn} onClick={handleDelete} disabled={deleteLoading}>
                 {deleteLoading ? "Deleting..." : "Delete"}
               </button>
             </div>
@@ -583,9 +505,11 @@ const styles: Record<string, React.CSSProperties> = {
   cancelBtn: { background: "#f3f4f6", color: "#333", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: 14 },
   deleteConfirmBtn: { background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: 14 },
   overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
-  modal: { background: "#fff", borderRadius: 16, padding: 32, width: "100%", maxWidth: 480, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" },
-  modalTitle: { fontSize: 20, fontWeight: 700, marginBottom: 20, marginTop: 0 },
+  modal: { background: "#fff", borderRadius: 16, padding: 32, width: "100%", maxWidth: 520, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" },
+  modalTitle: { fontSize: 20, fontWeight: 700, marginBottom: 4, marginTop: 0 },
+  modalSubtitle: { fontSize: 13, color: "#10b981", marginBottom: 20, marginTop: 0 },
   fieldWrap: { marginBottom: 16 },
+  rowWrap: { display: "flex", gap: 16 },
   label: { display: "block", fontSize: 13, fontWeight: 600, color: "#555", marginBottom: 6 },
   input: { width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", outline: "none" },
   modalActions: { display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 24 },

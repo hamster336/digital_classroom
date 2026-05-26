@@ -5,9 +5,9 @@ import { Student } from "../models/student";
 export const createStudentDB = async (student: Student): Promise<Student> => {
   console.log("Creating student in DB:", student);
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin  // ✅ fixed: was supabase (blocked by RLS)
     .from("student")
-    .insert([student.toInsertMap()]) //  excludes id
+    .insert([student.toInsertMap()])
     .select()
     .single();
 
@@ -16,7 +16,6 @@ export const createStudentDB = async (student: Student): Promise<Student> => {
     throw error;
   }
 
-  // full_name comes from users table — pass from memory after insert
   return Student.fromMap({
     ...data,
     full_name: student.fullName,
@@ -24,7 +23,6 @@ export const createStudentDB = async (student: Student): Promise<Student> => {
 };
 
 export const getAllStudentsDB = async (): Promise<Student[]> => {
-  // JOIN users to get full_name (not stored in student table)
   const { data, error } = await supabase
     .from("student")
     .select("*, users(full_name)");
@@ -75,7 +73,6 @@ export const updateStudentDB = async (
   id: string,
   updates: Partial<Student>
 ): Promise<Student | null> => {
-  // convert camelCase → snake_case for Supabase
   const dbUpdates: any = {};
   if (updates.rollNumber !== undefined) dbUpdates.roll_number = updates.rollNumber;
   if (updates.classId !== undefined) dbUpdates.class_id = updates.classId;
@@ -85,7 +82,7 @@ export const updateStudentDB = async (
     dbUpdates.last_checked_notices = updates.lastCheckedNotices.toISOString();
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin  // ✅ fixed: was supabase (avatarPath write blocked by RLS)
     .from("student")
     .update(dbUpdates)
     .eq("id", id)
@@ -123,7 +120,8 @@ export const uploadStudentAvatarDB = async (
   file: File,
   studentId: string
 ): Promise<string> => {
-  const filePath = `${studentId}-${file.name}`;
+  const sanitizedName = file.name.replace(/\s+/g, "-");  // ✅ fixed: was file.name (spaces break storage path)
+  const filePath = `${studentId}-${sanitizedName}`;
 
   const { error } = await supabaseAdmin.storage
     .from("avatars")
