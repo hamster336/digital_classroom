@@ -43,7 +43,7 @@ import {
   deleteStudent as deleteStudentController,
 } from '../controllers/studentController';
 
-import { signUpStudent } from '../controllers/userController';
+
 
 interface DataContextType {
   classrooms: Classroom[];
@@ -82,7 +82,8 @@ interface DataContextType {
     email: string,
     rollNumber: string,
     subjectIds: string[],
-    classId: string
+    classId: string,
+    avatarFile?: File | null
   ) => Promise<void>;
   updateStudent: (id: string, updates: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
@@ -252,21 +253,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   // STUDENT
   const addStudent = async (
-    fullName: string,
-    email: string,
-    rollNumber: string,
-    subjectIds: string[] = [],
-    classId: string = ''
-  ) => {
-    try {
-      const newUser = await signUpStudent(fullName, email, 'student');
-      const newItem = await createStudent(newUser.id, rollNumber, subjectIds, classId, null);
-      setStudents(prev => [...prev, newItem]);
-    } catch (err) {
-      console.error("Failed to add student:", err);
-      throw err;
-    }
-  };
+  fullName: string,
+  email: string,
+  rollNumber: string,
+  subjectIds: string[] = [],
+  classId: string = '',
+  avatarFile: File | null = null  // ← ADD THIS
+) => {
+  try {
+    const newItem = await createStudent(fullName, email, rollNumber, subjectIds, classId, avatarFile);
+    setStudents(prev => [...prev, newItem]);
+  } catch (err) {
+    console.error("Failed to add student:", err);
+    throw err;
+  }
+};
 
   const updateStudent = async (id: string, updates: Partial<Student>) => {
     try {
