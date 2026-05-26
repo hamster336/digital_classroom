@@ -50,10 +50,9 @@ class NotesServices {
         .range(from, to);
   }
 
-
   // upload note to db
   Future<void> addNotes({
-    required List<PlatformFile> files,      
+    required List<PlatformFile> files,
     required String teacherId,
     required String classId,
     required String subjectId,
@@ -67,7 +66,8 @@ class NotesServices {
             lookupMimeType(path, headerBytes: bytes) ??
             'application/octet_stream';
 
-        final storagePath = '$classId/${file.name}';      // 0011e270-2b78-4d7b-b597-37f75780c705/app_files_rows.json
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final storagePath = '$classId/$timestamp-${file.name}';
 
         // first upload the file to storage
         await client.storage

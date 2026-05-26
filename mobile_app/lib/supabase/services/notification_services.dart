@@ -14,13 +14,12 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings android = AndroidInitializationSettings(
+      'ic_notification',
+    );
     const settings = InitializationSettings(android: android);
 
-    await _plugin.initialize(
-      settings: settings,
-      onDidReceiveNotificationResponse: _handleNotificationTap,
-    );
+    await _plugin.initialize(settings: settings);
 
     _listenToForegroundMessages();
     _listenToBackgroundTap();
@@ -32,18 +31,19 @@ class NotificationService {
 
       if (notification != null) {
         _plugin.show(
-          id: message.hashCode, // unique id instead of 0
+          id: message.hashCode,
           title: notification.title,
           body: notification.body,
           notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
-              'assignment_reminders', // meaningful channel name
+              'assignment_reminders',
               'Assignment Reminders',
+              icon: "ic_notification",
               importance: Importance.max,
               priority: Priority.high,
             ),
           ),
-          payload: message.data['assignment_id'], // pass assignment id
+          payload: message.data['assignment_id'],
         );
       }
     });
@@ -53,33 +53,13 @@ class NotificationService {
     // When user taps notification and app was completely closed
     FirebaseMessaging.instance.getInitialMessage().then((message) {
       if (message != null) {
-        _handleNotificationTap(
-          NotificationResponse(
-            payload: message.data['assignment_id'],
-            notificationResponseType:
-                NotificationResponseType.selectedNotification,
-          ),
-        );
+        print('Opened from terminated state');
       }
     });
 
     // When user taps notification and app was in background
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      _handleNotificationTap(
-        NotificationResponse(
-          payload: message.data['assignment_id'],
-          notificationResponseType:
-              NotificationResponseType.selectedNotification,
-        ),
-      );
+      print('Opened from background');
     });
-  }
-
-  Future<void> _handleNotificationTap(NotificationResponse response) async {
-    final assignmentId = response.payload;
-
-    if (assignmentId != null && assignmentId.isNotEmpty) {
-      print('Navigating to assignment: $assignmentId');
-    }
   }
 }

@@ -51,7 +51,8 @@ class SubmissionRepoImpl extends SubmissionRepo {
           lookupMimeType(path, headerBytes: bytes) ??
           'application/octet_stream';
 
-      final storagePath = '$classId/${submission.name}';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final storagePath = '$classId/$timestamp-${submission.name}';
 
       final sub = AppFile(
         uploaderId: studentId,
