@@ -43,7 +43,7 @@ import {
   deleteStudent as deleteStudentController,
 } from '../controllers/studentController';
 
-import { signUpStudent } from '../controllers/userController';
+
 
 interface DataContextType {
   classrooms: Classroom[];
